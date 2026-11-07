@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Prevención de caché agresiva en navegadores móviles para actualizaciones automáticas -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Control Topográfico Diario • Obra Civil</title>
   
   <!-- Tailwind CSS CDN -->
@@ -101,6 +105,11 @@
               <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">CONTROL TOPOGRÁFICO</h1>
               <span id="roleBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 Admin
+              </span>
+              <!-- Indicador de Sincronización en Tiempo Real -->
+              <span id="cloudSyncBadge" class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="cloudSyncText">En Vivo</span>
               </span>
             </div>
             <p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5">
@@ -757,6 +766,155 @@
     <span id="toastMsg">Acción completada</span>
   </div>
 
+  <!-- SCRIPT MÓDULO FIREBASE FIRESTORE EN TIEMPO REAL -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Versión de despliegue para auto-actualización sin borrado manual de historial
+    const APP_BUILD_VERSION = '2026.11.07.v1';
+    window.APP_BUILD_VERSION = APP_BUILD_VERSION;
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'topografia-civil-4680';
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+
+    // Inicializar Firebase si la configuración está disponible en el entorno
+    const fbConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+    if (fbConfigRaw) {
+      try {
+        const firebaseConfig = JSON.parse(fbConfigRaw);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Autenticación inicial obligatoria antes de escuchar Firestore
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
+        } else {
+          await signInAnonymously(auth).catch(err => console.error("Error auth:", err));
+        }
+
+        currentUser = auth.currentUser;
+        window.firebaseDB = db;
+        window.firebaseAppId = appId;
+        window.firebaseUser = currentUser;
+
+        initRealtimeListeners();
+      } catch (err) {
+        console.warn("Iniciando con almacenamiento reactivo local:", err);
+      }
+    } else {
+      console.log("Modo local o Firebase configurable vía entorno.");
+    }
+
+    // Escuchador en Tiempo Real para toda la obra (frentes, liberaciones, cambios)
+    function initRealtimeListeners() {
+      if (!db || !currentUser) return;
+
+      const tasksCollection = collection(db, 'artifacts', appId, 'public', 'data', 'topografia_tasks');
+      const bpCollection = collection(db, 'artifacts', appId, 'public', 'data', 'topografia_blueprints');
+      const staffCollection = collection(db, 'artifacts', appId, 'public', 'data', 'topografia_staff');
+
+      // 1. Escuchar cambios de frentes y liberaciones
+      onSnapshot(tasksCollection, (snapshot) => {
+        const remoteTasks = [];
+        snapshot.forEach((docSnap) => {
+          remoteTasks.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        if (remoteTasks.length > 0) {
+          window.tasks = remoteTasks;
+          if (window.renderActiveView) window.renderActiveView();
+          if (window.updateAllCounters) window.updateAllCounters();
+          updateSyncBadge(true, 'En Vivo');
+        } else if (window.tasks && window.tasks.length > 0) {
+          // Si la nube está vacía en el primer arranque, migrar los datos iniciales
+          syncLocalTasksToCloud(window.tasks);
+        }
+      }, (err) => {
+        console.error("Error en snapshot frentes:", err);
+        updateSyncBadge(false, 'Local');
+      });
+
+      // 2. Escuchar catálogo de planos
+      onSnapshot(bpCollection, (snapshot) => {
+        const remoteBps = [];
+        snapshot.forEach((docSnap) => remoteBps.push(docSnap.data()));
+        if (remoteBps.length > 0) {
+          window.blueprints = remoteBps;
+          if (window.renderBlueprintsList) window.renderBlueprintsList();
+          if (window.updateAllCounters) window.updateAllCounters();
+        }
+      }, (err) => console.error("Error snapshot planos:", err));
+
+      // 3. Escuchar personal de topógrafos
+      onSnapshot(staffCollection, (snapshot) => {
+        const remoteStaff = [];
+        snapshot.forEach((docSnap) => remoteStaff.push(docSnap.data()));
+        if (remoteStaff.length > 0) {
+          window.staffList = remoteStaff;
+          if (window.renderStaffList) window.renderStaffList();
+          if (window.updateStaffSelectDropdown) window.updateStaffSelectDropdown();
+          if (window.updateAllCounters) window.updateAllCounters();
+        }
+      }, (err) => console.error("Error snapshot topógrafos:", err));
+    }
+
+    // Guardado y propagación en la nube
+    window.cloudSaveTask = async function(task) {
+      if (!db || !currentUser) return;
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'topografia_tasks', task.id);
+        await setDoc(docRef, task, { merge: true });
+        updateSyncBadge(true, 'Guardado');
+      } catch (e) {
+        console.error("Error guardando tarea en la nube:", e);
+      }
+    };
+
+    window.cloudDeleteTask = async function(taskId) {
+      if (!db || !currentUser) return;
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'topografia_tasks', taskId);
+        await deleteDoc(docRef);
+      } catch (e) {
+        console.error("Error eliminando tarea en la nube:", e);
+      }
+    };
+
+    window.syncLocalTasksToCloud = async function(tasksArray) {
+      if (!db || !currentUser) return;
+      for (const t of tasksArray) {
+        await window.cloudSaveTask(t);
+      }
+    };
+
+    function updateSyncBadge(isLive, label) {
+      const badgeText = document.getElementById('cloudSyncText');
+      if (badgeText) badgeText.textContent = label;
+    }
+
+    // Auto-actualización de código y eliminación de caché
+    function checkAppVersionAndCache() {
+      const currentStoredVer = localStorage.getItem('topografia_cached_build');
+      if (currentStoredVer && currentStoredVer !== APP_BUILD_VERSION) {
+        localStorage.setItem('topografia_cached_build', APP_BUILD_VERSION);
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            for (let name of names) caches.delete(name);
+          });
+        }
+        window.location.reload(true);
+      } else {
+        localStorage.setItem('topografia_cached_build', APP_BUILD_VERSION);
+      }
+    }
+    checkAppVersionAndCache();
+  </script>
+
   <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
   <script>
     const STORAGE_KEY_TASKS = 'topografia_tasks_v6_clean';
@@ -865,6 +1023,16 @@
       { name: 'Jhonatan Umaya', role: 'Topógrafo Titular • Área 4652' }
     ];
 
+    // Exponer globalmente para permitir la sincronización bidireccional en la nube
+    window.tasks = tasks;
+    window.blueprints = blueprints;
+    window.staffList = staffList;
+    window.renderActiveView = renderActiveView;
+    window.updateAllCounters = updateAllCounters;
+    window.renderBlueprintsList = renderBlueprintsList;
+    window.renderStaffList = renderStaffList;
+    window.updateStaffSelectDropdown = updateStaffSelectDropdown;
+
     document.addEventListener('DOMContentLoaded', () => {
       loadStorageData();
       initTheme();
@@ -880,18 +1048,26 @@
       try {
         const saved = localStorage.getItem(STORAGE_KEY_TASKS);
         tasks = saved ? JSON.parse(saved) : INITIAL_TASKS;
+        window.tasks = tasks;
       } catch (e) {
         tasks = INITIAL_TASKS;
+        window.tasks = tasks;
       }
 
       try {
         const savedBp = localStorage.getItem(STORAGE_KEY_BLUEPRINTS);
-        if (savedBp) blueprints = JSON.parse(savedBp);
+        if (savedBp) {
+          blueprints = JSON.parse(savedBp);
+          window.blueprints = blueprints;
+        }
       } catch (e) {}
 
       try {
         const savedStaff = localStorage.getItem(STORAGE_KEY_STAFF);
-        if (savedStaff) staffList = JSON.parse(savedStaff);
+        if (savedStaff) {
+          staffList = JSON.parse(savedStaff);
+          window.staffList = staffList;
+        }
       } catch (e) {}
 
       const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
@@ -900,10 +1076,18 @@
       }
     }
 
-    function saveTasksToStorage() {
+    function saveTasksToStorage(specificTaskToSync = null) {
       try {
         localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
       } catch (e) {}
+      
+      // Sincronización en tiempo real hacia Firestore
+      if (window.cloudSaveTask && specificTaskToSync) {
+        window.cloudSaveTask(specificTaskToSync);
+      } else if (window.syncLocalTasksToCloud && specificTaskToSync === null) {
+        tasks.forEach(t => window.cloudSaveTask && window.cloudSaveTask(t));
+      }
+
       updateAllCounters();
     }
 
@@ -1296,7 +1480,7 @@
         showToast(`Cancelado visto bueno en ${task.code}`);
       }
 
-      saveTasksToStorage();
+      saveTasksToStorage(task);
       renderActiveView();
     }
 
@@ -1674,9 +1858,10 @@
       };
 
       tasks.unshift(newTask);
-      saveTasksToStorage();
+      window.tasks = tasks;
+      saveTasksToStorage(newTask);
       closeAddModal();
-      showToast(`Frente ${code} creado correctamente`, 'success');
+      showToast(`Frente ${code} creado y sincronizado`, 'success');
 
       if (fecha !== activeDateString) {
         activeDateString = fecha;
@@ -1694,9 +1879,16 @@
       }
       if (!confirm('¿Seguro que deseas eliminar este frente de trabajo?')) return;
       tasks = tasks.filter(t => t.id !== id);
-      saveTasksToStorage();
+      window.tasks = tasks;
+      try {
+        localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+      } catch (e) {}
+
+      if (window.cloudDeleteTask) {
+        window.cloudDeleteTask(id);
+      }
       renderActiveView();
-      showToast('Frente eliminado');
+      showToast('Frente eliminado y actualizado en la nube');
     }
 
     // GESTIÓN DE PLANOS (SOLO ADMIN PUEDE AGREGAR Y ELIMINAR)
