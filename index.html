@@ -35,10 +35,10 @@
   </style>
 </head>
 
-<body class="bg-slate-900 text-slate-100 min-h-full flex flex-col font-sans antialiased overflow-x-hidden selection:bg-blue-500 selection:text-white">
+<body class="bg-slate-900 text-slate-100 min-h-full flex flex-col font-sans antialiased overflow-x-hidden selection:bg-blue-500 selection:text-white transition-colors duration-200">
 
   <!-- CABECERA PRINCIPAL FIJA -->
-  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
+  <header id="mainHeader" class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
       
       <!-- Fila Superior: Título, Sesión y Acciones Principales -->
@@ -57,25 +57,35 @@
             <p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5">
               <span>Proyecto Obra Civil</span>
               <span class="w-1 h-1 rounded-full bg-slate-600"></span>
-              <span class="text-slate-300 font-medium">Ronald Zapana / Jhonatan Umaya</span>
+              <span id="headerStaffNames" class="text-slate-300 font-medium">Ronald Zapana / Jhonatan Umaya</span>
             </p>
           </div>
         </div>
 
-        <!-- Acciones Cabecera: Login/Rol, WhatsApp, Nuevo Frente -->
+        <!-- Acciones Cabecera: Modo Claro/Oscuro, Login/Rol, WhatsApp, Nuevo Frente -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          
+          <!-- Botón Cambio de Tema Claro / Oscuro -->
+          <button id="btnThemeToggle" type="button" onclick="toggleTheme()" title="Cambiar tema claro / oscuro"
+            class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 flex items-center justify-center transition shadow-sm">
+            <i id="themeIcon" class="fa-solid fa-sun text-sm"></i>
+          </button>
+
+          <!-- Botón de Rol/Login -->
           <button id="btnRoleToggle" type="button" onclick="openLoginModal(true)" title="Cambiar sesión o identificarse"
             class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
             <i class="fa-solid fa-user-shield text-blue-400"></i>
             <span id="btnRoleText" class="hidden sm:inline">Admin</span>
           </button>
 
+          <!-- Botón WhatsApp Mejorado -->
           <button id="btnOpenWhatsApp" type="button" onclick="openWhatsAppModal()"
-            class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 flex items-center gap-1.5 transition">
-            <i class="fa-brands fa-whatsapp text-sm"></i>
-            <span class="hidden md:inline">Reporte WhatsApp</span>
+            class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 flex items-center gap-1.5 transition group">
+            <i class="fa-brands fa-whatsapp text-sm group-hover:scale-110 transition-transform"></i>
+            <span class="hidden md:inline">WhatsApp</span>
           </button>
 
+          <!-- Botón + Frente (SOLO ADMIN) -->
           <button id="btnOpenAddFront" type="button" onclick="openAddModal()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md shadow-blue-900/30 flex items-center gap-1.5 transition">
             <i class="fa-solid fa-plus text-xs"></i>
@@ -163,13 +173,14 @@
           class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
           <i class="fa-solid fa-users-gear text-slate-400"></i>
           <span>Topógrafos</span>
+          <span id="badge-staff" class="text-[10px] text-slate-400 font-mono">0</span>
         </button>
 
-        <!-- Pestaña Descargar Excel -->
-        <button id="btnExcelExport" type="button" onclick="exportTasksToExcel()"
-          class="px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-emerald-800/70 text-emerald-100 hover:bg-emerald-700 border border-emerald-600/50 ml-auto">
+        <!-- Pestaña Excel con Menú Mejorado -->
+        <button id="tab-excel" type="button" onclick="switchTab('excel')"
+          class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-emerald-800/70 text-emerald-100 hover:bg-emerald-700 border border-emerald-600/50 ml-auto">
           <i class="fa-solid fa-file-excel text-emerald-300"></i>
-          <span>Descargar Excel</span>
+          <span>Módulo Excel</span>
         </button>
 
       </nav>
@@ -270,79 +281,135 @@
               </tr>
             </thead>
             <tbody id="areaTableBody" class="divide-y divide-slate-700/60 font-normal">
-              <!-- Render dinámico -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Estado vacío -->
-        <div id="areaTableEmpty" class="hidden p-8 text-center space-y-2">
-          <i class="fa-regular fa-folder-open text-3xl text-slate-600"></i>
-          <p class="text-xs text-slate-400 font-medium">No se encontraron frentes registrados para esta área en la fecha seleccionada.</p>
-          <button type="button" onclick="openAddModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition">
-            Registrar Frente en esta Fecha
-          </button>
-        </div>
+            <!-- Render dinámico -->
+          </tbody>
+        </table>
       </div>
 
-    </section>
+      <!-- Estado vacío -->
+      <div id="areaTableEmpty" class="hidden p-8 text-center space-y-2">
+        <i class="fa-regular fa-folder-open text-3xl text-slate-600"></i>
+        <p class="text-xs text-slate-400 font-medium">No se encontraron frentes registrados para esta área en la fecha seleccionada.</p>
+        <button id="btnEmptyAddFront" type="button" onclick="openAddModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition">
+          Registrar Frente en esta Fecha
+        </button>
+      </div>
+    </div>
 
-    <!-- SECCIÓN 2: MÓDULO "¿QUÉ ME FALTA?" (ESTRICTAMENTE AISLADO) -->
-    <section id="section-pending" class="hidden space-y-4">
-      <div class="bg-gradient-to-r from-amber-950/40 via-slate-800 to-slate-800 border border-amber-500/30 rounded-xl p-4 shadow">
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <h2 class="text-base font-black text-amber-300 flex items-center gap-2">
-              <i class="fa-solid fa-clipboard-check text-amber-400"></i>
-              <span>Diagnóstico de Frentes y Liberaciones Pendientes</span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Identificación de puntos críticos de obra civil pendientes en la fecha activa.</p>
-          </div>
-          <span id="pendingTotalBadge" class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
-            0 Pendientes
+  </section>
+
+  <!-- SECCIÓN 2: MÓDULO "¿QUÉ ME FALTA?" (ESTRICTAMENTE AISLADO) -->
+  <section id="section-pending" class="hidden space-y-4">
+    <div class="bg-gradient-to-r from-amber-950/40 via-slate-800 to-slate-800 border border-amber-500/30 rounded-xl p-4 shadow">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div>
+          <h2 class="text-base font-black text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check text-amber-400"></i>
+            <span>Diagnóstico de Frentes y Liberaciones Pendientes</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Identificación de puntos críticos de obra civil pendientes en la fecha activa.</p>
+        </div>
+        <span id="pendingTotalBadge" class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+          0 Pendientes
+        </span>
+      </div>
+    </div>
+
+    <!-- Tarjetas de Diagnóstico de Alto Contraste -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <!-- 1. Falta Fundación -->
+      <div class="bg-slate-800/90 border-2 border-blue-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+        <div class="flex items-center justify-between text-xs font-black text-blue-300 border-b border-slate-700/80 pb-2">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-trowel-bricks text-blue-400"></i>
+            <span>1. Falta Fundación</span>
           </span>
+          <span id="count-pending-fundacion" class="px-2 py-0.5 rounded-full bg-blue-950 text-blue-200 font-mono text-[11px]">0</span>
         </div>
+        <div id="list-pending-fundacion" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
       </div>
 
-      <!-- Tarjetas de Diagnóstico de Alto Contraste -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <!-- 1. Falta Fundación -->
-        <div class="bg-slate-800/90 border-2 border-blue-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-          <div class="flex items-center justify-between text-xs font-black text-blue-300 border-b border-slate-700/80 pb-2">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-trowel-bricks text-blue-400"></i>
-              <span>1. Falta Fundación</span>
-            </span>
-            <span id="count-pending-fundacion" class="px-2 py-0.5 rounded-full bg-blue-950 text-blue-200 font-mono text-[11px]">0</span>
-          </div>
-          <div id="list-pending-fundacion" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
+      <!-- 2. Falta Pre-vaciado -->
+      <div class="bg-slate-800/90 border-2 border-amber-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+        <div class="flex items-center justify-between text-xs font-black text-amber-300 border-b border-slate-700/80 pb-2">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-clipboard-question text-amber-400"></i>
+            <span>2. Falta Pre-vaciado</span>
+          </span>
+          <span id="count-pending-prevaciado" class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 font-mono text-[11px]">0</span>
         </div>
-
-        <!-- 2. Falta Pre-vaciado -->
-        <div class="bg-slate-800/90 border-2 border-amber-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-          <div class="flex items-center justify-between text-xs font-black text-amber-300 border-b border-slate-700/80 pb-2">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-clipboard-question text-amber-400"></i>
-              <span>2. Falta Pre-vaciado</span>
-            </span>
-            <span id="count-pending-prevaciado" class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 font-mono text-[11px]">0</span>
-          </div>
-          <div id="list-pending-prevaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
-        </div>
-
-        <!-- 3. Falta Post-vaciado -->
-        <div class="bg-slate-800/90 border-2 border-purple-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-          <div class="flex items-center justify-between text-xs font-black text-purple-300 border-b border-slate-700/80 pb-2">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-check-to-slot text-purple-400"></i>
-              <span>3. Falta Post-vaciado</span>
-            </span>
-            <span id="count-pending-postvaciado" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-200 font-mono text-[11px]">0</span>
-          </div>
-          <div id="list-pending-postvaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
-        </div>
+        <div id="list-pending-prevaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
       </div>
-    </section>
+
+      <!-- 3. Falta Post-vaciado -->
+      <div class="bg-slate-800/90 border-2 border-purple-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+        <div class="flex items-center justify-between text-xs font-black text-purple-300 border-b border-slate-700/80 pb-2">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-check-to-slot text-purple-400"></i>
+            <span>3. Falta Post-vaciado</span>
+          </span>
+          <span id="count-pending-postvaciado" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-200 font-mono text-[11px]">0</span>
+        </div>
+        <div id="list-pending-postvaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3: MÓDULO EXCEL MEJORADO (VISUALIZACIÓN Y REPORTES) -->
+  <section id="section-excel" class="hidden space-y-4">
+    <div class="bg-slate-800/90 border border-emerald-500/30 rounded-xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
+      <div class="space-y-0.5">
+        <h2 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-file-excel text-emerald-400"></i>
+          <span>Módulo Oficial de Exportación a Excel</span>
+        </h2>
+        <p class="text-xs text-slate-400">Genera partes oficiales diarios o el dossier completo de liberaciones en formato .xlsx</p>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button type="button" onclick="exportTasksToExcel(false)"
+          class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition">
+          <i class="fa-solid fa-download"></i>
+          <span>Descargar Parte del Día (<span id="excelActiveDayLabel"></span>)</span>
+        </button>
+
+        <button type="button" onclick="exportTasksToExcel(true)"
+          class="px-3.5 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs flex items-center gap-2 border border-slate-600 transition">
+          <i class="fa-solid fa-book-bookmark text-amber-400"></i>
+          <span>Descargar Histórico Completo</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Previsualización de Datos para Excel -->
+    <div class="bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden shadow-xl space-y-2 p-3">
+      <div class="flex items-center justify-between text-xs font-bold text-slate-300 pb-2 border-b border-slate-700">
+        <span>Previsualización de Filas del Parte Oficial</span>
+        <span class="text-slate-400 text-[11px]" id="excelRowCountText">0 elementos</span>
+      </div>
+      
+      <div class="overflow-x-auto max-h-96">
+        <table class="w-full text-left text-xs text-slate-200 border-collapse">
+          <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-700 sticky top-0">
+            <tr>
+              <th class="py-2 px-2">Área</th>
+              <th class="py-2 px-2">Código</th>
+              <th class="py-2 px-2">Elemento</th>
+              <th class="py-2 px-2">Ejes</th>
+              <th class="py-2 px-2">Topógrafo</th>
+              <th class="py-2 px-2 text-center">Fundación</th>
+              <th class="py-2 px-2 text-center">Pre-vaciado</th>
+              <th class="py-2 px-2 text-center">Post-vaciado</th>
+              <th class="py-2 px-2 text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="excelPreviewTableBody" class="divide-y divide-slate-700/50 font-mono text-[11px]">
+            <!-- Render dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
   </main>
 
@@ -513,21 +580,7 @@
           <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Plano de Referencia</label>
           <input type="text" id="frontBlueprintInput" placeholder="Ej: PL-STR-4680-01 Rev.B"
             class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeAddModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold">
-            Cancelar
-          </button>
-          <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-md shadow-blue-900/30">
-            Guardar Frente
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 4. MODAL PLANOS DE OBRA -->
+  <!-- 4. MODAL PLANOS DE OBRA (SOLO ADMIN PUEDE AGREGAR/ELIMINAR) -->
   <div id="modalBlueprints" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -540,19 +593,25 @@
         </button>
       </div>
 
-      <form id="formAddBlueprint" onsubmit="event.preventDefault(); saveNewBlueprint();" class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 text-xs">
-        <input type="text" id="bpCode" required placeholder="Código (PL-4680-01)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-        <input type="text" id="bpTitle" required placeholder="Descripción del Plano" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-        <button type="submit" class="bg-teal-600 hover:bg-teal-500 text-white font-bold rounded px-2 py-1">
-          + Agregar
-        </button>
-      </form>
+      <!-- Formulario Agregar Plano (SOLO ADMIN) -->
+      <div id="adminBlueprintFormContainer">
+        <form id="formAddBlueprint" onsubmit="event.preventDefault(); saveNewBlueprint();" class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 text-xs">
+          <input type="text" id="bpCode" required placeholder="Código (PL-4680-01)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+          <input type="text" id="bpTitle" required placeholder="Descripción del Plano" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+          <button type="submit" class="bg-teal-600 hover:bg-teal-500 text-white font-bold rounded px-2 py-1">
+            + Agregar Plano
+          </button>
+        </form>
+      </div>
+      <div id="guestBlueprintNotice" class="hidden p-2 bg-slate-800 rounded-lg text-[11px] text-amber-300 border border-amber-500/30 text-center">
+        <i class="fa-solid fa-lock mr-1"></i> Solo el Administrador puede registrar o eliminar planos técnicos.
+      </div>
 
       <div id="blueprintsListContainer" class="space-y-1.5 text-xs max-h-60 overflow-y-auto"></div>
     </div>
   </div>
 
-  <!-- 5. MODAL TOPÓGRAFOS / PERSONAL -->
+  <!-- 5. MODAL TOPÓGRAFOS / PERSONAL (SOLO ADMIN PUEDE AGREGAR/ELIMINAR) -->
   <div id="modalStaff" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -565,57 +624,65 @@
         </button>
       </div>
 
-      <div class="space-y-2 text-xs">
-        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">RZ</div>
-            <div>
-              <p class="font-bold text-white">Ronald Zapana</p>
-              <p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4680 / 4653</p>
-            </div>
+      <!-- Formulario para agregar nuevo topógrafo (SOLO ADMIN) -->
+      <div id="adminStaffFormContainer">
+        <form id="formAddStaff" onsubmit="event.preventDefault(); saveNewStaff();" class="space-y-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-xs">
+          <p class="font-bold text-slate-300 text-[11px]">Registrar Nuevo Topógrafo</p>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="staffNameInput" required placeholder="Nombre completo" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+            <input type="text" id="staffRoleInput" required placeholder="Cargo / Especialidad" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
-        </div>
+          <button type="submit" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs transition">
+            + Guardar Topógrafo
+          </button>
+        </form>
+      </div>
+      <div id="guestStaffNotice" class="hidden p-2 bg-slate-800 rounded-lg text-[11px] text-amber-300 border border-amber-500/30 text-center">
+        <i class="fa-solid fa-lock mr-1"></i> Solo el Administrador puede registrar o eliminar personal.
+      </div>
 
-        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">JU</div>
-            <div>
-              <p class="font-bold text-white">Jhonatan Umaya</p>
-              <p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4652</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
-        </div>
+      <div id="staffListContainer" class="space-y-2 text-xs">
+        <!-- Render dinámico de topógrafos -->
       </div>
     </div>
   </div>
 
-  <!-- 6. MODAL WHATSAPP TÉCNICO -->
+  <!-- 6. MODAL WHATSAPP TÉCNICO POTENCIADO -->
   <div id="modalWhatsApp" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h3 class="text-sm font-black text-white flex items-center gap-2">
-          <i class="fa-brands fa-whatsapp text-emerald-400 text-base"></i>
-          <span>Reporte Técnico para WhatsApp</span>
+          <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
+          <span>Generador de Reportes Técnicos para WhatsApp</span>
         </h3>
         <button type="button" onclick="closeWhatsAppModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
 
+      <!-- Filtro Rápido de Reporte -->
+      <div class="flex items-center gap-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+        <span class="text-slate-400 font-bold text-[11px]">Enviar Área:</span>
+        <button type="button" onclick="setWhatsAppFilter('all')" id="btnWaAll" class="px-2 py-1 rounded bg-blue-600 text-white font-bold text-[10px]">Todas</button>
+        <button type="button" onclick="setWhatsAppFilter('4680')" id="btnWa4680" class="px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold text-[10px]">4680</button>
+        <button type="button" onclick="setWhatsAppFilter('4652')" id="btnWa4652" class="px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold text-[10px]">4652</button>
+        <button type="button" onclick="setWhatsAppFilter('4653')" id="btnWa4653" class="px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold text-[10px]">4653</button>
+      </div>
+
       <div class="space-y-2 text-xs">
-        <p class="text-[11px] text-slate-400">Previsualización del parte oficial de liberaciones para el grupo de obra:</p>
+        <p class="text-[11px] text-slate-400">Previsualización del parte oficial listo para compartir con el grupo de obra:</p>
         <textarea id="whatsAppTextPreview" rows="10" readonly
           class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-[11px] focus:outline-none select-all"></textarea>
       </div>
 
       <div class="flex items-center justify-end gap-2 pt-1">
-        <button type="button" onclick="copyWhatsAppToClipboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold text-xs">
-          <i class="fa-regular fa-copy mr-1"></i> Copiar Texto
+        <button type="button" onclick="copyWhatsAppToClipboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold text-xs flex items-center gap-1.5">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copiar Mensaje</span>
         </button>
-        <button type="button" onclick="sendWhatsAppDirect()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1.5">
-          <i class="fa-brands fa-whatsapp"></i> Abrir WhatsApp
+        <button type="button" onclick="sendWhatsAppDirect()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-950">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Abrir en WhatsApp</span>
         </button>
       </div>
     </div>
@@ -632,12 +699,15 @@
     const STORAGE_KEY_TASKS = 'topografia_tasks_v6_clean';
     const STORAGE_KEY_ROLE = 'topografia_user_role';
     const STORAGE_KEY_BLUEPRINTS = 'topografia_blueprints_v6';
+    const STORAGE_KEY_STAFF = 'topografia_staff_v6';
+    const STORAGE_KEY_THEME = 'topografia_theme_mode';
 
     let userRole = 'admin';
     let currentTab = '4680';
     let activeDateString = new Date().toISOString().split('T')[0];
     let calendarViewYear = new Date().getFullYear();
     let calendarViewMonth = new Date().getMonth();
+    let whatsAppFilterArea = 'all';
 
     let filterSearchQuery = '';
     let filterStatus = 'all';
@@ -727,13 +797,20 @@
       { code: 'PL-ALM-101', title: 'Estructuras Generales Almacén Central' }
     ];
 
+    let staffList = [
+      { name: 'Ronald Zapana', role: 'Topógrafo Titular • Área 4680 / 4653' },
+      { name: 'Jhonatan Umaya', role: 'Topógrafo Titular • Área 4652' }
+    ];
+
     document.addEventListener('DOMContentLoaded', () => {
       loadStorageData();
+      initTheme();
       initDateInputs();
       applyUserRoleUI();
       openLoginModal(false);
       switchTab('4680');
       updateAllCounters();
+      updateStaffSelectDropdown();
     });
 
     function loadStorageData() {
@@ -749,6 +826,11 @@
         if (savedBp) blueprints = JSON.parse(savedBp);
       } catch (e) {}
 
+      try {
+        const savedStaff = localStorage.getItem(STORAGE_KEY_STAFF);
+        if (savedStaff) staffList = JSON.parse(savedStaff);
+      } catch (e) {}
+
       const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
       if (savedRole === 'guest' || savedRole === 'admin') {
         userRole = savedRole;
@@ -762,6 +844,35 @@
       updateAllCounters();
     }
 
+    // GESTIÓN DE TEMA CLARO / OSCURO
+    function initTheme() {
+      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'dark';
+      applyTheme(savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      localStorage.setItem(STORAGE_KEY_THEME, nextTheme);
+      showToast(`Tema cambiado a ${nextTheme === 'dark' ? 'Oscuro' : 'Claro'}`);
+    }
+
+    function applyTheme(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (theme === 'light') {
+        document.documentElement.classList.add('light-theme');
+        document.body.classList.remove('bg-slate-900', 'text-slate-100');
+        document.body.classList.add('bg-slate-100', 'text-slate-900');
+        if (icon) icon.className = 'fa-solid fa-moon text-indigo-600 text-sm';
+      } else {
+        document.documentElement.classList.remove('light-theme');
+        document.body.classList.remove('bg-slate-100', 'text-slate-900');
+        document.body.classList.add('bg-slate-900', 'text-slate-100');
+        if (icon) icon.className = 'fa-solid fa-sun text-amber-400 text-sm';
+      }
+    }
+
     function initDateInputs() {
       const dateInput = document.getElementById('dateSelectorInput');
       if (dateInput) {
@@ -772,13 +883,15 @@
 
     function updateActiveDateLabel() {
       const lbl = document.getElementById('activeDateBadgeLabel');
+      const excelLbl = document.getElementById('excelActiveDayLabel');
       if (lbl) {
         const [y, m, d] = activeDateString.split('-');
         lbl.textContent = `(${d}/${m}/${y})`;
+        if (excelLbl) excelLbl.textContent = `${d}/${m}/${y}`;
       }
     }
 
-    // GESTIÓN DE LOGIN FORMAL
+    // GESTIÓN DE LOGIN FORMAL Y PERMISOS ESTRICTOS DE ADMIN
     function openLoginModal(canClose = true) {
       const modal = document.getElementById('modalLogin');
       modal.classList.remove('hidden');
@@ -834,18 +947,46 @@
       const roleBadge = document.getElementById('roleBadge');
       const btnRoleText = document.getElementById('btnRoleText');
       const btnAddFront = document.getElementById('btnOpenAddFront');
+      const btnEmptyAddFront = document.getElementById('btnEmptyAddFront');
+
+      // Formularios restringidos solo para Admin
+      const adminStaffForm = document.getElementById('adminStaffFormContainer');
+      const guestStaffNotice = document.getElementById('guestStaffNotice');
+      const adminBpForm = document.getElementById('adminBlueprintFormContainer');
+      const guestBpNotice = document.getElementById('guestBlueprintNotice');
 
       if (userRole === 'admin') {
         roleBadge.textContent = 'Admin';
         roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
         btnRoleText.textContent = 'Admin';
-        btnAddFront.classList.remove('hidden');
+        
+        if (btnAddFront) btnAddFront.classList.remove('hidden');
+        if (btnEmptyAddFront) btnEmptyAddFront.classList.remove('hidden');
+
+        if (adminStaffForm) adminStaffForm.classList.remove('hidden');
+        if (guestStaffNotice) guestStaffNotice.classList.add('hidden');
+
+        if (adminBpForm) adminBpForm.classList.remove('hidden');
+        if (guestBpNotice) guestBpNotice.classList.add('hidden');
       } else {
         roleBadge.textContent = 'Invitado';
         roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
         btnRoleText.textContent = 'Invitado';
-        btnAddFront.classList.add('hidden');
+        
+        // Ocultar botones de agregar frentes
+        if (btnAddFront) btnAddFront.classList.add('hidden');
+        if (btnEmptyAddFront) btnEmptyAddFront.classList.add('hidden');
+
+        // Deshabilitar agregar topógrafos y planos
+        if (adminStaffForm) adminStaffForm.classList.add('hidden');
+        if (guestStaffNotice) guestStaffNotice.classList.remove('hidden');
+
+        if (adminBpForm) adminBpForm.classList.add('hidden');
+        if (guestBpNotice) guestBpNotice.classList.remove('hidden');
       }
+
+      renderStaffList();
+      renderBlueprintsList();
     }
 
     // NAVEGACIÓN Y CONTROL ESTRICTO DE VISIBILIDAD DE MÓDULOS
@@ -854,9 +995,10 @@
 
       const sectionPending = document.getElementById('section-pending');
       const sectionAreaTable = document.getElementById('section-area-table');
+      const sectionExcel = document.getElementById('section-excel');
 
       // Actualizar estilos de los botones de navegación
-      ['4680', '4652', '4653', 'pending', 'blueprints', 'staff'].forEach(id => {
+      ['4680', '4652', '4653', 'pending', 'blueprints', 'staff', 'excel'].forEach(id => {
         const btn = document.getElementById(`tab-${id}`);
         if (!btn) return;
         if (id === tabId) {
@@ -868,23 +1010,26 @@
         }
       });
 
-      // AISLAMIENTO TOTAL: "¿Qué me falta?" solo se muestra en tabId === 'pending'
+      // AISLAMIENTO TOTAL ENTRE MÓDULOS
       if (tabId === '4680' || tabId === '4652' || tabId === '4653') {
         sectionAreaTable.classList.remove('hidden');
         sectionPending.classList.add('hidden');
+        sectionExcel.classList.add('hidden');
         updateAreaHeaderTitles(tabId);
         renderTableRows();
       } else if (tabId === 'pending') {
         sectionAreaTable.classList.add('hidden');
         sectionPending.classList.remove('hidden');
+        sectionExcel.classList.add('hidden');
         renderPendingModule();
-      } else if (tabId === 'blueprints') {
-        sectionAreaTable.classList.remove('hidden');
+      } else if (tabId === 'excel') {
+        sectionAreaTable.classList.add('hidden');
         sectionPending.classList.add('hidden');
+        sectionExcel.classList.remove('hidden');
+        renderExcelPreview();
+      } else if (tabId === 'blueprints') {
         openBlueprintModal();
       } else if (tabId === 'staff') {
-        sectionAreaTable.classList.remove('hidden');
-        sectionPending.classList.add('hidden');
         openStaffModal();
       }
 
@@ -909,6 +1054,8 @@
     function renderActiveView() {
       if (currentTab === 'pending') {
         renderPendingModule();
+      } else if (currentTab === 'excel') {
+        renderExcelPreview();
       } else {
         renderTableRows();
       }
@@ -1064,7 +1211,7 @@
 
     function toggleTaskStep(taskId, stepName) {
       if (userRole !== 'admin') {
-        showToast('Acción restringida para invitados');
+        showToast('Acción restringida: solo el administrador puede liberar');
         return;
       }
 
@@ -1092,7 +1239,6 @@
 
     // ACTUALIZACIÓN DE CONTADORES REACTIVOS POR ÁREA Y GENERALES
     function updateAllCounters() {
-      // 1. Contadores reactivos en las pestañas de área (4680, 4652, 4653)
       ['4680', '4652', '4653'].forEach(areaCode => {
         const badge = document.getElementById(`badge-${areaCode}`);
         if (badge) {
@@ -1101,7 +1247,6 @@
         }
       });
 
-      // 2. Frentes del día para KPI
       const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
       const totalFrentes = dayTasks.length;
 
@@ -1134,6 +1279,15 @@
 
       const badgeBlueprints = document.getElementById('badge-blueprints');
       if (badgeBlueprints) badgeBlueprints.textContent = blueprints.length;
+
+      const badgeStaff = document.getElementById('badge-staff');
+      if (badgeStaff) badgeStaff.textContent = staffList.length;
+
+      // Actualizar nombres del header
+      const headerStaff = document.getElementById('headerStaffNames');
+      if (headerStaff && staffList.length > 0) {
+        headerStaff.textContent = staffList.map(s => s.name.split(' ')[0]).join(' / ');
+      }
     }
 
     // MÓDULO ¿QUÉ ME FALTA?
@@ -1194,6 +1348,95 @@
         ` : ''}
       `;
       return div;
+    }
+
+    // MÓDULO EXCEL MEJORADO (PREVISUALIZACIÓN Y DESCARGAS)
+    function renderExcelPreview() {
+      const tbody = document.getElementById('excelPreviewTableBody');
+      const countLabel = document.getElementById('excelRowCountText');
+      tbody.innerHTML = '';
+
+      const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
+      countLabel.textContent = `${dayTasks.length} frentes activos en la fecha`;
+
+      if (dayTasks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-slate-500">No hay datos para la fecha seleccionada.</td></tr>`;
+        return;
+      }
+
+      dayTasks.forEach(t => {
+        const sFund = t.steps.find(s => s.name === 'fundacion');
+        const sPre = t.steps.find(s => s.name === 'prevaciado');
+        const sPost = t.steps.find(s => s.name === 'postvaciado');
+
+        const fOk = isStepDoneInActiveDate(sFund, activeDateString);
+        const pOk = isStepDoneInActiveDate(sPre, activeDateString);
+        const postOk = isStepDoneInActiveDate(sPost, activeDateString);
+
+        const prog = calculateProgress(t, activeDateString);
+
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-700/40 hover:bg-slate-700/20';
+        tr.innerHTML = `
+          <td class="py-2 px-2 text-slate-300 font-bold">${escapeHtml(t.area.split('-')[0].trim())}</td>
+          <td class="py-2 px-2 font-black text-blue-400">${escapeHtml(t.code)}</td>
+          <td class="py-2 px-2 text-white">${escapeHtml(t.name)}</td>
+          <td class="py-2 px-2 text-slate-400">${escapeHtml(t.ejes)}</td>
+          <td class="py-2 px-2 text-slate-300">${escapeHtml(t.topografo)}</td>
+          <td class="py-2 px-2 text-center ${fOk ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${fOk ? sFund.hora : '—'}</td>
+          <td class="py-2 px-2 text-center ${pOk ? 'text-amber-400 font-bold' : 'text-slate-500'}">${pOk ? sPre.hora : '—'}</td>
+          <td class="py-2 px-2 text-center ${postOk ? 'text-purple-400 font-bold' : 'text-slate-500'}">${postOk ? sPost.hora : '—'}</td>
+          <td class="py-2 px-2 text-center"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${prog === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'}">${prog}%</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportTasksToExcel(allHistory = false) {
+      if (typeof XLSX === 'undefined') {
+        showToast('Librería Excel no cargada aún');
+        return;
+      }
+
+      const tasksToExport = allHistory ? tasks : tasks.filter(t => isTaskInActiveDate(t, activeDateString));
+
+      if (tasksToExport.length === 0) {
+        showToast('No hay datos disponibles para exportar');
+        return;
+      }
+
+      const rows = [];
+      tasksToExport.forEach((t, index) => {
+        const sFund = t.steps.find(s => s.name === 'fundacion') || {};
+        const sPre = t.steps.find(s => s.name === 'prevaciado') || {};
+        const sPost = t.steps.find(s => s.name === 'postvaciado') || {};
+
+        rows.push({
+          'N°': index + 1,
+          'Área de Proyecto': t.area,
+          'Código': t.code,
+          'Elemento': t.name,
+          'Ubicación / Ejes': t.ejes,
+          'Topógrafo': t.topografo,
+          'Plano Ref.': t.plano || 'S/P',
+          'Fecha Registro': t.fechaCreacion,
+          '1. Fundación': sFund.done ? `Liberado (${sFund.fecha} ${sFund.hora})` : 'Pendiente',
+          '2. Pre-vaciado': sPre.done ? `Liberado (${sPre.fecha} ${sPre.hora})` : 'Pendiente',
+          '3. Post-vaciado': sPost.done ? `Liberado (${sPost.fecha} ${sPost.hora})` : 'Pendiente',
+          'Avance (%)': `${calculateProgress(t, activeDateString)}%`
+        });
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, allHistory ? 'Histórico General' : 'Parte Diario');
+
+      const fileName = allHistory 
+        ? `Dossier_Topografico_Historico.xlsx`
+        : `Parte_Topografico_${activeDateString}.xlsx`;
+
+      XLSX.writeFile(workbook, fileName);
+      showToast(`Descargando ${fileName}`, 'success');
     }
 
     // CALENDARIO E HISTORIAL
@@ -1310,10 +1553,10 @@
       showToast('Regresaste a la fecha de hoy');
     }
 
-    // REGISTRO DE FRENTES
+    // REGISTRO DE FRENTES (SOLO ADMIN)
     function openAddModal() {
       if (userRole !== 'admin') {
-        showToast('Acceso restringido para invitados');
+        showToast('Acceso restringido: solo el administrador puede crear frentes');
         return;
       }
       document.getElementById('modalAddFront').classList.remove('hidden');
@@ -1324,6 +1567,8 @@
       if (currentTab === '4652') selArea.value = '4652 - Taller de mantenimiento de equipo LESDE';
       else if (currentTab === '4653') selArea.value = '4653 - Almacén general';
       else selArea.value = '4680 - Almacén y descarga de ácidos';
+
+      updateStaffSelectDropdown();
     }
 
     function closeAddModal() {
@@ -1331,6 +1576,11 @@
     }
 
     function saveNewFrontSubmit() {
+      if (userRole !== 'admin') {
+        showToast('Permiso denegado: solo Administrador');
+        return;
+      }
+
       const area = document.getElementById('frontAreaSelect').value;
       const code = document.getElementById('frontCodeInput').value.trim();
       const name = document.getElementById('frontNameInput').value.trim();
@@ -1375,7 +1625,10 @@
     }
 
     function deleteFrontTask(id) {
-      if (userRole !== 'admin') return;
+      if (userRole !== 'admin') {
+        showToast('Acceso restringido: solo el administrador puede eliminar frentes');
+        return;
+      }
       if (!confirm('¿Seguro que deseas eliminar este frente de trabajo?')) return;
       tasks = tasks.filter(t => t.id !== id);
       saveTasksToStorage();
@@ -1383,9 +1636,10 @@
       showToast('Frente eliminado');
     }
 
-    // PLANOS
+    // GESTIÓN DE PLANOS (SOLO ADMIN PUEDE AGREGAR Y ELIMINAR)
     function openBlueprintModal() {
       document.getElementById('modalBlueprints').classList.remove('hidden');
+      applyUserRoleUI();
       renderBlueprintsList();
     }
     function closeBlueprintModal() {
@@ -1394,26 +1648,31 @@
 
     function renderBlueprintsList() {
       const cont = document.getElementById('blueprintsListContainer');
+      if (!cont) return;
       cont.innerHTML = '';
       blueprints.forEach((bp, index) => {
         const item = document.createElement('div');
-        item.className = 'p-2 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-between text-xs';
+        item.className = 'p-2.5 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-between text-xs';
         item.innerHTML = `
           <div>
             <span class="font-bold text-white font-mono">${escapeHtml(bp.code)}</span>
             <p class="text-[11px] text-slate-400">${escapeHtml(bp.title)}</p>
           </div>
           ${userRole === 'admin' ? `
-            <button type="button" onclick="deleteBlueprint(${index})" class="text-rose-400 hover:text-rose-300">
+            <button type="button" onclick="deleteBlueprint(${index})" title="Eliminar plano" class="text-rose-400 hover:text-rose-300 w-6 h-6 flex items-center justify-center rounded hover:bg-slate-700">
               <i class="fa-solid fa-trash-can"></i>
             </button>
-          ` : ''}
+          ` : '<span class="text-[10px] text-slate-500">Vigente</span>'}
         `;
         cont.appendChild(item);
       });
     }
 
     function saveNewBlueprint() {
+      if (userRole !== 'admin') {
+        showToast('Solo el administrador puede registrar planos');
+        return;
+      }
       const code = document.getElementById('bpCode').value.trim();
       const title = document.getElementById('bpTitle').value.trim();
       if (!code || !title) return;
@@ -1422,25 +1681,109 @@
       document.getElementById('formAddBlueprint').reset();
       renderBlueprintsList();
       updateAllCounters();
-      showToast('Plano registrado');
+      showToast('Plano registrado con éxito', 'success');
     }
 
     function deleteBlueprint(idx) {
+      if (userRole !== 'admin') {
+        showToast('Solo el administrador puede eliminar planos');
+        return;
+      }
       blueprints.splice(idx, 1);
       localStorage.setItem(STORAGE_KEY_BLUEPRINTS, JSON.stringify(blueprints));
       renderBlueprintsList();
       updateAllCounters();
+      showToast('Plano eliminado');
     }
 
-    // PERSONAL
+    // GESTIÓN DE TOPÓGRAFOS / PERSONAL (SOLO ADMIN)
     function openStaffModal() {
       document.getElementById('modalStaff').classList.remove('hidden');
+      applyUserRoleUI();
+      renderStaffList();
     }
     function closeStaffModal() {
       document.getElementById('modalStaff').classList.add('hidden');
     }
 
-    // WHATSAPP
+    function renderStaffList() {
+      const cont = document.getElementById('staffListContainer');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      staffList.forEach((st, idx) => {
+        const initials = st.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        const item = document.createElement('div');
+        item.className = 'bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between text-xs';
+        item.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">${initials}</div>
+            <div>
+              <p class="font-bold text-white">${escapeHtml(st.name)}</p>
+              <p class="text-[10px] text-slate-400">${escapeHtml(st.role)}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
+            ${userRole === 'admin' ? `
+              <button type="button" onclick="deleteStaff(${idx})" title="Eliminar topógrafo" class="w-6 h-6 text-rose-400 hover:text-rose-300 flex items-center justify-center">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        cont.appendChild(item);
+      });
+    }
+
+    function saveNewStaff() {
+      if (userRole !== 'admin') {
+        showToast('Acceso restringido: solo Administrador');
+        return;
+      }
+      const name = document.getElementById('staffNameInput').value.trim();
+      const role = document.getElementById('staffRoleInput').value.trim();
+      if (!name || !role) return;
+
+      staffList.push({ name, role });
+      localStorage.setItem(STORAGE_KEY_STAFF, JSON.stringify(staffList));
+      document.getElementById('formAddStaff').reset();
+      renderStaffList();
+      updateStaffSelectDropdown();
+      updateAllCounters();
+      showToast(`Topógrafo ${name} registrado`, 'success');
+    }
+
+    function deleteStaff(idx) {
+      if (userRole !== 'admin') {
+        showToast('Solo Administrador puede eliminar personal');
+        return;
+      }
+      if (staffList.length <= 1) {
+        showToast('Debe existir al menos un topógrafo');
+        return;
+      }
+      staffList.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY_STAFF, JSON.stringify(staffList));
+      renderStaffList();
+      updateStaffSelectDropdown();
+      updateAllCounters();
+      showToast('Topógrafo eliminado');
+    }
+
+    function updateStaffSelectDropdown() {
+      const sel = document.getElementById('frontSurveyorSelect');
+      if (!sel) return;
+      sel.innerHTML = '';
+      staffList.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.name;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    // WHATSAPP POTENCIADO Y FORMATEADO
     function openWhatsAppModal() {
       document.getElementById('modalWhatsApp').classList.remove('hidden');
       buildWhatsAppText();
@@ -1449,31 +1792,51 @@
       document.getElementById('modalWhatsApp').classList.add('hidden');
     }
 
+    function setWhatsAppFilter(area) {
+      whatsAppFilterArea = area;
+      ['all', '4680', '4652', '4653'].forEach(k => {
+        const b = document.getElementById(`btnWa${k.charAt(0).toUpperCase() + k.slice(1)}`);
+        if (!b) return;
+        if (k === area) {
+          b.className = 'px-2 py-1 rounded bg-blue-600 text-white font-bold text-[10px]';
+        } else {
+          b.className = 'px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold text-[10px]';
+        }
+      });
+      buildWhatsAppText();
+    }
+
     function buildWhatsAppText() {
       const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
       const [y, m, d] = activeDateString.split('-');
 
       let msg = `*CONTROL TOPOGRÁFICO DIARIO*\n`;
       msg += `📅 *Fecha:* ${d}/${m}/${y}\n`;
-      msg += `👷 *Topógrafos:* Ronald Zapana / Jhonatan Umaya\n`;
+      msg += `👷 *Topógrafos:* ${staffList.map(s => s.name).join(' / ')}\n`;
       msg += `------------------------------------\n\n`;
 
       if (dayTasks.length === 0) {
         msg += `No se registraron liberaciones en esta fecha.\n`;
       } else {
-        const areas = ['4680', '4652', '4653'];
+        const areas = whatsAppFilterArea === 'all' ? ['4680', '4652', '4653'] : [whatsAppFilterArea];
+        
         areas.forEach(aCode => {
           const areaTasks = dayTasks.filter(t => t.area.includes(aCode));
           if (areaTasks.length > 0) {
             msg += `📍 *ÁREA ${aCode}*\n`;
             areaTasks.forEach(t => {
-              const f = isStepDoneInActiveDate(t.steps.find(s => s.name === 'fundacion'), activeDateString);
-              const p = isStepDoneInActiveDate(t.steps.find(s => s.name === 'prevaciado'), activeDateString);
-              const post = isStepDoneInActiveDate(t.steps.find(s => s.name === 'postvaciado'), activeDateString);
+              const sFund = t.steps.find(s => s.name === 'fundacion');
+              const sPre = t.steps.find(s => s.name === 'prevaciado');
+              const sPost = t.steps.find(s => s.name === 'postvaciado');
+
+              const f = isStepDoneInActiveDate(sFund, activeDateString);
+              const p = isStepDoneInActiveDate(sPre, activeDateString);
+              const post = isStepDoneInActiveDate(sPost, activeDateString);
+              
               msg += `• *${t.code}* (${t.name} - ${t.ejes}):\n`;
-              msg += `  - Fundación: ${f ? '✅ Conforme' : '⏳ Pendiente'}\n`;
-              msg += `  - Pre-vaciado: ${p ? '✅ Conforme' : '⏳ Pendiente'}\n`;
-              msg += `  - Post-vaciado: ${post ? '✅ Conforme' : '⏳ Pendiente'}\n`;
+              msg += `  - Fundación: ${f ? `✅ Conforme (${sFund.hora})` : '⏳ Pendiente'}\n`;
+              msg += `  - Pre-vaciado: ${p ? `✅ Conforme (${sPre.hora})` : '⏳ Pendiente'}\n`;
+              msg += `  - Post-vaciado: ${post ? `✅ Conforme (${sPost.hora})` : '⏳ Pendiente'}\n`;
             });
             msg += `\n`;
           }
@@ -1496,43 +1859,6 @@
     function sendWhatsAppDirect() {
       const txt = encodeURIComponent(document.getElementById('whatsAppTextPreview').value);
       window.open(`https://api.whatsapp.com/send?text=${txt}`, '_blank');
-    }
-
-    // EXPORTACIÓN A EXCEL (.xlsx)
-    function exportTasksToExcel() {
-      if (typeof XLSX === 'undefined') {
-        showToast('Librería Excel no cargada aún');
-        return;
-      }
-
-      const rows = [];
-      tasks.forEach((t, index) => {
-        const sFund = t.steps.find(s => s.name === 'fundacion') || {};
-        const sPre = t.steps.find(s => s.name === 'prevaciado') || {};
-        const sPost = t.steps.find(s => s.name === 'postvaciado') || {};
-
-        rows.push({
-          'N°': index + 1,
-          'Área de Proyecto': t.area,
-          'Código': t.code,
-          'Elemento': t.name,
-          'Ubicación / Ejes': t.ejes,
-          'Topógrafo': t.topografo,
-          'Plano Ref.': t.plano || 'S/P',
-          'Fecha Creación': t.fechaCreacion,
-          '1. Fundación': sFund.done ? `Liberado (${sFund.fecha} ${sFund.hora})` : 'Pendiente',
-          '2. Pre-vaciado': sPre.done ? `Liberado (${sPre.fecha} ${sPre.hora})` : 'Pendiente',
-          '3. Post-vaciado': sPost.done ? `Liberado (${sPost.fecha} ${sPost.hora})` : 'Pendiente',
-        });
-      });
-
-      const worksheet = XLSX.utils.json_to_sheet(rows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Liberaciones');
-
-      const fileName = `Parte_Topografico_${activeDateString}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
-      showToast(`Descargando ${fileName}`, 'success');
     }
 
     // FILTROS
