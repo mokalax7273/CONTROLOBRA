@@ -1008,11 +1008,10 @@
       { name: "Jhonatan Umaya", role: "Topógrafo de Obra Civil", area: "4652 - Taller de mantenimiento de equipo LESDE" }
     ];
 
-    // --- HELPER: EVALUAR SI UN PASO ESTABA LIBERADO EN LA FECHA ACTIVA ---
+    // --- HELPER: EVALUAR SI UN PASO FUE LIBERADO EXACTAMENTE EN LA FECHA ACTIVA ---
     function isStepDoneAtDate(step, dateStr) {
       if (!step || !step.completado) return false;
-      if (!step.fecha) return true;
-      return step.fecha <= dateStr;
+      return step.fecha === dateStr;
     }
 
     // --- INICIALIZACIÓN ---
@@ -1081,6 +1080,13 @@
     function formatDisplayDate(dateStr) {
       const d = new Date(dateStr + 'T00:00:00');
       return d.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // --- HELPER: EVALUAR SI UNA TAREA TIENE ACTIVIDAD EN LA FECHA SELECCIONADA ---
+    function taskHasActivityOnDate(task, dateStr) {
+      const createdOnDate = task.fechaCreacion === dateStr;
+      const stepOnDate = task.steps.some(s => s.completado && s.fecha === dateStr);
+      return createdOnDate || stepOnDate;
     }
 
     // --- MODAL DE CALENDARIO E HISTORIAL ---
@@ -1376,10 +1382,9 @@
       const topoFilter = document.getElementById('topographerFilter')?.value || 'all';
       const statusFilter = document.getElementById('statusFilter')?.value || 'all';
 
-      // Filtrar frentes creados en o antes de la fecha activa
+      // Filtrar frentes que tengan actividad o registro exactamente en la fecha activa
       const areaTasks = tasks.filter(t => {
-        const taskCreated = t.fechaCreacion || TODAY_STR;
-        return t.zona === targetAreaName && taskCreated <= activeDateString;
+        return t.zona === targetAreaName && taskHasActivityOnDate(t, activeDateString);
       });
 
       const totalAreaTasks = areaTasks.length;
@@ -1586,8 +1591,8 @@
 
       let htmlS1 = '', htmlS2 = '', htmlS3 = '', htmlDone = '';
 
-      // Evaluar tareas creadas hasta la fecha activa
-      const currentTasks = tasks.filter(t => (t.fechaCreacion || TODAY_STR) <= activeDateString);
+      // Evaluar tareas con actividad exclusivamente en la fecha activa
+      const currentTasks = tasks.filter(t => taskHasActivityOnDate(t, activeDateString));
 
       currentTasks.forEach(t => {
         const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
@@ -1672,7 +1677,7 @@
       if (!container) return;
 
       container.innerHTML = AREAS_OFICIALES.map(area => {
-        const areaTasks = tasks.filter(t => t.zona === area.name && (t.fechaCreacion || TODAY_STR) <= activeDateString);
+        const areaTasks = tasks.filter(t => t.zona === area.name && taskHasActivityOnDate(t, activeDateString));
         const pendTasks = areaTasks.filter(t => {
           const s1 = isStepDoneAtDate(t.steps[0], activeDateString);
           const s2 = isStepDoneAtDate(t.steps[1], activeDateString);
@@ -2126,7 +2131,7 @@
       AREAS_OFICIALES.forEach(a => {
         const badge = document.getElementById(`badge-count-${a.id}`);
         if (badge) {
-          const count = tasks.filter(t => t.zona === a.name && (t.fechaCreacion || TODAY_STR) <= activeDateString).length;
+          const count = tasks.filter(t => t.zona === a.name && taskHasActivityOnDate(t, activeDateString)).length;
           badge.textContent = count;
         }
       });
@@ -2134,7 +2139,7 @@
       const pBadge = document.getElementById('badge-count-pending');
       if (pBadge) {
         let totalP = 0;
-        const currentTasks = tasks.filter(t => (t.fechaCreacion || TODAY_STR) <= activeDateString);
+        const currentTasks = tasks.filter(t => taskHasActivityOnDate(t, activeDateString));
         currentTasks.forEach(t => {
           if (!isStepDoneAtDate(t.steps[0], activeDateString)) totalP++;
           if (!isStepDoneAtDate(t.steps[1], activeDateString)) totalP++;
