@@ -32,6 +32,55 @@
     .animate-pop {
       animation: checkPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    /* Estilos explícitos para Tema Claro */
+    html.light-theme body {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+    html.light-theme #mainHeader {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme .bg-slate-900 {
+      background-color: #ffffff !important;
+    }
+    html.light-theme .bg-slate-800,
+    html.light-theme .bg-slate-800\/90,
+    html.light-theme .bg-slate-800\/80 {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme .text-white {
+      color: #0f172a !important;
+    }
+    html.light-theme .text-slate-100 {
+      color: #1e293b !important;
+    }
+    html.light-theme .text-slate-200 {
+      color: #334155 !important;
+    }
+    html.light-theme .text-slate-300 {
+      color: #475569 !important;
+    }
+    html.light-theme .text-slate-400 {
+      color: #64748b !important;
+    }
+    html.light-theme .border-slate-700,
+    html.light-theme .border-slate-800 {
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme .tab-nav-btn.bg-slate-800 {
+      background-color: #e2e8f0 !important;
+      color: #334155 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme input, 
+    html.light-theme select, 
+    html.light-theme textarea {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
   </style>
 </head>
 
@@ -580,6 +629,20 @@
           <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Plano de Referencia</label>
           <input type="text" id="frontBlueprintInput" placeholder="Ej: PL-STR-4680-01 Rev.B"
             class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="closeAddModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-bold">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold shadow-md shadow-blue-900/30">
+            Guardar Frente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 4. MODAL PLANOS DE OBRA (SOLO ADMIN PUEDE AGREGAR/ELIMINAR) -->
   <div id="modalBlueprints" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
@@ -851,25 +914,25 @@
     }
 
     function toggleTheme() {
-      const current = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark';
-      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      const isLight = document.documentElement.classList.contains('light-theme');
+      const nextTheme = isLight ? 'dark' : 'light';
       applyTheme(nextTheme);
       localStorage.setItem(STORAGE_KEY_THEME, nextTheme);
-      showToast(`Tema cambiado a ${nextTheme === 'dark' ? 'Oscuro' : 'Claro'}`);
+      showToast(`Tema cambiado a modo ${nextTheme === 'dark' ? 'Oscuro' : 'Claro'}`);
     }
 
     function applyTheme(theme) {
       const icon = document.getElementById('themeIcon');
       if (theme === 'light') {
         document.documentElement.classList.add('light-theme');
-        document.body.classList.remove('bg-slate-900', 'text-slate-100');
-        document.body.classList.add('bg-slate-100', 'text-slate-900');
-        if (icon) icon.className = 'fa-solid fa-moon text-indigo-600 text-sm';
+        if (icon) {
+          icon.className = 'fa-solid fa-moon text-indigo-500 text-sm';
+        }
       } else {
         document.documentElement.classList.remove('light-theme');
-        document.body.classList.remove('bg-slate-100', 'text-slate-900');
-        document.body.classList.add('bg-slate-900', 'text-slate-100');
-        if (icon) icon.className = 'fa-solid fa-sun text-amber-400 text-sm';
+        if (icon) {
+          icon.className = 'fa-solid fa-sun text-amber-400 text-sm';
+        }
       }
     }
 
@@ -1010,7 +1073,7 @@
         }
       });
 
-      // AISLAMIENTO TOTAL ENTRE MÓDULOS
+      // AISLAMIENTO TOTAL ENTRE MÓDULOS Y APERTURA DE VENTANAS
       if (tabId === '4680' || tabId === '4652' || tabId === '4653') {
         sectionAreaTable.classList.remove('hidden');
         sectionPending.classList.add('hidden');
