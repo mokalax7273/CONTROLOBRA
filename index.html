@@ -1,602 +1,2180 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CUAFIJAS | Dashboard Gerencial Integral</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control Topográfico Diario • Obra Civil</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
 
-    <style>
-        /* Custom Styles & Theme */
-        :root {
-            --primary: #0f172a;   /* Slate 900 */
-            --secondary: #0ea5e9; /* Sky 500 */
-            --accent: #f59e0b;    /* Amber 500 */
-            --bg-light: #f1f5f9;  /* Slate 100 */
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: #334155;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Montserrat', sans-serif;
-        }
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-        /* Sidebar Styles */
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: #94a3b8;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-link:hover, .sidebar-link.active {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-left-color: var(--secondary);
-        }
+  <!-- Font Awesome Icons con fallback a SVG/Unicode -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        .sidebar-link i {
-            width: 24px;
-            margin-right: 12px;
-            text-align: center;
-        }
+  <!-- SheetJS para Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-        /* Tab Buttons for Table */
-        .tab-btn {
-            @apply px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-sky-600 hover:border-sky-300 transition-colors;
-        }
-        .tab-btn.active {
-            @apply text-sky-600 border-sky-600 bg-white;
-        }
-
-        /* Card Hover Effects */
-        .card-hover {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        
-        /* Timeline Steps */
-        .step-item {
-            @apply relative flex flex-col justify-center items-center w-36;
-        }
-        .step-item:not(:first-child):before {
-            @apply content-[''] bg-slate-200 absolute w-full h-[3px] right-1/2 top-1/3 -translate-y-1/2 -z-10;
-        }
-        .step-circle {
-            @apply w-10 h-10 flex items-center justify-center rounded-full font-bold text-white bg-slate-300 z-10 ring-4 ring-white transition-colors duration-300;
-        }
-        .step-active .step-circle {
-            @apply bg-sky-500;
-        }
-        .step-active:not(:first-child):before {
-            @apply bg-sky-500;
-        }
-
-        /* Sensitivity Table Cells */
-        .sens-cell {
-            @apply px-2 py-3 text-center text-xs font-bold border border-slate-100 transition-colors hover:opacity-80 cursor-help;
-        }
-        .sens-bad { @apply bg-red-100 text-red-700; }
-        .sens-warn { @apply bg-amber-100 text-amber-700; }
-        .sens-good { @apply bg-emerald-100 text-emerald-700; }
-        .sens-excel { @apply bg-indigo-100 text-indigo-700; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569; 
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; 
-        }
-    </style>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.5);
+    }
+  </style>
 </head>
-<body class="bg-slate-100">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full flex flex-col antialiased transition-colors duration-200 overflow-x-hidden">
 
-    <!-- Mobile Header -->
-    <header class="md:hidden bg-slate-900 text-white p-4 fixed top-0 w-full z-50 flex justify-between items-center shadow-md">
-        <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-mountain text-sky-500 text-xl"></i>
-            <span class="font-Montserrat font-bold text-lg tracking-wider">CUAFIJAS</span>
-        </div>
-        <button id="menuBtn" class="text-gray-300 hover:text-white focus:outline-none">
-            <i class="fa-solid fa-bars text-2xl"></i>
-        </button>
-    </header>
-
-    <!-- Overlay for Mobile -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
-
-    <div class="flex min-h-screen pt-16 md:pt-0">
+  <!-- ================= ENCABEZADO FIJO (STICKY HEADER) ================= -->
+  <header class="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      
+      <!-- Fila Superior: Título, Selector de Fecha y Acciones -->
+      <div class="flex items-center justify-between py-2 gap-2 border-b border-slate-100 dark:border-slate-800/60">
         
-        <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
-            <!-- Logo Area -->
-            <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
-                <i class="fa-solid fa-mountain text-sky-500 text-2xl mr-3"></i>
-                <div>
-                    <h1 class="font-Montserrat font-bold text-xl tracking-wider leading-none">CUAFIJAS</h1>
-                    <span class="text-[10px] text-slate-500 uppercase tracking-widest">Proyecto Minero</span>
-                </div>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
-                <p class="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gestión</p>
-                
-                <a href="#dashboard" class="sidebar-link active" onclick="closeSidebar()">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    Dashboard
-                </a>
-                <a href="#estrategia" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-chess-knight"></i>
-                    Estrategia
-                </a>
-                <a href="#cronograma" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-timeline"></i>
-                    Cronograma
-                </a>
-                
-                <p class="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6">Costos</p>
-                <a href="#costos" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-calculator"></i>
-                    Análisis APU
-                </a>
-                <a href="#tabla-detalle" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-table-list"></i>
-                    Detalle Costos
-                </a>
-                <a href="#flujo-caja" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-money-bill-trend-up"></i>
-                    Flujo de Caja
-                </a>
-
-                <p class="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6">Análisis</p>
-                <a href="#rentabilidad" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    Rentabilidad
-                </a>
-                <a href="#sensibilidad" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-table-cells"></i>
-                    Sensibilidad
-                </a>
-                <a href="#gerencia" class="sidebar-link" onclick="closeSidebar()">
-                    <i class="fa-solid fa-users-viewfinder"></i>
-                    Gerencia
-                </a>
-            </nav>
-
-            <!-- Actions -->
-            <div class="p-4 border-t border-slate-800 bg-slate-950">
-                <button onclick="window.print()" class="w-full bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold py-2 px-4 rounded flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-print mr-2"></i> Imprimir Reporte
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content Wrapper -->
-        <div class="flex-1 md:ml-64 flex flex-col min-h-screen transition-all duration-300">
+        <!-- Logo, Título y Control de Fecha -->
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <i class="fa-solid fa-layer-group text-xs"></i>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate flex items-center gap-1">
+              Control Topográfico
+              <span class="text-[9px] px-1 py-0.2 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800">Obra</span>
+            </h1>
             
-            <!-- Main Area -->
-            <main class="flex-grow p-4 md:p-8 space-y-12 max-w-7xl mx-auto w-full">
-
-                <!-- DASHBOARD SUMMARY (KPIs) -->
-                <section id="dashboard" class="scroll-mt-24 animate-fade-in">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-800">Plan Estratégico 2025-2027</h2>
-                            <p class="text-slate-500 mt-1">Gestión de activos propios y optimización de flujo de caja.</p>
-                        </div>
-                        <span class="px-4 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 mt-4 md:mt-0">
-                            Estado: En Aprobación
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- KPI 1 -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-sky-500 card-hover">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">CAPEX Inicial</p>
-                                    <h3 class="text-2xl font-bold text-slate-800 mt-1">$1.08 M</h3>
-                                </div>
-                                <div class="p-2 bg-sky-100 rounded-lg text-sky-600"><i class="fa-solid fa-sack-dollar"></i></div>
-                            </div>
-                            <p class="text-sm text-slate-500 mt-4"><span class="text-emerald-500 font-bold">-45%</span> en tarifa mensual</p>
-                        </div>
-                        <!-- KPI 2 -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-emerald-500 card-hover">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Costo All-In</p>
-                                    <h3 class="text-2xl font-bold text-slate-800 mt-1">$63.90</h3>
-                                </div>
-                                <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600"><i class="fa-solid fa-tag"></i></div>
-                            </div>
-                            <p class="text-sm text-slate-500 mt-4">Break-even Operativo</p>
-                        </div>
-                        <!-- KPI 3 -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-amber-500 card-hover">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Margen Neto</p>
-                                    <h3 class="text-2xl font-bold text-slate-800 mt-1">11.8%</h3>
-                                </div>
-                                <div class="p-2 bg-amber-100 rounded-lg text-amber-600"><i class="fa-solid fa-chart-pie"></i></div>
-                            </div>
-                            <p class="text-sm text-slate-500 mt-4">Escenario Base</p>
-                        </div>
-                        <!-- KPI 4 -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-500 card-hover">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Payback</p>
-                                    <h3 class="text-2xl font-bold text-slate-800 mt-1">14 Meses</h3>
-                                </div>
-                                <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                            </div>
-                            <p class="text-sm text-slate-500 mt-4">Retorno de Inversión</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- NEW: TIMELINE SECTION -->
-                <section id="cronograma" class="scroll-mt-24">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-                        <h2 class="text-xl font-bold text-slate-800 mb-8 flex items-center">
-                            <i class="fa-solid fa-timeline text-sky-500 mr-3"></i> Cronograma de Hitos Principales
-                        </h2>
-                        <div class="flex justify-between items-center w-full overflow-x-auto pb-4">
-                            <div class="step-item step-active">
-                                <div class="step-circle">1</div>
-                                <p class="text-xs font-bold mt-2 text-slate-800">Mes 1</p>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Compra de Equipos<br>(Capex)</p>
-                            </div>
-                            <div class="step-item step-active">
-                                <div class="step-circle">2</div>
-                                <p class="text-xs font-bold mt-2 text-slate-800">Mes 2-3</p>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Movilización &<br>Accesos</p>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-circle">3</div>
-                                <p class="text-xs font-bold mt-2 text-slate-800">Mes 4</p>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Inicio Desarrollo<br>Galerías</p>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-circle">4</div>
-                                <p class="text-xs font-bold mt-2 text-slate-800">Mes 6</p>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Intersección<br>Veta</p>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-circle">5</div>
-                                <p class="text-xs font-bold mt-2 text-slate-800">Mes 7+</p>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Producción<br>Sostenida</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- STRATEGY & BUDGET -->
-                <section id="estrategia" class="scroll-mt-24">
-                    <div class="flex flex-col lg:flex-row gap-8">
-                        <div class="lg:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase">Modelo de Negocio</h3>
-                            <p class="text-sm text-slate-600 mb-4">La mina asume activos y materiales volátiles. El contratista se enfoca en la operación.</p>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between p-2 bg-sky-50 rounded border-l-4 border-sky-500">
-                                    <span>Maquinaria</span> <span class="font-bold text-sky-700">MINA</span>
-                                </div>
-                                <div class="flex justify-between p-2 bg-sky-50 rounded border-l-4 border-sky-500">
-                                    <span>Insumos</span> <span class="font-bold text-sky-700">MINA</span>
-                                </div>
-                                <div class="flex justify-between p-2 bg-indigo-50 rounded border-l-4 border-indigo-500">
-                                    <span>Mano de Obra</span> <span class="font-bold text-indigo-700">CONTRATA</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="lg:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase text-center">Distribución del Presupuesto</h3>
-                            <div class="chart-container" style="height: 250px;">
-                                <canvas id="budgetChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- COST ANALYSIS -->
-                <section id="costos" class="scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase">Costos Horarios Base</h3>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="hourlyCostChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase">Desglose APU ($/m)</h3>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="apuChart"></canvas>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- COST TABLE -->
-                <section id="tabla-detalle" class="scroll-mt-24">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-4 bg-slate-50 border-b border-slate-200">
-                            <h2 class="font-bold text-slate-800">Desglose Detallado</h2>
-                        </div>
-                        <!-- Tabs -->
-                        <div class="flex border-b border-slate-200 px-4 pt-2 gap-2 overflow-x-auto">
-                            <button class="tab-btn px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600 bg-white" onclick="filterTable('all', this)">Todos</button>
-                            <button class="tab-btn px-4 py-2 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="filterTable('equipos', this)">Equipos</button>
-                            <button class="tab-btn px-4 py-2 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="filterTable('apu', this)">APU</button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-slate-600">
-                                <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b border-slate-200">
-                                    <tr>
-                                        <th class="px-6 py-3">Ítem</th>
-                                        <th class="px-6 py-3 text-right">Unitario</th>
-                                        <th class="px-6 py-3 text-center">Responsable</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="costTableBody" class="divide-y divide-slate-200">
-                                    <tr data-category="equipos" class="bg-white"><td class="px-6 py-3">Dumper 5m³</td><td class="px-6 py-3 text-right text-sky-600">$61.07 /h</td><td class="px-6 py-3 text-center"><span class="bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded">MINA</span></td></tr>
-                                    <tr data-category="equipos" class="bg-slate-50"><td class="px-6 py-3">Jumbo 1 Brazo</td><td class="px-6 py-3 text-right text-sky-600">$78.50 /h</td><td class="px-6 py-3 text-center"><span class="bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded">MINA</span></td></tr>
-                                    <tr data-category="apu" class="bg-white"><td class="px-6 py-3">Costo Interno APU</td><td class="px-6 py-3 text-right font-bold">$528.50 /m</td><td class="px-6 py-3 text-center"><span class="bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded">MINA</span></td></tr>
-                                    <tr data-category="apu" class="bg-slate-50"><td class="px-6 py-3">Tarifa Contratista</td><td class="px-6 py-3 text-right font-bold text-indigo-600">$98.90 /m</td><td class="px-6 py-3 text-center"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded">CONTRATA</span></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- NEW: CASH FLOW SECTION -->
-                <section id="flujo-caja" class="scroll-mt-24">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center">
-                                <i class="fa-solid fa-money-bill-trend-up text-emerald-500 mr-3"></i> Flujo de Caja Proyectado
-                            </h2>
-                            <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Miles de USD</span>
-                        </div>
-                        <div class="chart-container" style="height: 350px;">
-                            <canvas id="cashFlowChart"></canvas>
-                        </div>
-                        <p class="text-center text-sm text-slate-500 mt-4">Nótese el pico de CAPEX en Mes 1 (Compra Equipos) y el inicio de ingresos en Mes 6.</p>
-                    </div>
-                </section>
-
-                <!-- PROFITABILITY & SENSITIVITY -->
-                <section id="rentabilidad" class="scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Waterfall -->
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h2 class="font-bold text-slate-800 mb-4">Estructura de Margen ($/TM)</h2>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="profitabilityChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- NEW: SENSITIVITY HEATMAP -->
-                    <div id="sensibilidad" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 scroll-mt-24">
-                        <h2 class="font-bold text-slate-800 mb-4 flex items-center">
-                            <i class="fa-solid fa-table-cells text-amber-500 mr-2"></i> Matriz de Sensibilidad (Margen %)
-                        </h2>
-                        <p class="text-xs text-slate-500 mb-4">Impacto en margen neto según variaciones en Precio del Metal (Eje Y) vs. Costo Operativo (Eje X).</p>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th class="p-2 bg-slate-100 border border-slate-200 text-xs text-slate-500">Precio \ Costo</th>
-                                        <th class="p-2 bg-slate-50 border border-slate-200 text-xs">-10% ($57)</th>
-                                        <th class="p-2 bg-slate-50 border border-slate-200 text-xs font-bold border-x-2 border-x-sky-200">Base ($64)</th>
-                                        <th class="p-2 bg-slate-50 border border-slate-200 text-xs">+10% ($70)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="p-2 bg-slate-50 border border-slate-200 font-bold text-xs text-right">+10% ($80)</td>
-                                        <td class="sens-cell sens-excel">28%</td>
-                                        <td class="sens-cell sens-good border-x-2 border-x-sky-200">20%</td>
-                                        <td class="sens-cell sens-warn">12%</td>
-                                    </tr>
-                                    <tr class="border-y-2 border-y-sky-200">
-                                        <td class="p-2 bg-slate-50 border border-slate-200 font-bold text-xs text-right border-y-2 border-y-sky-200">Base ($72.5)</td>
-                                        <td class="sens-cell sens-good border-y-2 border-y-sky-200">21%</td>
-                                        <td class="sens-cell sens-warn border-2 border-sky-400 relative">
-                                            11.8%
-                                            <span class="absolute top-0 right-0 w-2 h-2 bg-sky-500 rounded-full -mt-1 -mr-1 animate-ping"></span>
-                                        </td>
-                                        <td class="sens-cell sens-bad border-y-2 border-y-sky-200">3%</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2 bg-slate-50 border border-slate-200 font-bold text-xs text-right">-10% ($65)</td>
-                                        <td class="sens-cell sens-warn">12%</td>
-                                        <td class="sens-cell sens-bad border-x-2 border-x-sky-200">1.5%</td>
-                                        <td class="sens-cell sens-bad bg-red-200 text-red-900">-7%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-4 flex justify-between text-xs text-slate-500">
-                            <div class="flex items-center"><div class="w-3 h-3 bg-red-100 mr-1"></div> Crítico</div>
-                            <div class="flex items-center"><div class="w-3 h-3 bg-amber-100 mr-1"></div> Riesgo</div>
-                            <div class="flex items-center"><div class="w-3 h-3 bg-emerald-100 mr-1"></div> Saludable</div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- MANAGEMENT -->
-                <section id="gerencia" class="scroll-mt-24 mb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Estrategia de Mitigación</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-red-500 shadow-sm">
-                            <h4 class="font-bold text-slate-800 mb-2">Operaciones</h4>
-                            <p class="text-sm text-slate-600">"Control topográfico diario para evitar dilución y mantener la ley de cabeza."</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-amber-500 shadow-sm">
-                            <h4 class="font-bold text-slate-800 mb-2">Logística</h4>
-                            <p class="text-sm text-slate-600">"Racionamiento de diésel y explosivos. Penalidad contractual por sobreconsumo."</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-emerald-500 shadow-sm">
-                            <h4 class="font-bold text-slate-800 mb-2">Admin</h4>
-                            <p class="text-sm text-slate-600">"Pago a proveedores a 45 días para mitigar el impacto del CAPEX inicial en la caja."</p>
-                        </div>
-                    </div>
-                </section>
-
-            </main>
-
-            <!-- Footer -->
-            <footer class="bg-white border-t border-slate-200 py-8 text-center">
-                <p class="text-xs text-slate-400">Informe Técnico Confidencial © 2025 MINERA CUAFIJAS</p>
-            </footer>
+            <!-- Selector de Fecha / Navegación Rápida -->
+            <div class="flex items-center gap-1 mt-0.5">
+              <button type="button" onclick="navigateDay(-1)" class="w-4 h-4 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 flex items-center justify-center text-[9px]" title="Día anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <input type="date" id="currentDatePicker" onchange="onDateChanged(this.value)" class="text-[10px] sm:text-[11px] font-semibold bg-transparent border-0 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer p-0">
+              <button type="button" onclick="navigateDay(1)" class="w-4 h-4 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 flex items-center justify-center text-[9px]" title="Día siguiente">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+              <button type="button" onclick="openCalendarModal()" class="px-1.5 py-0.5 rounded text-[10px] bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 transition flex items-center gap-1" title="Abrir Calendario Histórico">
+                <i class="fa-regular fa-calendar-days text-[10px]"></i>
+                <span class="hidden sm:inline">Historial</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Botones de Acción Superior -->
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          
+          <!-- Botón de Estado / Rol de Usuario -->
+          <button type="button" id="userSessionBtn" onclick="openLoginModal(true)" class="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition border border-slate-200/80 dark:border-slate-700">
+            <span id="userBadgeDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span id="userRoleLabel" class="hidden sm:inline">Admin</span>
+            <i class="fa-solid fa-arrow-right-from-bracket text-[9px] text-slate-400 ml-0.5"></i>
+          </button>
+
+          <!-- Botón Modo Oscuro / Claro -->
+          <button type="button" onclick="toggleCurrentTheme()" class="w-7 h-7 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Cambiar tema">
+            <i class="fa-solid fa-moon dark:hidden text-[11px]"></i>
+            <i class="fa-solid fa-sun hidden dark:inline text-[11px] text-amber-400"></i>
+          </button>
+
+          <!-- Botón WhatsApp (Solo Admin) -->
+          <button type="button" id="headerWhatsAppBtn" onclick="openWhatsAppModal()" class="admin-only flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition cursor-pointer">
+            <i class="fa-brands fa-whatsapp text-xs"></i>
+            <span class="hidden md:inline">WhatsApp</span>
+          </button>
+
+          <!-- Botón + Frente (Solo Admin) -->
+          <button type="button" id="headerAddBtn" onclick="openAddModal()" class="admin-only flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition cursor-pointer">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>Nuevo Frente</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fila Inferior: Navegación de Módulos Estáticos -->
+      <nav id="mainNavigationTabs" class="flex items-center gap-1 py-1.5 overflow-x-auto no-scrollbar text-[11px]">
+        
+        <!-- Pestaña Área 4680 -->
+        <button type="button" id="headerTab-area-4680" onclick="switchTab('area-4680')" class="px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shrink-0 whitespace-nowrap bg-blue-600 text-white shadow-xs cursor-pointer">
+          <i class="fa-solid fa-flask-vial text-[10px]"></i>
+          <span>4680 • Descarga Ácidos</span>
+          <span id="badge-count-4680" class="px-1.5 py-0.2 rounded-full text-[9px] bg-white/20 text-white font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Área 4652 -->
+        <button type="button" id="headerTab-area-4652" onclick="switchTab('area-4652')" class="px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-truck-pickup text-[10px]"></i>
+          <span>4652 • Taller LESDE</span>
+          <span id="badge-count-4652" class="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Área 4653 -->
+        <button type="button" id="headerTab-area-4653" onclick="switchTab('area-4653')" class="px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-warehouse text-[10px]"></i>
+          <span>4653 • Almacén General</span>
+          <span id="badge-count-4653" class="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña ¿Qué me falta? (Admin) -->
+        <button type="button" id="headerTab-pending" onclick="switchTab('pending')" class="admin-only px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-clipboard-question text-[10px]"></i>
+          <span>¿Qué me falta?</span>
+          <span id="badge-count-pending" class="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500 text-white font-bold font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Planos (Admin) -->
+        <button type="button" id="headerTab-blueprints" onclick="switchTab('blueprints')" class="admin-only px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-map-location-dot text-[10px]"></i>
+          <span>Planos</span>
+          <span id="badge-count-blueprints" class="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Topógrafos (Admin) -->
+        <button type="button" id="headerTab-staff" onclick="switchTab('staff')" class="admin-only px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-users-gear text-[10px]"></i>
+          <span>Topógrafos</span>
+        </button>
+
+        <!-- Pestaña Módulo Excel (Admin) -->
+        <button type="button" id="headerTab-excel" onclick="switchTab('excel')" class="admin-only px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-file-excel text-[10px] text-emerald-500"></i>
+          <span>Módulo Excel</span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 space-y-4">
+
+    <!-- AVISO MODO INVITADO -->
+    <div id="guestModeBanner" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px] flex items-center justify-between gap-3 shadow-xs">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-eye text-sm text-amber-600 shrink-0"></i>
+        <span><strong>Modo Invitado (Solo Lectura):</strong> Consulta las áreas y liberaciones. Para registrar frentes o marcar vistos buenos, accede como Administrador.</span>
+      </div>
+      <button type="button" onclick="openLoginModal(true)" class="px-2 py-0.5 rounded bg-amber-600 text-white font-medium hover:bg-amber-700 shrink-0 transition text-[10px]">Acceder como Admin</button>
     </div>
 
-    <!-- Scripts -->
-    <script>
-        // Sidebar & Table Logic
-        const menuBtn = document.getElementById('menuBtn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const navLinks = document.querySelectorAll('.sidebar-link');
+    <!-- BANNER INFORMATIVO DE FECHA ACTIVA -->
+    <div class="flex items-center justify-between px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">
+      <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+        <i class="fa-regular fa-clock text-blue-500"></i>
+        <span>Estado registrado al: <strong id="activeDateDisplayBadge" class="text-slate-800 dark:text-slate-200 font-bold">Hoy</strong></span>
+      </div>
+      <button type="button" onclick="jumpToToday()" id="btnBackToToday" class="hidden text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold flex items-center gap-1">
+        <i class="fa-solid fa-rotate-left"></i> Volver a Hoy
+      </button>
+    </div>
 
-        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); sidebarOverlay.classList.toggle('hidden'); }
-        function closeSidebar() { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); }
-        menuBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
-        navLinks.forEach(link => link.addEventListener('click', () => { if(window.innerWidth < 768) closeSidebar(); }));
+    <!-- ================= CONTENIDO DE TABLAS DE ÁREA ================= -->
+    <section id="tabContent-zones" class="space-y-3">
+      
+      <!-- Barra de Filtros y Búsqueda -->
+      <div class="bg-white dark:bg-slate-900 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row gap-2 items-center justify-between">
+        
+        <!-- Buscador -->
+        <div class="relative w-full sm:w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="searchInput" oninput="renderZoneCards()" placeholder="Buscar zapata, muro, eje..." class="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white">
+        </div>
 
-        function filterTable(category, btnElement) {
-            const rows = document.querySelectorAll('#costTableBody tr');
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-sky-600', 'border-sky-600', 'bg-white');
-                btn.classList.add('text-slate-500', 'border-transparent');
-            });
-            btnElement.classList.remove('text-slate-500', 'border-transparent');
-            btnElement.classList.add('text-sky-600', 'border-sky-600', 'bg-white');
-            rows.forEach(row => row.style.display = (category === 'all' || row.getAttribute('data-category') === category) ? '' : 'none');
+        <!-- Filtros Rápidos -->
+        <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto justify-end">
+          
+          <!-- Filtro por Topógrafo -->
+          <select id="topographerFilter" onchange="renderZoneCards()" class="px-2 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none">
+            <option value="all">👷 Todos los Topógrafos</option>
+            <option value="Ronald Zapana">Ronald Zapana</option>
+            <option value="Jhonatan Umaya">Jhonatan Umaya</option>
+          </select>
+
+          <!-- Filtro por Estado -->
+          <select id="statusFilter" onchange="renderZoneCards()" class="px-2 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none">
+            <option value="all">⚡ Todos los estados</option>
+            <option value="pending">⏳ Con pendientes</option>
+            <option value="completed">✅ 100% Concluidos</option>
+          </select>
+
+          <!-- Descarga Directa Excel -->
+          <button type="button" onclick="exportTasksToExcel()" class="admin-only px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition flex items-center gap-1" title="Descargar reporte en Excel">
+            <i class="fa-solid fa-file-excel text-xs"></i>
+            <span class="hidden md:inline">Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Encabezado del Área Activa -->
+      <div id="activeAreaHeaderCard" class="p-3.5 rounded-2xl bg-slate-900 text-white shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="activeAreaCodeBadge" class="px-2 py-0.2 rounded-md bg-blue-500 text-[10px] font-bold tracking-wider">ÁREA 4680</span>
+            <span class="text-[11px] text-blue-200 font-medium">3 Liberaciones Clave</span>
+          </div>
+          <h2 id="activeAreaTitle" class="text-sm sm:text-base font-bold mt-0.5">4680 • Almacén y descarga de ácidos</h2>
+        </div>
+
+        <div class="flex items-center gap-3 bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-sm self-stretch md:self-auto justify-around">
+          <div class="text-center">
+            <div id="activeAreaTotalElements" class="text-base font-extrabold text-white">4</div>
+            <div class="text-[9px] text-blue-200 uppercase font-semibold">Frentes</div>
+          </div>
+          <div class="w-px h-6 bg-white/20"></div>
+          <div class="text-center">
+            <div id="activeAreaProgressPct" class="text-base font-extrabold text-emerald-400">25%</div>
+            <div class="text-[9px] text-blue-200 uppercase font-semibold">Liberado</div>
+          </div>
+          <div class="w-px h-6 bg-white/20"></div>
+          <div class="text-center">
+            <div id="activeAreaPendingCount" class="text-base font-extrabold text-amber-300">3</div>
+            <div class="text-[9px] text-blue-200 uppercase font-semibold">Pendientes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla Principal de Elementos del Área -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700 text-[11px]">
+                <th class="py-2 px-2.5 w-10 text-center">N°</th>
+                <th class="py-2 px-2.5 min-w-[120px]">Elemento / Código</th>
+                <th class="py-2 px-2.5 min-w-[110px]">Ejes / Ubicación</th>
+                <th class="py-2 px-2.5 min-w-[100px]">Topógrafo</th>
+                <th class="py-2 px-2 min-w-[125px] text-center">1. Fundación</th>
+                <th class="py-2 px-2 min-w-[125px] text-center">2. Pre-vaciado</th>
+                <th class="py-2 px-2 min-w-[125px] text-center">3. Post-vaciado</th>
+                <th class="py-2 px-2 w-24 text-center">Avance</th>
+                <th class="py-2 px-2 w-12 text-center admin-only"></th>
+              </tr>
+            </thead>
+            <tbody id="zonesTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+              <!-- Celdas iniciales precargadas para prevenir vista en blanco -->
+              <tr>
+                <td colspan="9" class="p-6 text-center text-slate-400">Cargando frentes de trabajo...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyAreaState" class="hidden p-8 text-center space-y-2">
+          <div class="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-sm">
+            <i class="fa-solid fa-compass-drafting"></i>
+          </div>
+          <h3 class="text-xs font-semibold text-slate-700 dark:text-slate-300">No hay frentes registrados en esta fecha</h3>
+          <p class="text-[11px] text-slate-500 max-w-sm mx-auto">Pulsa "+ Nuevo Frente" o revisa otra fecha en el calendario.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= CONTENIDO: ¿QUÉ ME FALTA? ================= -->
+    <section id="tabContent-pending" class="hidden space-y-4">
+      
+      <!-- Banner de Diagnóstico -->
+      <div class="p-3.5 rounded-2xl bg-amber-600 text-white shadow-xs flex items-center justify-between gap-3">
+        <div>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.2 rounded-full">Control de Cierres</span>
+          <h2 class="text-sm sm:text-base font-bold mt-0.5">¿Qué me falta liberar en obra?</h2>
+          <p class="text-[11px] text-amber-100">Estado al corte de la fecha seleccionada.</p>
+        </div>
+        <div class="text-right">
+          <span id="pendingTotalCountHero" class="text-2xl font-extrabold text-white">0</span>
+          <p class="text-[9px] uppercase font-semibold text-amber-100">Checks pendientes</p>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de 4 Tarjetas de Alta Visibilidad -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        <!-- Tarjeta 1: Falta Fundación -->
+        <div class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-500/40 dark:border-blue-500/30 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-[11px]">1</span>
+              <span id="pendingCount-s1" class="text-lg font-black text-blue-700 dark:text-blue-300">0</span>
+            </div>
+            <h3 class="text-[11px] font-bold text-blue-900 dark:text-blue-200 mt-1.5 uppercase tracking-wide">Falta Fundación</h3>
+            <p class="text-[10px] text-blue-700/80 dark:text-blue-300/80">Trazo, fondo de excavación y solado.</p>
+          </div>
+          <div id="pendingList-s1" class="mt-2 space-y-1 max-h-40 overflow-y-auto custom-scroll">
+            <!-- Badges dinámicos -->
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Falta Pre-vaciado -->
+        <div class="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/50 dark:border-amber-500/30 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-[11px]">2</span>
+              <span id="pendingCount-s2" class="text-lg font-black text-amber-700 dark:text-amber-300">0</span>
+            </div>
+            <h3 class="text-[11px] font-bold text-amber-900 dark:text-amber-200 mt-1.5 uppercase tracking-wide">Falta Pre-vaciado</h3>
+            <p class="text-[10px] text-amber-700/80 dark:text-amber-300/80">Encofrado, acero, pernos y protocolo.</p>
+          </div>
+          <div id="pendingList-s2" class="mt-2 space-y-1 max-h-40 overflow-y-auto custom-scroll">
+            <!-- Badges dinámicos -->
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Falta Post-vaciado -->
+        <div class="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-purple-500/40 dark:border-purple-500/30 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-[11px]">3</span>
+              <span id="pendingCount-s3" class="text-lg font-black text-purple-700 dark:text-purple-300">0</span>
+            </div>
+            <h3 class="text-[11px] font-bold text-purple-900 dark:text-purple-200 mt-1.5 uppercase tracking-wide">Falta Post-vaciado</h3>
+            <p class="text-[10px] text-purple-700/80 dark:text-purple-300/80">Control de cotas finales y desencofrado.</p>
+          </div>
+          <div id="pendingList-s3" class="mt-2 space-y-1 max-h-40 overflow-y-auto custom-scroll">
+            <!-- Badges dinámicos -->
+          </div>
+        </div>
+
+        <!-- Tarjeta 4: Concluidos al 100% -->
+        <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-500/40 dark:border-emerald-500/30 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-[11px]">
+                <i class="fa-solid fa-check"></i>
+              </span>
+              <span id="completedCountCard" class="text-lg font-black text-emerald-700 dark:text-emerald-300">0</span>
+            </div>
+            <h3 class="text-[11px] font-bold text-emerald-900 dark:text-emerald-200 mt-1.5 uppercase tracking-wide">100% Concluidos</h3>
+            <p class="text-[10px] text-emerald-700/80 dark:text-emerald-300/80">Con los 3 controles aprobados al corte.</p>
+          </div>
+          <div id="completedListContainer" class="mt-2 space-y-1 max-h-40 overflow-y-auto custom-scroll">
+            <!-- Badges dinámicos -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Resumen Detallado por Área -->
+      <div id="pendingDetailsByArea" class="space-y-3">
+        <!-- Generado dinámicamente -->
+      </div>
+
+    </section>
+
+    <!-- ================= CONTENIDO: PLANOS DE OBRA ================= -->
+    <section id="tabContent-blueprints" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white">Planos Técnicos del Proyecto</h2>
+          <p class="text-[11px] text-slate-500">Planos vinculables a cada elemento estructural.</p>
+        </div>
+        <button type="button" onclick="openBlueprintModal()" class="px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-xs">
+          <i class="fa-solid fa-plus text-[10px]"></i>
+          <span>Registrar Plano</span>
+        </button>
+      </div>
+
+      <div id="blueprintsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        <!-- Render dinámico -->
+      </div>
+    </section>
+
+    <!-- ================= CONTENIDO: TOPÓGRAFOS ================= -->
+    <section id="tabContent-staff" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white">Equipo de Topografía de Campo</h2>
+          <p class="text-[11px] text-slate-500">Gestión de topógrafos responsables de las liberaciones diarias.</p>
+        </div>
+        <button type="button" onclick="openStaffModal()" class="px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-xs">
+          <i class="fa-solid fa-user-plus text-[10px]"></i>
+          <span>Nuevo Topógrafo</span>
+        </button>
+      </div>
+
+      <div id="staffContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        <!-- Render dinámico -->
+      </div>
+    </section>
+
+    <!-- ================= CONTENIDO: MÓDULO EXCEL ================= -->
+    <section id="tabContent-excel" class="hidden space-y-3">
+      
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            Exportación de Partes Topográficos
+          </h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">Planilla oficial con trazabilidad de fechas y horas de cada visto bueno.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <select id="excelDateScopeSelect" onchange="renderExcelPreview()" class="px-2 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none">
+            <option value="selectedDay">📅 Solo el día seleccionado</option>
+            <option value="selectedMonth">🗓️ Todo el mes en curso</option>
+            <option value="allHistory">📚 Historial Completo (Todos los meses)</option>
+          </select>
+          <button type="button" onclick="exportTasksToExcel()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer">
+            <i class="fa-solid fa-download text-xs"></i>
+            <span>Descargar (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista Previa de Datos -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+        <div class="p-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Vista Previa de la Planilla Oficial</span>
+          <span id="excelTotalRowsCount" class="text-[11px] text-slate-500">0 registros listos</span>
+        </div>
+        <div class="overflow-x-auto custom-scroll max-h-96">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 sticky top-0 text-[11px]">
+              <tr>
+                <th class="py-2 px-2.5">N°</th>
+                <th class="py-2 px-2.5">Fecha</th>
+                <th class="py-2 px-2.5">Área</th>
+                <th class="py-2 px-2.5">Código</th>
+                <th class="py-2 px-2.5">Elemento</th>
+                <th class="py-2 px-2.5">Ejes</th>
+                <th class="py-2 px-2.5">Topógrafo</th>
+                <th class="py-2 px-2.5">Fundación</th>
+                <th class="py-2 px-2.5">Pre-vaciado</th>
+                <th class="py-2 px-2.5">Post-vaciado</th>
+                <th class="py-2 px-2.5 text-center">Avance</th>
+              </tr>
+            </thead>
+            <tbody id="excelPreviewTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-normal text-[11px]">
+              <!-- Render dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= PIE DE PÁGINA ================= -->
+  <footer class="mt-auto py-3 border-t border-slate-200 dark:border-slate-800 text-center text-[11px] text-slate-400 dark:text-slate-500">
+    <p>Control Topográfico Diario • Sistema de Gestión de Obra Civil</p>
+    <p class="text-[10px] mt-0.5 text-slate-500 dark:text-slate-400 font-medium">Creado por el Ing. Juan Diego García</p>
+  </footer>
+
+  <!-- ================= NOTIFICACIÓN TOAST ================= -->
+  <div id="toastNotification" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toastInner" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 text-white text-xs shadow-xl border border-slate-700">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+      <span id="toastMessage">Acción completada con éxito</span>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: INICIO DE SESIÓN / MODO INVITADO ================= -->
+  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 relative space-y-3">
+      
+      <button type="button" id="closeLoginModalBtn" onclick="closeLoginModal()" class="hidden absolute top-4 right-4 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <div class="w-10 h-10 mx-auto rounded-2xl bg-blue-600 flex items-center justify-center text-white text-lg shadow-md">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white pt-1">Acceso al Sistema</h3>
+        <p class="text-[11px] text-slate-500">Control Topográfico Diario • Áreas 4680, 4652, 4653</p>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-2.5 pt-1">
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Usuario Admin</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="loginUsername" required placeholder="admin" value="admin" class="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Contraseña</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="password" id="loginPassword" required placeholder="admin" value="admin" class="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+          Ingresar como Administrador
+        </button>
+      </form>
+
+      <div class="relative flex items-center justify-center my-2">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-white dark:bg-slate-900 px-2 text-[9px] text-slate-400 uppercase font-semibold">o continuar como</span>
+      </div>
+
+      <button type="button" onclick="handleGuestLogin()" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700">
+        <i class="fa-solid fa-eye text-slate-500 text-xs"></i>
+        <span>Modo Invitado (Solo Lectura)</span>
+      </button>
+
+      <p class="text-[9px] text-slate-400 text-center">Admin: <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.2 rounded">admin / admin</code></p>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: AGREGAR NUEVO FRENTE ================= -->
+  <div id="addModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-3">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-plus"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Nuevo Frente de Trabajo</h3>
+        </div>
+        <button type="button" onclick="closeAddModal()" class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 text-xs flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateTask(event)" class="space-y-3">
+        
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Área Oficial del Proyecto *</label>
+          <select id="modalTaskArea" required class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+            <option value="4680 - Almacén y descarga de ácidos">4680 - Almacén y descarga de ácidos</option>
+            <option value="4652 - Taller de mantenimiento de equipo LESDE">4652 - Taller de mantenimiento de equipo LESDE</option>
+            <option value="4653 - Almacén general">4653 - Almacén general</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Tipo de Elemento *</label>
+            <input type="text" id="modalTaskType" required placeholder="Zapata, Muro, Losa..." list="elementsPresetList" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+            <datalist id="elementsPresetList">
+              <option value="Zapata Aislada">
+              <option value="Zapata Combinada">
+              <option value="Muro de Contención">
+              <option value="Pedestal">
+              <option value="Losa de Concreto">
+              <option value="Viga de Cimentación">
+              <option value="Foso de Drenaje">
+              <option value="Trazo y Replanteo">
+            </datalist>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Código / Identificador *</label>
+            <input type="text" id="modalTaskId" required placeholder="Ej: Z-04, MC-01" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none uppercase">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Ubicación / Ejes de Replanteo *</label>
+          <input type="text" id="modalTaskEjes" required placeholder="Ej: Entre Ejes A-B / 1-3" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Topógrafo Encargado *</label>
+          <select id="modalTaskTopografo" required class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+            <option value="Ronald Zapana">Ronald Zapana</option>
+            <option value="Jhonatan Umaya">Jhonatan Umaya</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Plano de Referencia</label>
+          <input type="text" id="modalTaskPlanos" placeholder="Ej: PL-EST-4680-01" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAddModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition">Cancelar</button>
+          <button type="submit" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition">Guardar Frente</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CALENDARIO E HISTÓRICO MENSUAL ================= -->
+  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-4 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+        <div class="flex items-center gap-1.5">
+          <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-regular fa-calendar-check text-xs"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Calendario Histórico</h3>
+            <p class="text-[10px] text-slate-400">Audita frentes y liberaciones por día</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCalendarModal()" class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Barra de navegación del mes -->
+      <div class="flex items-center justify-between px-1">
+        <button type="button" onclick="changeCalendarMonth(-1)" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <span id="calendarMonthYearLabel" class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Mes Año</span>
+        <button type="button" onclick="changeCalendarMonth(1)" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Cuadrícula del Calendario -->
+      <div class="space-y-1.5">
+        <div class="grid grid-cols-7 text-center text-[9px] font-bold text-slate-400 uppercase">
+          <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+        </div>
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
+          <!-- Render dinámico -->
+        </div>
+      </div>
+
+      <!-- Resumen del día seleccionado -->
+      <div id="calendarDaySummary" class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-xs space-y-0.5">
+        <div class="flex items-center justify-between font-bold text-slate-900 dark:text-white">
+          <span id="calendarSelectedDateLabel" class="text-[11px]">Fecha seleccionada</span>
+          <span id="calendarSelectedCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-mono">0 Lib.</span>
+        </div>
+        <p id="calendarSelectedDetails" class="text-[10px] text-slate-500">Toca un día para cargar su parte diario.</p>
+      </div>
+
+      <div class="pt-1 flex items-center justify-between gap-2">
+        <button type="button" onclick="jumpToToday()" class="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+          Hoy
+        </button>
+        <button type="button" onclick="closeCalendarModal()" class="px-3.5 py-1 rounded-xl text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white transition">
+          Ver Fecha Seleccionada
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: WHATSAPP ================= -->
+  <div id="whatsAppModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-3">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-brands fa-whatsapp text-xs"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Reporte Técnico para WhatsApp</h3>
+            <p class="text-[10px] text-slate-400">Texto generado con formato de obra</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeWhatsAppModal()" class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Filtro de Reporte -->
+      <div class="flex gap-1.5">
+        <button type="button" onclick="generateWhatsAppMessage('all')" class="flex-1 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50">General</button>
+        <button type="button" onclick="generateWhatsAppMessage('4680')" class="flex-1 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50">4680</button>
+        <button type="button" onclick="generateWhatsAppMessage('4652')" class="flex-1 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50">4652</button>
+        <button type="button" onclick="generateWhatsAppMessage('4653')" class="flex-1 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50">4653</button>
+      </div>
+
+      <div>
+        <textarea id="whatsAppTextPreview" rows="9" class="w-full p-2.5 rounded-2xl text-[11px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:outline-none"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <button type="button" onclick="copyWhatsAppToClipboard()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center gap-1">
+          <i class="fa-solid fa-copy text-xs"></i>
+          <span>Copiar</span>
+        </button>
+        <button type="button" onclick="sendToWhatsAppDirect()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center gap-1">
+          <i class="fa-brands fa-whatsapp text-xs"></i>
+          <span>Abrir WhatsApp</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: REGISTRAR PLANO ================= -->
+  <div id="blueprintModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-4 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+        <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Registrar Plano Técnico</h3>
+        <button type="button" onclick="closeBlueprintModal()" class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateBlueprint(event)" class="space-y-2.5">
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Código del Plano *</label>
+          <input type="text" id="modalBpCode" required placeholder="Ej: PL-EST-4680-01" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none uppercase">
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Título o Descripción *</label>
+          <input type="text" id="modalBpTitle" required placeholder="Ej: Cimentaciones y Zapatas" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Área Asociada *</label>
+          <select id="modalBpArea" required class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+            <option value="4680 - Almacén y descarga de ácidos">4680 - Almacén y descarga de ácidos</option>
+            <option value="4652 - Taller de mantenimiento de equipo LESDE">4652 - Taller de mantenimiento de equipo LESDE</option>
+            <option value="4653 - Almacén general">4653 - Almacén general</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Revisión</label>
+          <input type="text" id="modalBpRev" placeholder="Ej: Rev. 1" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+        <div class="pt-1 flex justify-end gap-2">
+          <button type="button" onclick="closeBlueprintModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Cancelar</button>
+          <button type="submit" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: REGISTRAR TOPÓGRAFO ================= -->
+  <div id="staffModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-4 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+        <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Nuevo Topógrafo</h3>
+        <button type="button" onclick="closeStaffModal()" class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateStaff(event)" class="space-y-2.5">
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Nombre Completo *</label>
+          <input type="text" id="modalStaffName" required placeholder="Ej: Ronald Zapana" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Cargo / Especialidad *</label>
+          <input type="text" id="modalStaffRole" required placeholder="Ej: Topógrafo de Obra Civil" class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Área Principal Habitual *</label>
+          <select id="modalStaffArea" required class="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none">
+            <option value="4680 - Almacén y descarga de ácidos">4680 - Almacén y descarga de ácidos</option>
+            <option value="4652 - Taller de mantenimiento de equipo LESDE">4652 - Taller de mantenimiento de equipo LESDE</option>
+            <option value="4653 - Almacén general">4653 - Almacén general</option>
+          </select>
+        </div>
+        <div class="pt-1 flex justify-end gap-2">
+          <button type="button" onclick="closeStaffModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Cancelar</button>
+          <button type="submit" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT PRINCIPAL ================= -->
+  <script>
+    // --- ESTADO GLOBAL DE DATOS ---
+    const AREAS_OFICIALES = [
+      { id: "4680", code: "4680", name: "4680 - Almacén y descarga de ácidos", short: "Descarga Ácidos", icon: "fa-flask-vial" },
+      { id: "4652", code: "4652", name: "4652 - Taller de mantenimiento de equipo LESDE", short: "Taller LESDE", icon: "fa-truck-pickup" },
+      { id: "4653", code: "4653", name: "4653 - Almacén general", short: "Almacén General", icon: "fa-warehouse" }
+    ];
+
+    let currentAreaKey = "4680";
+    let currentTab = "area-4680";
+    let currentUserRole = null;
+    
+    // CONTROL DE FECHAS
+    let activeDateString = new Date().toISOString().split('T')[0];
+    let calendarViewDate = new Date();
+
+    const TODAY_STR = new Date().toISOString().split('T')[0];
+    const YESTERDAY_DATE = new Date();
+    YESTERDAY_DATE.setDate(YESTERDAY_DATE.getDate() - 1);
+    const YESTERDAY_STR = YESTERDAY_DATE.toISOString().split('T')[0];
+
+    const DEFAULT_TASKS = [
+      // 4680
+      {
+        id: "T-4680-1",
+        zona: "4680 - Almacén y descarga de ácidos",
+        tipo: "Zapata Aislada",
+        identificador: "Z-1",
+        ejes: "Ejes A-B / 1-2",
+        topografo: "Ronald Zapana",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4680-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "08:15 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: true, hora: "10:45 AM", fecha: TODAY_STR },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+      {
+        id: "T-4680-2",
+        zona: "4680 - Almacén y descarga de ácidos",
+        tipo: "Zapata Aislada",
+        identificador: "Z-2",
+        ejes: "Ejes B-C / 1-2",
+        topografo: "Ronald Zapana",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4680-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "08:40 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+      {
+        id: "T-4680-3",
+        zona: "4680 - Almacén y descarga de ácidos",
+        tipo: "Zapata Combinada",
+        identificador: "Z-4",
+        ejes: "Ejes C-D / 3-4",
+        topografo: "Ronald Zapana",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4680-02"],
+        steps: [
+          { nombre: "Fundación", completado: false, hora: null, fecha: null },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+      {
+        id: "T-4680-4",
+        zona: "4680 - Almacén y descarga de ácidos",
+        tipo: "Muro de Contención",
+        identificador: "MC-01",
+        ejes: "Eje Perimetral Norte",
+        topografo: "Ronald Zapana",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4680-03"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "09:00 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: true, hora: "11:30 AM", fecha: TODAY_STR },
+          { nombre: "Post-vaciado", completado: true, hora: "04:15 PM", fecha: TODAY_STR }
+        ]
+      },
+
+      // 4652
+      {
+        id: "T-4652-1",
+        zona: "4652 - Taller de mantenimiento de equipo LESDE",
+        tipo: "Zapata Aislada",
+        identificador: "Z-1-LESDE",
+        ejes: "Ejes 1-2 / F-G",
+        topografo: "Jhonatan Umaya",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4652-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "08:20 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: true, hora: "01:10 PM", fecha: TODAY_STR },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+      {
+        id: "T-4652-2",
+        zona: "4652 - Taller de mantenimiento de equipo LESDE",
+        tipo: "Pedestal",
+        identificador: "P-1-LESDE",
+        ejes: "Eje 2 / F",
+        topografo: "Jhonatan Umaya",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4652-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "09:15 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+      {
+        id: "T-4652-3",
+        zona: "4652 - Taller de mantenimiento de equipo LESDE",
+        tipo: "Foso de Drenaje",
+        identificador: "FOSO-01",
+        ejes: "Ejes 3-4 / Central",
+        topografo: "Jhonatan Umaya",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4652-02"],
+        steps: [
+          { nombre: "Fundación", completado: false, hora: null, fecha: null },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+
+      // 4653
+      {
+        id: "T-4653-1",
+        zona: "4653 - Almacén general",
+        tipo: "Zapata Aislada",
+        identificador: "Z-101",
+        ejes: "Ejes X1-X2 / Y1-Y2",
+        topografo: "Ronald Zapana",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4653-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "07:50 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: true, hora: "10:15 AM", fecha: TODAY_STR },
+          { nombre: "Post-vaciado", completado: true, hora: "03:45 PM", fecha: TODAY_STR }
+        ]
+      },
+      {
+        id: "T-4653-2",
+        zona: "4653 - Almacén general",
+        tipo: "Losa de Concreto",
+        identificador: "LOSA-01",
+        ejes: "Paño Central Ejes 2-5",
+        topografo: "Jhonatan Umaya",
+        fechaCreacion: TODAY_STR,
+        planos: ["PL-EST-4653-02"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "08:30 AM", fecha: TODAY_STR },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      },
+
+      // Ejemplo histórico de ayer
+      {
+        id: "T-HIST-YESTERDAY-1",
+        zona: "4680 - Almacén y descarga de ácidos",
+        tipo: "Zapata Aislada",
+        identificador: "Z-0-HIST",
+        ejes: "Eje 1 / A",
+        topografo: "Ronald Zapana",
+        fechaCreacion: YESTERDAY_STR,
+        planos: ["PL-EST-4680-01"],
+        steps: [
+          { nombre: "Fundación", completado: true, hora: "09:30 AM", fecha: YESTERDAY_STR },
+          { nombre: "Pre-vaciado", completado: true, hora: "02:00 PM", fecha: YESTERDAY_STR },
+          { nombre: "Post-vaciado", completado: true, hora: "05:10 PM", fecha: YESTERDAY_STR }
+        ]
+      }
+    ];
+
+    let tasks = [];
+    let blueprints = [
+      { code: "PL-EST-4680-01", title: "Cimentación y Zapatas Área Ácidos", area: "4680 - Almacén y descarga de ácidos", rev: "Rev. 1" },
+      { code: "PL-EST-4680-02", title: "Diques y Muros de Contención Ácidos", area: "4680 - Almacén y descarga de ácidos", rev: "Rev. 0" },
+      { code: "PL-EST-4652-01", title: "Cimentaciones Taller Mantenimiento LESDE", area: "4652 - Taller de mantenimiento de equipo LESDE", rev: "Rev. 2" },
+      { code: "PL-EST-4653-01", title: "Plano Estructural Almacén General", area: "4653 - Almacén general", rev: "Rev. 1" }
+    ];
+
+    let staff = [
+      { name: "Ronald Zapana", role: "Topógrafo Especialista", area: "4680 - Almacén y descarga de ácidos" },
+      { name: "Jhonatan Umaya", role: "Topógrafo de Obra Civil", area: "4652 - Taller de mantenimiento de equipo LESDE" }
+    ];
+
+    // --- HELPER: EVALUAR SI UN PASO ESTABA LIBERADO EN LA FECHA ACTIVA ---
+    function isStepDoneAtDate(step, dateStr) {
+      if (!step || !step.completado) return false;
+      if (!step.fecha) return true;
+      return step.fecha <= dateStr;
+    }
+
+    // --- INICIALIZACIÓN ---
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        loadStorageData();
+        initDatePickers();
+
+        const savedRole = localStorage.getItem('topografia_user_role');
+        if (!savedRole) {
+          openLoginModal(false);
+        } else {
+          applyRole(savedRole);
         }
 
-        // Charts Config
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.color = '#64748b';
-        const colors = { mina: '#0ea5e9', contrata: '#6366f1', costo: '#ef4444', ingreso: '#10b981', neutral: '#94a3b8' };
+        switchTab('area-4680');
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    });
 
-        // 1. Budget Donut
-        new Chart(document.getElementById('budgetChart'), {
-            type: 'doughnut',
-            data: { labels: ['Mina (Activos)', 'Contrata (Servicios)'], datasets: [{ data: [756778, 327372], backgroundColor: [colors.mina, colors.contrata], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
-        });
+    function initDatePickers() {
+      const picker = document.getElementById('currentDatePicker');
+      if (picker) {
+        picker.value = activeDateString;
+      }
+      updateActiveDateDisplay();
+    }
 
-        // 2. Hourly Bar
-        new Chart(document.getElementById('hourlyCostChart'), {
-            type: 'bar',
-            data: { labels: ['Jumbo', 'Dumper', 'Scoop', 'Operador', 'Ayudante'], datasets: [{ label: 'USD/Hora', data: [78.50, 61.07, 55.20, 6.97, 3.67], backgroundColor: [colors.mina, colors.mina, colors.mina, colors.contrata, colors.contrata], borderRadius: 4 }] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false } } } }
-        });
+    function updateActiveDateDisplay() {
+      const badge = document.getElementById('activeDateDisplayBadge');
+      const backBtn = document.getElementById('btnBackToToday');
+      const todayStr = new Date().toISOString().split('T')[0];
 
-        // 3. APU Stacked
-        new Chart(document.getElementById('apuChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Mano Obra', 'Equipos', 'Materiales', 'GG+Util'],
-                datasets: [
-                    { label: 'Mina', data: [0, 318, 210, 0], backgroundColor: colors.mina },
-                    { label: 'Contrata', data: [34, 40, 5, 19], backgroundColor: colors.contrata }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#f1f5f9' } } }, plugins: { legend: { position: 'bottom' } } }
-        });
+      if (badge) {
+        if (activeDateString === todayStr) {
+          badge.textContent = `Hoy (${formatDisplayDate(activeDateString)})`;
+          if (backBtn) backBtn.classList.add('hidden');
+        } else {
+          badge.textContent = `${formatDisplayDate(activeDateString)} [Historial]`;
+          if (backBtn) backBtn.classList.remove('hidden');
+        }
+      }
+    }
 
-        // 4. Profitability Waterfall
-        new Chart(document.getElementById('profitabilityChart'), {
-            type: 'bar',
-            data: {
-                labels: ['NSR', 'Minado', 'Planta', 'Gral', 'Amort', 'Margen'],
-                datasets: [{
-                    label: 'USD/TM',
-                    data: [[0, 72.5], [44.5, 72.5], [26, 44.5], [14, 26], [8.6, 14], [0, 8.6]],
-                    backgroundColor: [colors.ingreso, colors.costo, colors.costo, colors.costo, colors.neutral, '#f59e0b'],
-                    borderRadius: 4
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-        });
+    function onDateChanged(newDateStr) {
+      if (!newDateStr) return;
+      activeDateString = newDateStr;
+      updateActiveDateDisplay();
+      showToast(`Visualizando: ${formatDisplayDate(activeDateString)}`, 'info');
+      renderZoneCards();
+      if (currentTab === 'pending') renderPendingModule();
+      if (currentTab === 'excel') renderExcelPreview();
+      updateBadges();
+    }
 
-        // 5. NEW: CASH FLOW CHART
-        new Chart(document.getElementById('cashFlowChart'), {
-            type: 'line',
-            data: {
-                labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'],
-                datasets: [
-                    {
-                        label: 'Egresos (Costos)',
-                        data: [600, 300, 150, 120, 120, 120, 120, 120, 120, 120, 120, 120], // Spike at start
-                        borderColor: colors.costo,
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Ingresos (NSR)',
-                        data: [0, 0, 0, 0, 50, 100, 140, 145, 145, 145, 145, 145], // Ramp up later
-                        borderColor: colors.ingreso,
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false } }
-                },
-                plugins: {
-                    legend: { position: 'top' }
-                }
+    function navigateDay(offset) {
+      const d = new Date(activeDateString + 'T00:00:00');
+      d.setDate(d.getDate() + offset);
+      activeDateString = d.toISOString().split('T')[0];
+      const picker = document.getElementById('currentDatePicker');
+      if (picker) picker.value = activeDateString;
+      onDateChanged(activeDateString);
+    }
+
+    function formatDisplayDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // --- MODAL DE CALENDARIO E HISTORIAL ---
+    function openCalendarModal() {
+      const modal = document.getElementById('calendarModal');
+      if (modal) modal.classList.remove('hidden');
+      calendarViewDate = new Date(activeDateString + 'T00:00:00');
+      renderCalendarView();
+    }
+
+    function closeCalendarModal() {
+      const modal = document.getElementById('calendarModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function changeCalendarMonth(offset) {
+      calendarViewDate.setMonth(calendarViewDate.getMonth() + offset);
+      renderCalendarView();
+    }
+
+    function jumpToToday() {
+      activeDateString = new Date().toISOString().split('T')[0];
+      const picker = document.getElementById('currentDatePicker');
+      if (picker) picker.value = activeDateString;
+      calendarViewDate = new Date();
+      onDateChanged(activeDateString);
+      closeCalendarModal();
+    }
+
+    function renderCalendarView() {
+      const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      const year = calendarViewDate.getFullYear();
+      const month = calendarViewDate.getMonth();
+
+      const label = document.getElementById('calendarMonthYearLabel');
+      if (label) label.textContent = `${monthNames[month]} ${year}`;
+
+      const grid = document.getElementById('calendarDaysGrid');
+      if (!grid) return;
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let daysHtml = '';
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        daysHtml += `<div class="p-1 opacity-0 pointer-events-none"></div>`;
+      }
+
+      for (let d = 1; d <= totalDaysInMonth; d++) {
+        const monthPad = String(month + 1).padStart(2, '0');
+        const dayPad = String(d).padStart(2, '0');
+        const cellDateStr = `${year}-${monthPad}-${dayPad}`;
+
+        const isSelected = cellDateStr === activeDateString;
+        const isToday = cellDateStr === new Date().toISOString().split('T')[0];
+
+        // Liberaciones ocurridas exactamente ese día
+        let dayChecksCount = 0;
+        tasks.forEach(t => {
+          t.steps.forEach(s => {
+            if (s.completado && s.fecha === cellDateStr) {
+              dayChecksCount++;
             }
+          });
         });
-    </script>
+
+        daysHtml += `
+          <button type="button" onclick="selectDateFromCalendar('${cellDateStr}')" class="p-1 rounded-lg flex flex-col items-center justify-center transition cursor-pointer ${isSelected ? 'bg-blue-600 text-white font-bold shadow-xs ring-1 ring-blue-400' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'} ${isToday && !isSelected ? 'border border-blue-500 font-bold' : ''}">
+            <span class="text-[11px] leading-tight">${d}</span>
+            ${dayChecksCount > 0 ? `
+              <span class="text-[8px] px-1 rounded-full ${isSelected ? 'bg-white/30 text-white' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold'}">
+                ${dayChecksCount}
+              </span>
+            ` : `<span class="h-2"></span>`}
+          </button>
+        `;
+      }
+
+      grid.innerHTML = daysHtml;
+      updateCalendarDaySummary(activeDateString);
+    }
+
+    function selectDateFromCalendar(dateStr) {
+      activeDateString = dateStr;
+      const picker = document.getElementById('currentDatePicker');
+      if (picker) picker.value = activeDateString;
+      renderCalendarView();
+      updateCalendarDaySummary(dateStr);
+      onDateChanged(dateStr);
+    }
+
+    function updateCalendarDaySummary(dateStr) {
+      const summaryDate = document.getElementById('calendarSelectedDateLabel');
+      const summaryBadge = document.getElementById('calendarSelectedCountBadge');
+      const summaryDetails = document.getElementById('calendarSelectedDetails');
+
+      if (!summaryDate) return;
+
+      const d = new Date(dateStr + 'T00:00:00');
+      summaryDate.textContent = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+      let liberaciones = 0;
+      let frentesInvolucrados = new Set();
+
+      tasks.forEach(t => {
+        t.steps.forEach(s => {
+          if (s.completado && s.fecha === dateStr) {
+            liberaciones++;
+            frentesInvolucrados.add(t.identificador);
+          }
+        });
+      });
+
+      if (summaryBadge) summaryBadge.textContent = `${liberaciones} Lib.`;
+      if (summaryDetails) {
+        if (liberaciones > 0) {
+          summaryDetails.textContent = `Frentes: ${Array.from(frentesInvolucrados).join(', ')}`;
+        } else {
+          summaryDetails.textContent = `Sin liberaciones registradas en este día.`;
+        }
+      }
+    }
+
+    function loadStorageData() {
+      try {
+        const savedTasks = localStorage.getItem('topografia_tasks_db');
+        if (savedTasks) {
+          tasks = JSON.parse(savedTasks);
+          tasks.forEach(t => {
+            if (!t.fechaCreacion) t.fechaCreacion = TODAY_STR;
+            t.steps.forEach(s => {
+              if (s.completado && !s.fecha) s.fecha = TODAY_STR;
+            });
+          });
+        } else {
+          tasks = [...DEFAULT_TASKS];
+          saveTasks();
+        }
+
+        const savedBp = localStorage.getItem('topografia_blueprints_db');
+        if (savedBp) blueprints = JSON.parse(savedBp);
+
+        const savedStaff = localStorage.getItem('topografia_staff_db');
+        if (savedStaff) staff = JSON.parse(savedStaff);
+      } catch (e) {
+        tasks = [...DEFAULT_TASKS];
+      }
+    }
+
+    function saveTasks() {
+      localStorage.setItem('topografia_tasks_db', JSON.stringify(tasks));
+      updateBadges();
+    }
+
+    // --- SISTEMA DE ROLES Y LOGIN ---
+    function openLoginModal(canClose = true) {
+      const modal = document.getElementById('loginModal');
+      const closeBtn = document.getElementById('closeLoginModalBtn');
+      if (modal) modal.classList.remove('hidden');
+      if (closeBtn) {
+        if (canClose && currentUserRole) {
+          closeBtn.classList.remove('hidden');
+        } else {
+          closeBtn.classList.add('hidden');
+        }
+      }
+    }
+
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+
+      if (u === 'admin' && p === 'admin') {
+        applyRole('admin');
+        closeLoginModal();
+        showToast('Bienvenido, Administrador', 'success');
+      } else {
+        showToast('Usuario o clave incorrectos (use admin / admin)', 'error');
+      }
+    }
+
+    function handleGuestLogin() {
+      applyRole('guest');
+      closeLoginModal();
+      showToast('Accediendo en Modo Invitado (Solo Lectura)', 'info');
+    }
+
+    function applyRole(role) {
+      currentUserRole = role;
+      localStorage.setItem('topografia_user_role', role);
+
+      const label = document.getElementById('userRoleLabel');
+      const dot = document.getElementById('userBadgeDot');
+      const guestBanner = document.getElementById('guestModeBanner');
+      const adminElements = document.querySelectorAll('.admin-only');
+
+      if (role === 'admin') {
+        if (label) label.textContent = "Admin";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
+        if (guestBanner) guestBanner.classList.add('hidden');
+        adminElements.forEach(el => el.classList.remove('hidden'));
+      } else {
+        if (label) label.textContent = "Invitado";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
+        if (guestBanner) guestBanner.classList.remove('hidden');
+        adminElements.forEach(el => el.classList.add('hidden'));
+
+        if (!currentTab.startsWith('area-')) {
+          switchTab('area-4680');
+        }
+      }
+
+      renderZoneCards();
+      updateBadges();
+    }
+
+    // --- CAMBIO DE PESTAÑAS (TABS) ---
+    function switchTab(tabId) {
+      if (currentUserRole === 'guest' && !tabId.startsWith('area-')) {
+        showToast('Esta sección es exclusiva para el Administrador', 'warning');
+        return;
+      }
+
+      currentTab = tabId;
+
+      const allBtns = document.querySelectorAll('#mainNavigationTabs button');
+      allBtns.forEach(btn => {
+        btn.className = "px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shrink-0 whitespace-nowrap cursor-pointer";
+      });
+
+      const activeBtn = document.getElementById(`headerTab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition bg-blue-600 text-white shadow-xs shrink-0 whitespace-nowrap cursor-pointer";
+      }
+
+      const sections = ['tabContent-zones', 'tabContent-pending', 'tabContent-blueprints', 'tabContent-staff', 'tabContent-excel'];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      if (tabId.startsWith('area-')) {
+        currentAreaKey = tabId.replace('area-', '');
+        const zSec = document.getElementById('tabContent-zones');
+        if (zSec) zSec.classList.remove('hidden');
+        updateAreaHeader();
+        renderZoneCards();
+      } else if (tabId === 'pending') {
+        const pSec = document.getElementById('tabContent-pending');
+        if (pSec) pSec.classList.remove('hidden');
+        renderPendingModule();
+      } else if (tabId === 'blueprints') {
+        const bSec = document.getElementById('tabContent-blueprints');
+        if (bSec) bSec.classList.remove('hidden');
+        renderBlueprints();
+      } else if (tabId === 'staff') {
+        const sSec = document.getElementById('tabContent-staff');
+        if (sSec) sSec.classList.remove('hidden');
+        renderStaff();
+      } else if (tabId === 'excel') {
+        const eSec = document.getElementById('tabContent-excel');
+        if (eSec) eSec.classList.remove('hidden');
+        renderExcelPreview();
+      }
+    }
+
+    function updateAreaHeader() {
+      const area = AREAS_OFICIALES.find(a => a.id === currentAreaKey) || AREAS_OFICIALES[0];
+      const titleEl = document.getElementById('activeAreaTitle');
+      const badgeEl = document.getElementById('activeAreaCodeBadge');
+
+      if (titleEl) titleEl.textContent = area.name;
+      if (badgeEl) badgeEl.textContent = `ÁREA ${area.code}`;
+    }
+
+    // --- RENDER DE TABLA DE FRENTES POR ÁREA (HISTÓRICO Y SENSIBLE A FECHA) ---
+    function renderZoneCards() {
+      const tbody = document.getElementById('zonesTableBody');
+      const emptyState = document.getElementById('emptyAreaState');
+      if (!tbody) return;
+
+      const areaObj = AREAS_OFICIALES.find(a => a.id === currentAreaKey);
+      const targetAreaName = areaObj ? areaObj.name : '';
+
+      const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+      const topoFilter = document.getElementById('topographerFilter')?.value || 'all';
+      const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+
+      // Filtrar frentes creados en o antes de la fecha activa
+      const areaTasks = tasks.filter(t => {
+        const taskCreated = t.fechaCreacion || TODAY_STR;
+        return t.zona === targetAreaName && taskCreated <= activeDateString;
+      });
+
+      const totalAreaTasks = areaTasks.length;
+      let completedAreaTasks = 0;
+      let pendingAreaTasks = 0;
+
+      areaTasks.forEach(t => {
+        const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+        const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+        const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+        if (s1Done && s2Done && s3Done) completedAreaTasks++;
+        else pendingAreaTasks++;
+      });
+
+      const pctArea = totalAreaTasks > 0 ? Math.round((completedAreaTasks / totalAreaTasks) * 100) : 0;
+      
+      const totalEl = document.getElementById('activeAreaTotalElements');
+      const pctEl = document.getElementById('activeAreaProgressPct');
+      const pendEl = document.getElementById('activeAreaPendingCount');
+
+      if (totalEl) totalEl.textContent = totalAreaTasks;
+      if (pctEl) pctEl.textContent = `${pctArea}%`;
+      if (pendEl) pendEl.textContent = pendingAreaTasks;
+
+      const filtered = areaTasks.filter(t => {
+        const matchSearch = t.identificador.toLowerCase().includes(search) ||
+                            t.tipo.toLowerCase().includes(search) ||
+                            (t.ejes && t.ejes.toLowerCase().includes(search)) ||
+                            (t.topografo && t.topografo.toLowerCase().includes(search));
+        const matchTopo = topoFilter === 'all' || t.topografo === topoFilter;
+        
+        const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+        const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+        const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+        const isDoneAtDate = s1Done && s2Done && s3Done;
+
+        const matchStatus = statusFilter === 'all' || 
+                            (statusFilter === 'completed' && isDoneAtDate) ||
+                            (statusFilter === 'pending' && !isDoneAtDate);
+
+        return matchSearch && matchTopo && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      } else {
+        if (emptyState) emptyState.classList.add('hidden');
+      }
+
+      tbody.innerHTML = filtered.map((t, idx) => {
+        const rawS1 = t.steps[0] || { nombre: "Fundación", completado: false, hora: null, fecha: null };
+        const rawS2 = t.steps[1] || { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null };
+        const rawS3 = t.steps[2] || { nombre: "Post-vaciado", completado: false, hora: null, fecha: null };
+
+        const s1Done = isStepDoneAtDate(rawS1, activeDateString);
+        const s2Done = isStepDoneAtDate(rawS2, activeDateString);
+        const s3Done = isStepDoneAtDate(rawS3, activeDateString);
+
+        const doneCount = [s1Done, s2Done, s3Done].filter(Boolean).length;
+        const progressPct = Math.round((doneCount / 3) * 100);
+
+        const isReadOnly = currentUserRole === 'guest';
+
+        return `
+          <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+            <td class="py-2 px-2.5 text-center text-slate-400 font-mono text-[10px]">${idx + 1}</td>
+            
+            <!-- Elemento / Código -->
+            <td class="py-2 px-2.5">
+              <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                <span class="px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-mono text-[11px]">${t.identificador}</span>
+                <span class="truncate text-[11px]">${t.tipo}</span>
+              </div>
+              <div class="text-[9px] text-slate-400">${t.planos?.join(', ') || 'Sin plano'}</div>
+            </td>
+
+            <!-- Ejes -->
+            <td class="py-2 px-2.5">
+              <span class="inline-flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium text-[11px]">
+                <i class="fa-solid fa-arrows-split-up-and-left text-[9px] text-slate-400"></i>
+                ${t.ejes || 'Sin ejes'}
+              </span>
+            </td>
+
+            <!-- Topógrafo -->
+            <td class="py-2 px-2.5">
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                <i class="fa-solid fa-user-gear text-[9px] text-blue-500"></i>
+                ${t.topografo}
+              </span>
+            </td>
+
+            <!-- Check 1: Fundación (Botón Compacto) -->
+            <td class="py-1.5 px-2 text-center">
+              <button type="button" onclick="toggleStep('${t.id}', 0)" ${isReadOnly ? 'disabled' : ''} class="w-full max-w-[125px] mx-auto h-8 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1 transition ${s1Done ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50'} ${isReadOnly ? 'cursor-default opacity-85' : 'cursor-pointer'}">
+                <i class="fa-solid ${s1Done ? 'fa-circle-check text-white' : 'fa-circle text-slate-300 dark:text-slate-600'} text-[10px]"></i>
+                <div class="text-left leading-none">
+                  <div class="font-bold">${s1Done ? 'Liberado' : 'Pendiente'}</div>
+                  ${s1Done && rawS1.hora ? `<div class="text-[8px] opacity-85">${rawS1.hora}</div>` : ''}
+                </div>
+              </button>
+            </td>
+
+            <!-- Check 2: Pre-vaciado (Botón Compacto) -->
+            <td class="py-1.5 px-2 text-center">
+              <button type="button" onclick="toggleStep('${t.id}', 1)" ${isReadOnly ? 'disabled' : ''} class="w-full max-w-[125px] mx-auto h-8 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1 transition ${s2Done ? 'bg-amber-500 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-50'} ${isReadOnly ? 'cursor-default opacity-85' : 'cursor-pointer'}">
+                <i class="fa-solid ${s2Done ? 'fa-circle-check text-white' : 'fa-circle text-slate-300 dark:text-slate-600'} text-[10px]"></i>
+                <div class="text-left leading-none">
+                  <div class="font-bold">${s2Done ? 'Liberado' : 'Pendiente'}</div>
+                  ${s2Done && rawS2.hora ? `<div class="text-[8px] opacity-85">${rawS2.hora}</div>` : ''}
+                </div>
+              </button>
+            </td>
+
+            <!-- Check 3: Post-vaciado (Botón Compacto) -->
+            <td class="py-1.5 px-2 text-center">
+              <button type="button" onclick="toggleStep('${t.id}', 2)" ${isReadOnly ? 'disabled' : ''} class="w-full max-w-[125px] mx-auto h-8 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1 transition ${s3Done ? 'bg-purple-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-purple-50'} ${isReadOnly ? 'cursor-default opacity-85' : 'cursor-pointer'}">
+                <i class="fa-solid ${s3Done ? 'fa-circle-check text-white' : 'fa-circle text-slate-300 dark:text-slate-600'} text-[10px]"></i>
+                <div class="text-left leading-none">
+                  <div class="font-bold">${s3Done ? 'Liberado' : 'Pendiente'}</div>
+                  ${s3Done && rawS3.hora ? `<div class="text-[8px] opacity-85">${rawS3.hora}</div>` : ''}
+                </div>
+              </button>
+            </td>
+
+            <!-- Avance -->
+            <td class="py-2 px-2 text-center">
+              <div class="inline-flex items-center gap-1.5">
+                <div class="w-10 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                  <div class="h-full ${progressPct === 100 ? 'bg-emerald-500' : 'bg-blue-600'}" style="width: ${progressPct}%"></div>
+                </div>
+                <span class="font-bold text-[10px] ${progressPct === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}">${progressPct}%</span>
+              </div>
+            </td>
+
+            <!-- Acciones (Admin) -->
+            <td class="py-2 px-2 text-center admin-only">
+              <button type="button" onclick="deleteTask('${t.id}')" class="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition" title="Eliminar frente">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // --- CAMBIAR ESTADO DE CHECK ---
+    function toggleStep(taskId, stepIndex) {
+      if (currentUserRole === 'guest') {
+        showToast('El Modo Invitado es solo lectura', 'warning');
+        return;
+      }
+
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.steps[stepIndex]) return;
+
+      const step = task.steps[stepIndex];
+      const currentlyDoneAtDate = isStepDoneAtDate(step, activeDateString);
+
+      if (!currentlyDoneAtDate) {
+        // Marcar como liberado en la fecha activa
+        step.completado = true;
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        step.hora = `${hours}:${minutes} ${ampm}`;
+        step.fecha = activeDateString;
+        showToast(`${task.identificador} • ${step.nombre} liberado (${formatDisplayDate(activeDateString)})`, 'success');
+      } else {
+        // Desmarcar
+        step.completado = false;
+        step.hora = null;
+        step.fecha = null;
+        showToast(`${task.identificador} • ${step.nombre} desmarcado`, 'info');
+      }
+
+      saveTasks();
+      renderZoneCards();
+      if (currentTab === 'pending') renderPendingModule();
+      if (currentTab === 'excel') renderExcelPreview();
+    }
+
+    function deleteTask(taskId) {
+      if (currentUserRole !== 'admin') return;
+      if (!confirm('¿Deseas eliminar este frente de trabajo?')) return;
+
+      tasks = tasks.filter(t => t.id !== taskId);
+      saveTasks();
+      renderZoneCards();
+      showToast('Frente eliminado', 'info');
+    }
+
+    // --- MODULO: ¿QUÉ ME FALTA? (SENSIBLE A LA FECHA ACTIVA) ---
+    function renderPendingModule() {
+      let countS1 = 0, countS2 = 0, countS3 = 0, countDone = 0;
+      const listS1 = document.getElementById('pendingList-s1');
+      const listS2 = document.getElementById('pendingList-s2');
+      const listS3 = document.getElementById('pendingList-s3');
+      const listDone = document.getElementById('completedListContainer');
+
+      let htmlS1 = '', htmlS2 = '', htmlS3 = '', htmlDone = '';
+
+      // Evaluar tareas creadas hasta la fecha activa
+      const currentTasks = tasks.filter(t => (t.fechaCreacion || TODAY_STR) <= activeDateString);
+
+      currentTasks.forEach(t => {
+        const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+        const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+        const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+
+        const allDone = s1Done && s2Done && s3Done;
+
+        if (allDone) {
+          countDone++;
+          htmlDone += `
+            <div class="px-2 py-1 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-emerald-300 dark:border-emerald-800 text-[11px] flex items-center justify-between shadow-xs">
+              <div>
+                <span class="font-bold text-emerald-800 dark:text-emerald-300 font-mono">${t.identificador}</span>
+                <span class="text-[9px] text-slate-500 ml-1">(${t.tipo})</span>
+              </div>
+              <span class="text-[8px] px-1 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold">100% OK</span>
+            </div>
+          `;
+        } else {
+          if (!s1Done) {
+            countS1++;
+            htmlS1 += `
+              <div class="px-2 py-1 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-blue-300 dark:border-blue-800 text-[11px] flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="font-bold text-blue-900 dark:text-blue-200 font-mono">${t.identificador}</span>
+                  <div class="text-[9px] text-slate-500">${t.zona.split(' - ')[0]} • ${t.ejes || ''}</div>
+                </div>
+                <button type="button" onclick="toggleStep('${t.id}', 0)" class="px-2 py-0.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-bold shadow-xs transition cursor-pointer">
+                  Liberar
+                </button>
+              </div>
+            `;
+          }
+          if (s1Done && !s2Done) {
+            countS2++;
+            htmlS2 += `
+              <div class="px-2 py-1 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-amber-300 dark:border-amber-800 text-[11px] flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="font-bold text-amber-900 dark:text-amber-200 font-mono">${t.identificador}</span>
+                  <div class="text-[9px] text-slate-500">${t.zona.split(' - ')[0]} • ${t.ejes || ''}</div>
+                </div>
+                <button type="button" onclick="toggleStep('${t.id}', 1)" class="px-2 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[9px] font-bold shadow-xs transition cursor-pointer">
+                  Liberar
+                </button>
+              </div>
+            `;
+          }
+          if (s2Done && !s3Done) {
+            countS3++;
+            htmlS3 += `
+              <div class="px-2 py-1 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-purple-300 dark:border-purple-800 text-[11px] flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="font-bold text-purple-900 dark:text-purple-200 font-mono">${t.identificador}</span>
+                  <div class="text-[9px] text-slate-500">${t.zona.split(' - ')[0]} • ${t.ejes || ''}</div>
+                </div>
+                <button type="button" onclick="toggleStep('${t.id}', 2)" class="px-2 py-0.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[9px] font-bold shadow-xs transition cursor-pointer">
+                  Liberar
+                </button>
+              </div>
+            `;
+          }
+        }
+      });
+
+      document.getElementById('pendingCount-s1').textContent = countS1;
+      document.getElementById('pendingCount-s2').textContent = countS2;
+      document.getElementById('pendingCount-s3').textContent = countS3;
+      document.getElementById('completedCountCard').textContent = countDone;
+      document.getElementById('pendingTotalCountHero').textContent = (countS1 + countS2 + countS3);
+
+      listS1.innerHTML = htmlS1 || '<p class="text-[10px] text-blue-600/70 italic text-center py-1.5">Sin pendientes</p>';
+      listS2.innerHTML = htmlS2 || '<p class="text-[10px] text-amber-600/70 italic text-center py-1.5">Sin pendientes</p>';
+      listS3.innerHTML = htmlS3 || '<p class="text-[10px] text-purple-600/70 italic text-center py-1.5">Sin pendientes</p>';
+      listDone.innerHTML = htmlDone || '<p class="text-[10px] text-emerald-600/70 italic text-center py-1.5">Ninguno al 100%</p>';
+
+      renderPendingDetailsByArea();
+    }
+
+    function renderPendingDetailsByArea() {
+      const container = document.getElementById('pendingDetailsByArea');
+      if (!container) return;
+
+      container.innerHTML = AREAS_OFICIALES.map(area => {
+        const areaTasks = tasks.filter(t => t.zona === area.name && (t.fechaCreacion || TODAY_STR) <= activeDateString);
+        const pendTasks = areaTasks.filter(t => {
+          const s1 = isStepDoneAtDate(t.steps[0], activeDateString);
+          const s2 = isStepDoneAtDate(t.steps[1], activeDateString);
+          const s3 = isStepDoneAtDate(t.steps[2], activeDateString);
+          return !(s1 && s2 && s3);
+        });
+
+        return `
+          <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold font-mono text-slate-700 dark:text-slate-300">ÁREA ${area.code}</span>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white">${area.name}</h4>
+              </div>
+              <span class="text-[11px] font-semibold ${pendTasks.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">
+                ${pendTasks.length > 0 ? `${pendTasks.length} frentes pendientes` : 'Todo al 100%'}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              ${areaTasks.map(t => {
+                const s1 = isStepDoneAtDate(t.steps[0], activeDateString);
+                const s2 = isStepDoneAtDate(t.steps[1], activeDateString);
+                const s3 = isStepDoneAtDate(t.steps[2], activeDateString);
+                const isAll = s1 && s2 && s3;
+
+                return `
+                  <div class="p-2 rounded-xl border ${isAll ? 'border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30' : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40'} flex flex-col justify-between space-y-1.5">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <span class="font-bold text-xs text-slate-900 dark:text-white font-mono">${t.identificador}</span>
+                        <div class="text-[9px] text-slate-500">${t.tipo} • ${t.ejes || 'Sin ejes'}</div>
+                      </div>
+                      <span class="text-[9px] font-bold ${isAll ? 'text-emerald-600' : 'text-amber-600'}">${isAll ? '100%' : 'En curso'}</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 text-center text-[9px] font-bold">
+                      <div class="p-1 rounded ${s1 ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}">1. Fund</div>
+                      <div class="p-1 rounded ${s2 ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}">2. Pre</div>
+                      <div class="p-1 rounded ${s3 ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}">3. Post</div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- MODALES: AGREGAR FRENTE ---
+    function openAddModal() {
+      if (currentUserRole !== 'admin') {
+        showToast('Acceso exclusivo para Administrador', 'warning');
+        return;
+      }
+      const m = document.getElementById('addModal');
+      if (m) m.classList.remove('hidden');
+
+      const activeObj = AREAS_OFICIALES.find(a => a.id === currentAreaKey);
+      if (activeObj) {
+        const areaSelect = document.getElementById('modalTaskArea');
+        if (areaSelect) areaSelect.value = activeObj.name;
+      }
+    }
+
+    function closeAddModal() {
+      const m = document.getElementById('addModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function handleCreateTask(e) {
+      e.preventDefault();
+      const area = document.getElementById('modalTaskArea').value;
+      const type = document.getElementById('modalTaskType').value.trim();
+      const id = document.getElementById('modalTaskId').value.trim().toUpperCase();
+      const ejes = document.getElementById('modalTaskEjes').value.trim();
+      const topo = document.getElementById('modalTaskTopografo').value;
+      const planos = document.getElementById('modalTaskPlanos').value.trim();
+
+      const newTask = {
+        id: 'T-' + Date.now(),
+        zona: area,
+        tipo: type,
+        identificador: id,
+        ejes: ejes,
+        topografo: topo,
+        fechaCreacion: activeDateString,
+        planos: planos ? [planos] : [],
+        steps: [
+          { nombre: "Fundación", completado: false, hora: null, fecha: null },
+          { nombre: "Pre-vaciado", completado: false, hora: null, fecha: null },
+          { nombre: "Post-vaciado", completado: false, hora: null, fecha: null }
+        ]
+      };
+
+      tasks.push(newTask);
+      saveTasks();
+      closeAddModal();
+      renderZoneCards();
+      showToast(`Frente ${id} registrado en ${formatDisplayDate(activeDateString)}`, 'success');
+      e.target.reset();
+    }
+
+    // --- PLANOS ---
+    function openBlueprintModal() {
+      if (currentUserRole !== 'admin') return;
+      document.getElementById('blueprintModal').classList.remove('hidden');
+    }
+
+    function closeBlueprintModal() {
+      document.getElementById('blueprintModal').classList.add('hidden');
+    }
+
+    function handleCreateBlueprint(e) {
+      e.preventDefault();
+      const code = document.getElementById('modalBpCode').value.trim().toUpperCase();
+      const title = document.getElementById('modalBpTitle').value.trim();
+      const area = document.getElementById('modalBpArea').value;
+      const rev = document.getElementById('modalBpRev').value.trim() || 'Rev. 0';
+
+      blueprints.push({ code, title, area, rev });
+      localStorage.setItem('topografia_blueprints_db', JSON.stringify(blueprints));
+      closeBlueprintModal();
+      renderBlueprints();
+      updateBadges();
+      showToast('Plano registrado', 'success');
+      e.target.reset();
+    }
+
+    function renderBlueprints() {
+      const c = document.getElementById('blueprintsContainer');
+      if (!c) return;
+      c.innerHTML = blueprints.map((b, i) => `
+        <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-1.5">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-mono text-xs font-bold">${b.code}</span>
+              <span class="text-[10px] font-semibold text-slate-500">${b.rev}</span>
+            </div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white mt-1">${b.title}</h4>
+            <p class="text-[10px] text-slate-500">${b.area}</p>
+          </div>
+          <div class="pt-1.5 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <button type="button" onclick="deleteBlueprint(${i})" class="text-red-500 hover:text-red-700 text-xs admin-only"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteBlueprint(idx) {
+      if (currentUserRole !== 'admin') return;
+      blueprints.splice(idx, 1);
+      localStorage.setItem('topografia_blueprints_db', JSON.stringify(blueprints));
+      renderBlueprints();
+      updateBadges();
+      showToast('Plano eliminado', 'info');
+    }
+
+    // --- TOPÓGRAFOS ---
+    function openStaffModal() {
+      if (currentUserRole !== 'admin') return;
+      document.getElementById('staffModal').classList.remove('hidden');
+    }
+
+    function closeStaffModal() {
+      document.getElementById('staffModal').classList.add('hidden');
+    }
+
+    function handleCreateStaff(e) {
+      e.preventDefault();
+      const name = document.getElementById('modalStaffName').value.trim();
+      const role = document.getElementById('modalStaffRole').value.trim();
+      const area = document.getElementById('modalStaffArea').value;
+
+      staff.push({ name, role, area });
+      localStorage.setItem('topografia_staff_db', JSON.stringify(staff));
+      closeStaffModal();
+      renderStaff();
+      updateTopographerSelects();
+      showToast('Topógrafo registrado', 'success');
+      e.target.reset();
+    }
+
+    function renderStaff() {
+      const c = document.getElementById('staffContainer');
+      if (!c) return;
+      c.innerHTML = staff.map((s, i) => {
+        const assignedTasks = tasks.filter(t => t.topografo === s.name);
+        const completedTasks = assignedTasks.filter(t => isStepDoneAtDate(t.steps[0], activeDateString) && isStepDoneAtDate(t.steps[1], activeDateString) && isStepDoneAtDate(t.steps[2], activeDateString));
+
+        return `
+          <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-xs">
+                ${s.name.charAt(0)}
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white">${s.name}</h4>
+                <p class="text-[10px] text-slate-500">${s.role}</p>
+                <span class="text-[9px] text-blue-600 dark:text-blue-400 font-medium">${s.area.split(' - ')[0]}</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-xl flex items-center justify-around text-center text-xs">
+              <div>
+                <div class="font-bold text-slate-800 dark:text-slate-200 text-xs">${assignedTasks.length}</div>
+                <div class="text-[8px] text-slate-400 uppercase">Asignados</div>
+              </div>
+              <div class="w-px h-5 bg-slate-200 dark:bg-slate-700"></div>
+              <div>
+                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-xs">${completedTasks.length}</div>
+                <div class="text-[8px] text-slate-400 uppercase">Liberados</div>
+              </div>
+            </div>
+
+            <div class="pt-1 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button type="button" onclick="deleteStaff(${i})" class="text-red-500 hover:text-red-700 text-xs admin-only"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteStaff(idx) {
+      if (currentUserRole !== 'admin') return;
+      staff.splice(idx, 1);
+      localStorage.setItem('topografia_staff_db', JSON.stringify(staff));
+      renderStaff();
+      updateTopographerSelects();
+      showToast('Topógrafo eliminado', 'info');
+    }
+
+    function updateTopographerSelects() {
+      const selects = [document.getElementById('topographerFilter'), document.getElementById('modalTaskTopografo')];
+      selects.forEach(sel => {
+        if (!sel) return;
+        const currentVal = sel.value;
+        const isFilter = sel.id === 'topographerFilter';
+        let opts = isFilter ? '<option value="all">👷 Todos los Topógrafos</option>' : '';
+        staff.forEach(s => {
+          opts += `<option value="${s.name}">${s.name}</option>`;
+        });
+        sel.innerHTML = opts;
+        if (currentVal) sel.value = currentVal;
+      });
+    }
+
+    // --- MÓDULO EXCEL & EXPORTACIÓN CON FILTRO HISTÓRICO ---
+    function renderExcelPreview() {
+      const tbody = document.getElementById('excelPreviewTableBody');
+      const countEl = document.getElementById('excelTotalRowsCount');
+      if (!tbody) return;
+
+      const scope = document.getElementById('excelDateScopeSelect')?.value || 'selectedDay';
+      let exportableTasks = getFilteredTasksByScope(scope);
+
+      if (countEl) countEl.textContent = `${exportableTasks.length} registros (${scope === 'allHistory' ? 'Todo el Historial' : formatDisplayDate(activeDateString)})`;
+
+      tbody.innerHTML = exportableTasks.map((t, idx) => {
+        const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+        const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+        const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+
+        const done = [s1Done, s2Done, s3Done].filter(Boolean).length;
+        const pct = Math.round((done / 3) * 100);
+
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+            <td class="py-1.5 px-2.5 text-slate-400">${idx + 1}</td>
+            <td class="py-1.5 px-2.5 font-mono text-[10px]">${t.fechaCreacion || '-'}</td>
+            <td class="py-1.5 px-2.5 font-semibold">${t.zona.split(' - ')[0]}</td>
+            <td class="py-1.5 px-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">${t.identificador}</td>
+            <td class="py-1.5 px-2.5">${t.tipo}</td>
+            <td class="py-1.5 px-2.5">${t.ejes || '-'}</td>
+            <td class="py-1.5 px-2.5">${t.topografo}</td>
+            <td class="py-1.5 px-2.5 ${s1Done ? 'text-emerald-600 font-semibold' : 'text-slate-400'}">${s1Done ? `LIBERADO` : 'PENDIENTE'}</td>
+            <td class="py-1.5 px-2.5 ${s2Done ? 'text-amber-600 font-semibold' : 'text-slate-400'}">${s2Done ? `LIBERADO` : 'PENDIENTE'}</td>
+            <td class="py-1.5 px-2.5 ${s3Done ? 'text-purple-600 font-semibold' : 'text-slate-400'}">${s3Done ? `LIBERADO` : 'PENDIENTE'}</td>
+            <td class="py-1.5 px-2.5 text-center font-bold ${pct === 100 ? 'text-emerald-600' : 'text-slate-600'}">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function getFilteredTasksByScope(scope) {
+      if (scope === 'allHistory') {
+        return tasks;
+      } else if (scope === 'selectedMonth') {
+        const monthPrefix = activeDateString.slice(0, 7);
+        return tasks.filter(t => {
+          const matchCreated = t.fechaCreacion && t.fechaCreacion.startsWith(monthPrefix);
+          const matchSteps = t.steps.some(s => s.fecha && s.fecha.startsWith(monthPrefix));
+          return matchCreated || matchSteps;
+        });
+      } else {
+        return tasks.filter(t => {
+          const matchCreated = t.fechaCreacion === activeDateString;
+          const matchSteps = t.steps.some(s => s.fecha === activeDateString);
+          return matchCreated || matchSteps;
+        });
+      }
+    }
+
+    function exportTasksToExcel() {
+      const scope = document.getElementById('excelDateScopeSelect')?.value || 'selectedDay';
+      const exportableTasks = getFilteredTasksByScope(scope);
+
+      if (!exportableTasks || exportableTasks.length === 0) {
+        showToast('No hay registros en el rango de fecha seleccionado', 'warning');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        showToast('Librería Excel no cargó correctamente', 'error');
+        return;
+      }
+
+      try {
+        const dataForSheet = exportableTasks.map((t, idx) => {
+          const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+          const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+          const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+
+          const done = [s1Done, s2Done, s3Done].filter(Boolean).length;
+          const pct = Math.round((done / 3) * 100);
+
+          return {
+            "N°": idx + 1,
+            "Fecha Registro": t.fechaCreacion || 'N/A',
+            "Área Oficial": t.zona,
+            "Código Área": t.zona.split(' - ')[0],
+            "Identificador": t.identificador,
+            "Tipo de Elemento": t.tipo,
+            "Ejes de Replanteo": t.ejes || 'Sin especificar',
+            "Topógrafo": t.topografo,
+            "Planos": t.planos?.join(', ') || 'Sin plano',
+            "1. Fundación": s1Done ? `LIBERADO [${t.steps[0].fecha || ''} ${t.steps[0].hora || ''}]` : 'PENDIENTE',
+            "2. Pre-vaciado": s2Done ? `LIBERADO [${t.steps[1].fecha || ''} ${t.steps[1].hora || ''}]` : 'PENDIENTE',
+            "3. Post-vaciado": s3Done ? `LIBERADO [${t.steps[2].fecha || ''} ${t.steps[2].hora || ''}]` : 'PENDIENTE',
+            "Avance (%)": `${pct}%`,
+            "Estado": pct === 100 ? "CONCLUIDO" : (pct > 0 ? "EN PROCESO" : "PENDIENTE")
+          };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Parte Topografía");
+
+        worksheet['!cols'] = [
+          {wch: 5}, {wch: 14}, {wch: 35}, {wch: 12}, {wch: 14}, {wch: 22},
+          {wch: 22}, {wch: 20}, {wch: 18}, {wch: 26}, {wch: 26},
+          {wch: 26}, {wch: 12}, {wch: 14}
+        ];
+
+        let fileName = `Parte_Topografico_${activeDateString}.xlsx`;
+        if (scope === 'selectedMonth') fileName = `Parte_Topografico_Mes_${activeDateString.slice(0, 7)}.xlsx`;
+        if (scope === 'allHistory') fileName = `Parte_Topografico_HISTORICO_COMPLETO.xlsx`;
+
+        XLSX.writeFile(workbook, fileName);
+        showToast(`Reporte descargado: ${fileName}`, 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Error al generar archivo Excel', 'error');
+      }
+    }
+
+    // --- WHATSAPP CON FECHA ACTIVA ---
+    function openWhatsAppModal() {
+      const m = document.getElementById('whatsAppModal');
+      if (m) m.classList.remove('hidden');
+      generateWhatsAppMessage('all');
+    }
+
+    function closeWhatsAppModal() {
+      const m = document.getElementById('whatsAppModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function generateWhatsAppMessage(filter) {
+      // Filtrar frentes creados hasta la fecha activa
+      let filtered = tasks.filter(t => (t.fechaCreacion || TODAY_STR) <= activeDateString);
+      let headerText = "REPORTE GENERAL DE TOPOGRAFÍA";
+
+      if (filter !== 'all') {
+        const areaObj = AREAS_OFICIALES.find(a => a.id === filter);
+        if (areaObj) {
+          filtered = filtered.filter(t => t.zona === areaObj.name);
+          headerText = `REPORTE TOPOGRÁFICO • ÁREA ${areaObj.code}`;
+        }
+      }
+
+      const displayDate = formatDisplayDate(activeDateString);
+      let msg = `📐 *${headerText}*\n📅 *Fecha Corte:* ${displayDate}\n━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      if (filtered.length === 0) {
+        msg += `No hay frentes registrados en o antes de esta fecha.\n`;
+      } else {
+        AREAS_OFICIALES.forEach(a => {
+          const areaTasks = filtered.filter(t => t.zona === a.name);
+          if (areaTasks.length > 0) {
+            msg += `📍 *ÁREA ${a.code} - ${a.short.toUpperCase()}*\n`;
+            areaTasks.forEach(t => {
+              const s1Done = isStepDoneAtDate(t.steps[0], activeDateString);
+              const s2Done = isStepDoneAtDate(t.steps[1], activeDateString);
+              const s3Done = isStepDoneAtDate(t.steps[2], activeDateString);
+
+              const s1Text = s1Done ? `✅ Fund. (${t.steps[0].hora || 'OK'})` : `⏳ Fund. Pendiente`;
+              const s2Text = s2Done ? `✅ Pre. (${t.steps[1].hora || 'OK'})` : `⏳ Pre. Pendiente`;
+              const s3Text = s3Done ? `✅ Post. (${t.steps[2].hora || 'OK'})` : `⏳ Post. Pendiente`;
+
+              msg += `• *${t.identificador}* (${t.tipo}) - ${t.ejes || 'Sin ejes'}\n`;
+              msg += `  ${s1Text} | ${s2Text} | ${s3Text}\n`;
+              msg += `  👷 _Topógrafo:_ ${t.topografo}\n\n`;
+            });
+          }
+        });
+      }
+
+      msg += `━━━━━━━━━━━━━━━━━━━\n*Control Topográfico de Obra Civil*`;
+      document.getElementById('whatsAppTextPreview').value = msg;
+    }
+
+    function copyWhatsAppToClipboard() {
+      const txt = document.getElementById('whatsAppTextPreview');
+      txt.select();
+      document.execCommand('copy');
+      showToast('Mensaje copiado al portapapeles', 'success');
+    }
+
+    function sendToWhatsAppDirect() {
+      const txt = document.getElementById('whatsAppTextPreview').value;
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`;
+      window.open(url, '_blank');
+    }
+
+    // --- TEMA CLARO / OSCURO ---
+    function toggleCurrentTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('topografia_theme', isDark ? 'dark' : 'light');
+    }
+
+    if (localStorage.getItem('topografia_theme') === 'dark' || (!('topografia_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // --- ACTUALIZACIÓN DE CONTADORES / BADGES (SENSIBLE A LA FECHA ACTIVA) ---
+    function updateBadges() {
+      AREAS_OFICIALES.forEach(a => {
+        const badge = document.getElementById(`badge-count-${a.id}`);
+        if (badge) {
+          const count = tasks.filter(t => t.zona === a.name && (t.fechaCreacion || TODAY_STR) <= activeDateString).length;
+          badge.textContent = count;
+        }
+      });
+
+      const pBadge = document.getElementById('badge-count-pending');
+      if (pBadge) {
+        let totalP = 0;
+        const currentTasks = tasks.filter(t => (t.fechaCreacion || TODAY_STR) <= activeDateString);
+        currentTasks.forEach(t => {
+          if (!isStepDoneAtDate(t.steps[0], activeDateString)) totalP++;
+          if (!isStepDoneAtDate(t.steps[1], activeDateString)) totalP++;
+          if (!isStepDoneAtDate(t.steps[2], activeDateString)) totalP++;
+        });
+        pBadge.textContent = totalP;
+      }
+
+      const bpBadge = document.getElementById('badge-count-blueprints');
+      if (bpBadge) bpBadge.textContent = blueprints.length;
+    }
+
+    // --- UTILIDAD: TOAST ---
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+
+      if (!toast || !msgEl) return;
+
+      msgEl.textContent = msg;
+
+      if (type === 'success') {
+        icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
+      } else if (type === 'warning') {
+        icon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-sm";
+      } else if (type === 'error') {
+        icon.className = "fa-solid fa-circle-xmark text-red-400 text-sm";
+      } else {
+        icon.className = "fa-solid fa-circle-info text-blue-400 text-sm";
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
