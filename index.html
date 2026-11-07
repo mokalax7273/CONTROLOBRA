@@ -1,1359 +1,1578 @@
 <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Control Topográfico Diario • Obra Civil</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- FontAwesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- SheetJS para exportación Excel limpia -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<style>
-body {
-touch-action: manipulation;
--webkit-tap-highlight-color: transparent;
-}
-.no-scrollbar::-webkit-scrollbar {
-display: none;
-}
-.no-scrollbar {
--ms-overflow-style: none;
-scrollbar-width: none;
-}
-@keyframes checkPop {
-0% { transform: scale(0.92); }
-50% { transform: scale(1.05); }
-100% { transform: scale(1); }
-}
-.animate-pop {
-animation: checkPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control Topográfico Diario • Obra Civil</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SheetJS para exportación Excel limpia -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes checkPop {
+      0% { transform: scale(0.92); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: checkPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
 </head>
+
 <body class="bg-slate-900 text-slate-100 min-h-full flex flex-col font-sans antialiased overflow-x-hidden selection:bg-blue-500 selection:text-white">
-<!-- CABECERA PRINCIPAL FIJA -->
-<header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
-<div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
-<!-- Fila Superior: Título, Sesión y Acciones Principales -->
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2.5 min-w-0">
-<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-teal-500 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-<i class="fa-solid fa-compass-drafting text-white text-base sm:text-lg"></i>
-</div>
-<div class="truncate">
-<div class="flex items-center gap-2">
-<h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">CONTROL TOPOGRÁFICO</h1>
-<span id="roleBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-Admin
-</span>
-</div>
-<p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5">
-<span>Proyecto Obra Civil</span>
-<span class="w-1 h-1 rounded-full bg-slate-600"></span>
-<span class="text-slate-300 font-medium">Ronald Zapana / Jhonatan Umaya</span>
-</p>
-</div>
-</div>
-<!-- Acciones Cabecera: Login/Rol, WhatsApp, Nuevo Frente -->
-<div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-<button id="btnRoleToggle" type="button" onclick="openLoginModal(true)" title="Cambiar sesión o identificarse"
-class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
-<i class="fa-solid fa-user-shield text-blue-400"></i>
-<span id="btnRoleText" class="hidden sm:inline">Admin</span>
-</button>
-<button id="btnOpenWhatsApp" type="button" onclick="openWhatsAppModal()"
-class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 flex items-center gap-1.5 transition">
-<i class="fa-brands fa-whatsapp text-sm"></i>
-<span class="hidden md:inline">Reporte WhatsApp</span>
-</button>
-<button id="btnOpenAddFront" type="button" onclick="openAddModal()"
-class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md shadow-blue-900/30 flex items-center gap-1.5 transition">
-<i class="fa-solid fa-plus text-xs"></i>
-<span>+ Frente</span>
-</button>
-</div>
-</div>
-<!-- Barra de Fecha y Navegación Diaria -->
-<div class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-<div class="flex items-center gap-1.5 bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">
-<button type="button" onclick="changeDayRelative(-1)" title="Día anterior" class="w-7 h-7 rounded hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
-<i class="fa-solid fa-chevron-left text-[11px]"></i>
-</button>
-<input type="date" id="dateSelectorInput" onchange="onDateSelectorChange(this.value)"
-class="bg-transparent text-white font-semibold text-xs border-none focus:outline-none cursor-pointer">
-<button type="button" onclick="changeDayRelative(1)" title="Día siguiente" class="w-7 h-7 rounded hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
-<i class="fa-solid fa-chevron-right text-[11px]"></i>
-</button>
-<button type="button" onclick="goToToday()" class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition">
-Hoy
-</button>
-</div>
-<!-- Botón Calendario Mensual -->
-<button type="button" onclick="openCalendarModal()"
-class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
-<i class="fa-regular fa-calendar-days text-indigo-400"></i>
-<span>Calendario Mensual</span>
-<span id="activeDateBadgeLabel" class="ml-1 text-[10px] text-blue-400 font-bold"></span>
-</button>
-</div>
-<!-- NAVEGACIÓN PRINCIPAL ENTRE ÁREAS Y MÓDULOS -->
-<nav class="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
-<!-- Pestaña Área 4680 -->
-<button id="tab-4680" type="button" onclick="switchTab('4680')"
-class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-blue-600 text-white shadow-md shadow-blue-900/30 border border-blue-500/40">
-<span class="w-2 h-2 rounded-full bg-cyan-300"></span>
-<span>4680: Ácidos</span>
-<span id="badge-4680" class="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-950 text-blue-200 font-mono">0</span>
-</button>
-<!-- Pestaña Área 4652 -->
-<button id="tab-4652" type="button" onclick="switchTab('4652')"
-class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700/80 border border-slate-700">
-<span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-<span>4652: LESDE</span>
-<span id="badge-4652" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">0</span>
-</button>
-<!-- Pestaña Área 4653 -->
-<button id="tab-4653" type="button" onclick="switchTab('4653')"
-class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700/80 border border-slate-700">
-<span class="w-2 h-2 rounded-full bg-teal-400"></span>
-<span>4653: Almacén Gral.</span>
-<span id="badge-4653" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">0</span>
-</button>
-<!-- Separador -->
-<div class="h-5 w-px bg-slate-700 mx-1 shrink-0"></div>
-<!-- Pestaña ¿Qué me falta? -->
-<button id="tab-pending" type="button" onclick="switchTab('pending')"
-class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-amber-300 hover:bg-slate-700/80 border border-amber-500/30">
-<i class="fa-solid fa-clipboard-list text-amber-400"></i>
-<span>¿Qué me falta?</span>
-<span id="badge-pending" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-950/80 text-amber-200 font-mono">0</span>
-</button>
-<!-- Pestaña Planos -->
-<button id="tab-blueprints" type="button" onclick="switchTab('blueprints')"
-class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
-<i class="fa-regular fa-map text-slate-400"></i>
-<span>Planos</span>
-<span id="badge-blueprints" class="text-[10px] text-slate-400 font-mono">0</span>
-</button>
-<!-- Pestaña Topógrafos -->
-<button id="tab-staff" type="button" onclick="switchTab('staff')"
-class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
-<i class="fa-solid fa-users-gear text-slate-400"></i>
-<span>Topógrafos</span>
-</button>
-<!-- Pestaña Descargar Excel -->
-<button id="btnExcelExport" type="button" onclick="exportTasksToExcel()"
-class="px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-emerald-800/70 text-emerald-100 hover:bg-emerald-700 border border-emerald-600/50 ml-auto">
-<i class="fa-solid fa-file-excel text-emerald-300"></i>
-<span>Descargar Excel</span>
-</button>
-</nav>
-</div>
-</header>
-<!-- CONTENEDOR PRINCIPAL DINÁMICO -->
-<main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex-1 w-full space-y-4">
-<!-- BARRA DE KPIS DEL DÍA -->
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-<div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
-<div>
-<p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Frentes del Día</p>
-<p id="kpiTotalDay" class="text-lg sm:text-xl font-black text-white">0</p>
-</div>
-<div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
-<i class="fa-solid fa-layer-group text-sm"></i>
-</div>
-</div>
-<div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
-<div>
-<p class="text-[10px] uppercase font-bold tracking-wider text-emerald-400">Liberados (Hoy)</p>
-<p id="kpiReleasedDay" class="text-lg sm:text-xl font-black text-emerald-400">0</p>
-</div>
-<div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-<i class="fa-solid fa-check-double text-sm"></i>
-</div>
-</div>
-<div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
-<div>
-<p class="text-[10px] uppercase font-bold tracking-wider text-amber-400">Pendientes</p>
-<p id="kpiPendingDay" class="text-lg sm:text-xl font-black text-amber-400">0</p>
-</div>
-<div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
-<i class="fa-solid fa-hourglass-half text-sm"></i>
-</div>
-</div>
-<div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
-<div class="w-full">
-<div class="flex items-center justify-between text-[10px] font-bold uppercase text-slate-400 mb-1">
-<span>Cumplimiento</span>
-<span id="kpiPercentText" class="text-blue-400 font-mono">0%</span>
-</div>
-<div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-<div id="kpiProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- SECCIÓN 1: VISTA DE TABLA POR ÁREA ACTIVA (4680, 4652, 4653) -->
-<section id="section-area-table" class="space-y-3">
-<!-- Filtros y Búsqueda -->
-<div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5">
-<div class="flex items-center gap-2">
-<span id="areaHeaderTag" class="px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-600/30 text-blue-300 border border-blue-500/40">
-Área 4680
-</span>
-<span id="areaHeaderSub" class="text-xs text-slate-300 font-medium hidden sm:inline">
-Almacén y Descarga de Ácidos
-</span>
-</div>
-<div class="flex items-center gap-2 w-full sm:w-auto">
-<div class="relative flex-1 sm:w-64">
-<i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-<input type="text" id="areaSearchInput" oninput="onSearchFilterChange(this.value)" placeholder="Buscar elemento, eje, topógrafo..."
-class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-</div>
-<select id="areaStateFilter" onchange="onStateFilterChange(this.value)"
-class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
-<option value="all">Todos</option>
-<option value="pending">Pendientes</option>
-<option value="done">Concluidos (100%)</option>
-</select>
-</div>
-</div>
-<!-- TABLA PRINCIPAL DE CONTROL TOPOGRÁFICO -->
-<div class="bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs text-slate-200 border-collapse">
-<thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-700">
-<tr>
-<th class="py-2.5 px-3">Elemento / Ejes</th>
-<th class="py-2.5 px-2">Topógrafo</th>
-<th class="py-2.5 px-2 text-center">1. Fundación</th>
-<th class="py-2.5 px-2 text-center">2. Pre-vaciado</th>
-<th class="py-2.5 px-2 text-center">3. Post-vaciado</th>
-<th class="py-2.5 px-2 text-center">Avance</th>
-<th class="py-2.5 px-3 text-right">Acciones</th>
-</tr>
-</thead>
-<tbody id="areaTableBody" class="divide-y divide-slate-700/60 font-normal">
-<!-- Render dinámico -->
-</tbody>
-</table>
-</div>
-<!-- Estado vacío -->
-<div id="areaTableEmpty" class="hidden p-8 text-center space-y-2">
-<i class="fa-regular fa-folder-open text-3xl text-slate-600"></i>
-<p class="text-xs text-slate-400 font-medium">No se encontraron frentes registrados para esta área en la fecha seleccionada.</p>
-<button type="button" onclick="openAddModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition">
-Registrar Frente en esta Fecha
-</button>
-</div>
-</div>
-</section>
-<!-- SECCIÓN 2: MÓDULO "¿QUÉ ME FALTA?" (ESTRICTAMENTE AISLADO) -->
-<section id="section-pending" class="hidden space-y-4">
-<div class="bg-gradient-to-r from-amber-950/40 via-slate-800 to-slate-800 border border-amber-500/30 rounded-xl p-4 shadow">
-<div class="flex items-center justify-between gap-2 flex-wrap">
-<div>
-<h2 class="text-base font-black text-amber-300 flex items-center gap-2">
-<i class="fa-solid fa-clipboard-check text-amber-400"></i>
-<span>Diagnóstico de Frentes y Liberaciones Pendientes</span>
-</h2>
-<p class="text-xs text-slate-400 mt-0.5">Identificación de puntos críticos de obra civil pendientes en la fecha activa.</p>
-</div>
-<span id="pendingTotalBadge" class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
-0 Pendientes
-</span>
-</div>
-</div>
-<!-- Tarjetas de Diagnóstico de Alto Contraste -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-<!-- 1. Falta Fundación -->
-<div class="bg-slate-800/90 border-2 border-blue-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-<div class="flex items-center justify-between text-xs font-black text-blue-300 border-b border-slate-700/80 pb-2">
-<span class="flex items-center gap-1.5">
-<i class="fa-solid fa-trowel-bricks text-blue-400"></i>
-<span>1. Falta Fundación</span>
-</span>
-<span id="count-pending-fundacion" class="px-2 py-0.5 rounded-full bg-blue-950 text-blue-200 font-mono text-[11px]">0</span>
-</div>
-<div id="list-pending-fundacion" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
-</div>
-<!-- 2. Falta Pre-vaciado -->
-<div class="bg-slate-800/90 border-2 border-amber-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-<div class="flex items-center justify-between text-xs font-black text-amber-300 border-b border-slate-700/80 pb-2">
-<span class="flex items-center gap-1.5">
-<i class="fa-solid fa-clipboard-question text-amber-400"></i>
-<span>2. Falta Pre-vaciado</span>
-</span>
-<span id="count-pending-prevaciado" class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 font-mono text-[11px]">0</span>
-</div>
-<div id="list-pending-prevaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
-</div>
-<!-- 3. Falta Post-vaciado -->
-<div class="bg-slate-800/90 border-2 border-purple-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
-<div class="flex items-center justify-between text-xs font-black text-purple-300 border-b border-slate-700/80 pb-2">
-<span class="flex items-center gap-1.5">
-<i class="fa-solid fa-check-to-slot text-purple-400"></i>
-<span>3. Falta Post-vaciado</span>
-</span>
-<span id="count-pending-postvaciado" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-200 font-mono text-[11px]">0</span>
-</div>
-<div id="list-pending-postvaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
-</div>
-</div>
-</section>
-</main>
-<!-- ==================== MODALES DEL SISTEMA ==================== -->
-<!-- 1. MODAL FORMAL DE LOGIN (USUARIO Y CONTRASEÑA) -->
-<div id="modalLogin" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl p-5 space-y-4">
-<div class="text-center space-y-1">
-<div class="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg shadow-blue-500/30">
-<i class="fa-solid fa-lock"></i>
-</div>
-<h3 class="text-base font-black text-white">Acceso al Sistema</h3>
-<p class="text-xs text-slate-400">Ingresa tus credenciales técnicas de obra civil</p>
-</div>
-<form id="formLogin" onsubmit="event.preventDefault(); submitLoginForm();" class="space-y-3">
-<!-- Campo Usuario -->
-<div>
-<label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Usuario</label>
-<div class="relative">
-<i class="fa-solid fa-user absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-<input type="text" id="loginUsername" required placeholder="admin" autocomplete="username"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-</div>
-</div>
-<!-- Campo Contraseña -->
-<div>
-<label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Contraseña</label>
-<div class="relative">
-<i class="fa-solid fa-key absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-<input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-<button type="button" onclick="togglePasswordVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200">
-<i id="loginEyeIcon" class="fa-regular fa-eye text-xs"></i>
-</button>
-</div>
-</div>
-<div id="loginErrorMsg" class="hidden text-[11px] text-rose-400 font-semibold text-center bg-rose-950/40 border border-rose-800/60 rounded-lg p-2">
-Usuario o contraseña incorrectos. (Demo: admin / admin)
-</div>
-<!-- Botones de Acción -->
-<div class="space-y-2 pt-1">
-<button type="submit"
-class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-lg shadow-lg shadow-blue-900/40 transition">
-Iniciar Sesión como Admin
-</button>
-<button type="button" onclick="enterAsGuest()"
-class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg border border-slate-700 transition">
-Continuar en Modo Consulta (Solo Lectura)
-</button>
-</div>
-</form>
-</div>
-</div>
-<!-- 2. MODAL CALENDARIO / HISTORIAL MENSUAL -->
-<div id="modalCalendar" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between border-b border-slate-800 pb-3">
-<div class="flex items-center gap-2">
-<i class="fa-regular fa-calendar-days text-indigo-400 text-lg"></i>
-<div>
-<h3 class="text-sm font-black text-white">Historial y Calendario de Obra</h3>
-<p class="text-[11px] text-slate-400">Auditoría día a día de liberaciones y frentes</p>
-</div>
-</div>
-<button type="button" onclick="closeCalendarModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-<i class="fa-solid fa-xmark text-xs"></i>
-</button>
-</div>
-<!-- Controles de Mes -->
-<div class="flex items-center justify-between bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
-<button type="button" onclick="changeMonthRelative(-1)" class="px-2 py-1 bg-slate-700 rounded hover:bg-slate-600 text-white font-bold">
-<i class="fa-solid fa-chevron-left"></i> Mes Ant.
-</button>
-<span id="calendarMonthTitle" class="font-black text-white text-sm">Mes Año</span>
-<button type="button" onclick="changeMonthRelative(1)" class="px-2 py-1 bg-slate-700 rounded hover:bg-slate-600 text-white font-bold">
-Mes Sig. <i class="fa-solid fa-chevron-right"></i>
-</button>
-</div>
-<!-- Grid de Días del Mes -->
-<div class="space-y-1">
-<div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black uppercase text-slate-400 py-1">
-<span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
-</div>
-<div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
-</div>
-<div class="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800">
-<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-500"></span> F = Frentes en el día</span>
-<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> L = Liberaciones aprobadas</span>
-</div>
-</div>
-</div>
-<!-- 3. MODAL NUEVO FRENTE -->
-<div id="modalAddFront" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-<h3 id="modalFrontTitle" class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-solid fa-plus-circle text-blue-400"></i>
-<span>Registrar Nuevo Frente de Obra</span>
-</h3>
-<button type="button" onclick="closeAddModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-<i class="fa-solid fa-xmark text-xs"></i>
-</button>
-</div>
-<form id="formNewFront" onsubmit="event.preventDefault(); saveNewFrontSubmit();" class="space-y-2.5 text-xs">
-<!-- Selector de Área Oficial -->
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Área Oficial del Proyecto</label>
-<select id="frontAreaSelect" required
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-blue-500">
-<option value="4680 - Almacén y descarga de ácidos">4680 - Almacén y descarga de ácidos</option>
-<option value="4652 - Taller de mantenimiento de equipo LESDE">4652 - Taller de mantenimiento de equipo LESDE</option>
-<option value="4653 - Almacén general">4653 - Almacén general</option>
-</select>
-</div>
-<!-- Código y Nombre -->
-<div class="grid grid-cols-2 gap-2">
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Código / ID</label>
-<input type="text" id="frontCodeInput" required placeholder="Ej: Z-04, MC-02"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-</div>
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Elemento</label>
-<input type="text" id="frontNameInput" required placeholder="Ej: Zapata Aislada, Muro"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-</div>
-</div>
-<!-- Ejes / Ubicación -->
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Ubicación / Ejes</label>
-<input type="text" id="frontAxesInput" required placeholder="Ej: Entre Ejes A-B / 3-4"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-</div>
-<!-- Topógrafo y Fecha -->
-<div class="grid grid-cols-2 gap-2">
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Topógrafo a Cargo</label>
-<select id="frontSurveyorSelect" required
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-<option value="Ronald Zapana">Ronald Zapana</option>
-<option value="Jhonatan Umaya">Jhonatan Umaya</option>
-</select>
-</div>
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha de Registro</label>
-<input type="date" id="frontDateInput" required
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-</div>
-</div>
-<!-- Plano Vinculado -->
-<div>
-<label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Plano de Referencia</label>
-<input type="text" id="frontBlueprintInput" placeholder="Ej: PL-STR-4680-01 Rev.B"
-class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
-</div>
-<div class="pt-2 flex items-center justify-end gap-2">
-<button type="button" onclick="closeAddModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold">
-Cancelar
-</button>
-<button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-md shadow-blue-900/30">
-Guardar Frente
-</button>
-</div>
-</form>
-</div>
-</div>
-<!-- 4. MODAL PLANOS DE OBRA -->
-<div id="modalBlueprints" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-<h3 class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-regular fa-map text-teal-400"></i>
-<span>Catálogo de Planos Técnicos Vigentes</span>
-</h3>
-<button type="button" onclick="closeBlueprintModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-<i class="fa-solid fa-xmark text-xs"></i>
-</button>
-</div>
-<form id="formAddBlueprint" onsubmit="event.preventDefault(); saveNewBlueprint();" class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 text-xs">
-<input type="text" id="bpCode" required placeholder="Código (PL-4680-01)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-<input type="text" id="bpTitle" required placeholder="Descripción del Plano" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-<button type="submit" class="bg-teal-600 hover:bg-teal-500 text-white font-bold rounded px-2 py-1">
-+ Agregar
-</button>
-</form>
-<div id="blueprintsListContainer" class="space-y-1.5 text-xs max-h-60 overflow-y-auto"></div>
-</div>
-</div>
-<!-- 5. MODAL TOPÓGRAFOS / PERSONAL -->
-<div id="modalStaff" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-<h3 class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-solid fa-users-gear text-blue-400"></i>
-<span>Personal de Topografía</span>
-</h3>
-<button type="button" onclick="closeStaffModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-<i class="fa-solid fa-xmark text-xs"></i>
-</button>
-</div>
-<div class="space-y-2 text-xs">
-<div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
-<div class="flex items-center gap-2.5">
-<div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">RZ</div>
-<div>
-<p class="font-bold text-white">Ronald Zapana</p>
-<p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4680 / 4653</p>
-</div>
-</div>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
-</div>
-<div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
-<div class="flex items-center gap-2.5">
-<div class="w-8 h-8 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">JU</div>
-<div>
-<p class="font-bold text-white">Jhonatan Umaya</p>
-<p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4652</p>
-</div>
-</div>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
-</div>
-</div>
-</div>
-</div>
-<!-- 6. MODAL WHATSAPP TÉCNICO -->
-<div id="modalWhatsApp" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
-<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
-<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-<h3 class="text-sm font-black text-white flex items-center gap-2">
-<i class="fa-brands fa-whatsapp text-emerald-400 text-base"></i>
-<span>Reporte Técnico para WhatsApp</span>
-</h3>
-<button type="button" onclick="closeWhatsAppModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-<i class="fa-solid fa-xmark text-xs"></i>
-</button>
-</div>
-<div class="space-y-2 text-xs">
-<p class="text-[11px] text-slate-400">Previsualización del parte oficial de liberaciones para el grupo de obra:</p>
-<textarea id="whatsAppTextPreview" rows="10" readonly
-class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-[11px] focus:outline-none select-all"></textarea>
-</div>
-<div class="flex items-center justify-end gap-2 pt-1">
-<button type="button" onclick="copyWhatsAppToClipboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold text-xs">
-<i class="fa-regular fa-copy mr-1"></i> Copiar Texto
-</button>
-<button type="button" onclick="sendWhatsAppDirect()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1.5">
-<i class="fa-brands fa-whatsapp"></i> Abrir WhatsApp
-</button>
-</div>
-</div>
-</div>
-<!-- TOAST NOTIFICACIÓN -->
-<div id="toastNotification" class="fixed bottom-4 right-4 z-50 bg-slate-800 border border-slate-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
-<i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
-<span id="toastMsg">Acción completada</span>
-</div>
-<!-- ==================== LÓGICA JAVASCRIPT ==================== -->
-<script>
-const STORAGE_KEY_TASKS = 'topografia_tasks_v5_clean';
-const STORAGE_KEY_ROLE = 'topografia_user_role';
-const STORAGE_KEY_BLUEPRINTS = 'topografia_blueprints_v5';
-let userRole = 'admin';
-let currentTab = '4680';
-let activeDateString = new Date().toISOString().split('T')[0];
-let calendarViewYear = new Date().getFullYear();
-let calendarViewMonth = new Date().getMonth();
-let filterSearchQuery = '';
-let filterStatus = 'all';
-const INITIAL_TASKS = [
-{
-id: '4680-Z1',
-area: '4680 - Almacén y descarga de ácidos',
-code: 'Z-01',
-name: 'Zapata Aislada Z-1',
-ejes: 'Ejes A-B / 1-2',
-topografo: 'Ronald Zapana',
-plano: 'PL-STR-4680-01',
-fechaCreacion: new Date().toISOString().split('T')[0],
-steps: [
-{ name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '08:30 AM' },
-{ name: 'prevaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '11:15 AM' },
-{ name: 'postvaciado', done: false, fecha: null, hora: null }
-]
-},
-{
-id: '4680-Z4',
-area: '4680 - Almacén y descarga de ácidos',
-code: 'Z-04',
-name: 'Zapata Z-4 de Contención',
-ejes: 'Ejes C-D / 4-5',
-topografo: 'Ronald Zapana',
-plano: 'PL-STR-4680-02',
-fechaCreacion: new Date().toISOString().split('T')[0],
-steps: [
-{ name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '09:00 AM' },
-{ name: 'prevaciado', done: false, fecha: null, hora: null },
-{ name: 'postvaciado', done: false, fecha: null, hora: null }
-]
-},
-{
-id: '4652-ZL1',
-area: '4652 - Taller de mantenimiento de equipo LESDE',
-code: 'Z-LESDE-01',
-name: 'Zapata Corrida Principal',
-ejes: 'Ejes 1-3 / Taller',
-topografo: 'Jhonatan Umaya',
-plano: 'PL-LESDE-04',
-fechaCreacion: new Date().toISOString().split('T')[0],
-steps: [
-{ name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '07:45 AM' },
-{ name: 'prevaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '10:20 AM' },
-{ name: 'postvaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '03:15 PM' }
-]
-},
-{
-id: '4652-FOS1',
-area: '4652 - Taller de mantenimiento de equipo LESDE',
-code: 'FOSO-01',
-name: 'Foso de Inspección Mecánica',
-ejes: 'Eje F / Bahía 2',
-topografo: 'Jhonatan Umaya',
-plano: 'PL-LESDE-06',
-fechaCreacion: new Date().toISOString().split('T')[0],
-steps: [
-{ name: 'fundacion', done: false, fecha: null, hora: null },
-{ name: 'prevaciado', done: false, fecha: null, hora: null },
-{ name: 'postvaciado', done: false, fecha: null, hora: null }
-]
-},
-{
-id: '4653-Z101',
-area: '4653 - Almacén general',
-code: 'Z-101',
-name: 'Zapata Cimentación Nave',
-ejes: 'Ejes G-H / 8-9',
-topografo: 'Ronald Zapana',
-plano: 'PL-ALM-101',
-fechaCreacion: new Date().toISOString().split('T')[0],
-steps: [
-{ name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '10:00 AM' },
-{ name: 'prevaciado', done: false, fecha: null, hora: null },
-{ name: 'postvaciado', done: false, fecha: null, hora: null }
-]
-}
-];
-let tasks = [];
-let blueprints = [
-{ code: 'PL-STR-4680-01', title: 'Cimentaciones Nave de Ácidos Rev.B' },
-{ code: 'PL-LESDE-04', title: 'Fundaciones Taller y Fosos LESDE' },
-{ code: 'PL-ALM-101', title: 'Estructuras Generales Almacén Central' }
-];
-document.addEventListener('DOMContentLoaded', () => {
-loadStorageData();
-initDateInputs();
-applyUserRoleUI();
-openLoginModal(false);
-switchTab('4680');
-updateAllCounters();
-});
-function loadStorageData() {
-try {
-const saved = localStorage.getItem(STORAGE_KEY_TASKS);
-tasks = saved ? JSON.parse(saved) : INITIAL_TASKS;
-} catch (e) {
-tasks = INITIAL_TASKS;
-}
-try {
-const savedBp = localStorage.getItem(STORAGE_KEY_BLUEPRINTS);
-if (savedBp) blueprints = JSON.parse(savedBp);
-} catch (e) {}
-const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
-if (savedRole === 'guest' || savedRole === 'admin') {
-userRole = savedRole;
-}
-}
-function saveTasksToStorage() {
-try {
-localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
-} catch (e) {}
-updateAllCounters();
-}
-function initDateInputs() {
-const dateInput = document.getElementById('dateSelectorInput');
-if (dateInput) {
-dateInput.value = activeDateString;
-}
-updateActiveDateLabel();
-}
-function updateActiveDateLabel() {
-const lbl = document.getElementById('activeDateBadgeLabel');
-if (lbl) {
-const [y, m, d] = activeDateString.split('-');
-lbl.textContent = ⁠(${d}/${m}/${y})⁠;
-}
-}
-// GESTIÓN DE LOGIN FORMAL
-function openLoginModal(canClose = true) {
-const modal = document.getElementById('modalLogin');
-modal.classList.remove('hidden');
-document.getElementById('loginErrorMsg').classList.add('hidden');
-document.getElementById('loginUsername').value = userRole === 'admin' ? 'admin' : '';
-document.getElementById('loginPassword').value = '';
-}
-function closeLoginModal() {
-document.getElementById('modalLogin').classList.add('hidden');
-}
-function togglePasswordVisibility() {
-const pass = document.getElementById('loginPassword');
-const icon = document.getElementById('loginEyeIcon');
-if (pass.type === 'password') {
-pass.type = 'text';
-icon.classList.remove('fa-eye');
-icon.classList.add('fa-eye-slash');
-} else {
-pass.type = 'password';
-icon.classList.remove('fa-eye-slash');
-icon.classList.add('fa-eye');
-}
-}
-function submitLoginForm() {
-const user = document.getElementById('loginUsername').value.trim();
-const pass = document.getElementById('loginPassword').value.trim();
-if (user === 'admin' && pass === 'admin') {
-userRole = 'admin';
-localStorage.setItem(STORAGE_KEY_ROLE, 'admin');
-applyUserRoleUI();
-closeLoginModal();
-showToast('Sesión iniciada como Administrador', 'success');
-renderActiveView();
-} else {
-document.getElementById('loginErrorMsg').classList.remove('hidden');
-}
-}
-function enterAsGuest() {
-userRole = 'guest';
-localStorage.setItem(STORAGE_KEY_ROLE, 'guest');
-applyUserRoleUI();
-closeLoginModal();
-showToast('Acceso en Modo Consulta (Solo Lectura)');
-renderActiveView();
-}
-function applyUserRoleUI() {
-const roleBadge = document.getElementById('roleBadge');
-const btnRoleText = document.getElementById('btnRoleText');
-const btnAddFront = document.getElementById('btnOpenAddFront');
-if (userRole === 'admin') {
-roleBadge.textContent = 'Admin';
-roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
-btnRoleText.textContent = 'Admin';
-btnAddFront.classList.remove('hidden');
-} else {
-roleBadge.textContent = 'Invitado';
-roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
-btnRoleText.textContent = 'Invitado';
-btnAddFront.classList.add('hidden');
-}
-}
-// NAVEGACIÓN Y CONTROL ESTRICTO DE VISIBILIDAD DE MÓDULOS
-function switchTab(tabId) {
-currentTab = tabId;
-const sectionPending = document.getElementById('section-pending');
-const sectionAreaTable = document.getElementById('section-area-table');
-// Actualizar estilos de los botones de navegación
-['4680', '4652', '4653', 'pending', 'blueprints', 'staff'].forEach(id => {
-const btn = document.getElementById(⁠tab-${id}⁠);
-if (!btn) return;
-if (id === tabId) {
-btn.classList.add('bg-blue-600', 'text-white', 'border-blue-500/40');
-btn.classList.remove('bg-slate-800', 'text-slate-300');
-} else {
-btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500/40');
-btn.classList.add('bg-slate-800', 'text-slate-300');
-}
-});
-// AISLAMIENTO TOTAL: "¿Qué me falta?" solo se muestra en tabId === 'pending'
-if (tabId === '4680' || tabId === '4652' || tabId === '4653') {
-sectionAreaTable.classList.remove('hidden');
-sectionPending.classList.add('hidden');
-updateAreaHeaderTitles(tabId);
-renderTableRows();
-} else if (tabId === 'pending') {
-sectionAreaTable.classList.add('hidden');
-sectionPending.classList.remove('hidden');
-renderPendingModule();
-} else if (tabId === 'blueprints') {
-sectionAreaTable.classList.remove('hidden');
-sectionPending.classList.add('hidden');
-openBlueprintModal();
-} else if (tabId === 'staff') {
-sectionAreaTable.classList.remove('hidden');
-sectionPending.classList.add('hidden');
-openStaffModal();
-}
-updateAllCounters();
-}
-function updateAreaHeaderTitles(areaCode) {
-const tag = document.getElementById('areaHeaderTag');
-const sub = document.getElementById('areaHeaderSub');
-if (areaCode === '4680') {
-tag.textContent = 'Área 4680';
-sub.textContent = 'Almacén y Descarga de Ácidos';
-} else if (areaCode === '4652') {
-tag.textContent = 'Área 4652';
-sub.textContent = 'Taller de Mantenimiento LESDE';
-} else if (areaCode === '4653') {
-tag.textContent = 'Área 4653';
-sub.textContent = 'Almacén General';
-}
-}
-function renderActiveView() {
-if (currentTab === 'pending') {
-renderPendingModule();
-} else {
-renderTableRows();
-}
-updateAllCounters();
-}
-function isTaskInActiveDate(task, dateStr) {
-if (task.fechaCreacion === dateStr) return true;
-if (task.steps && task.steps.some(s => s.fecha === dateStr)) return true;
-return false;
-}
-function isStepDoneInActiveDate(step, dateStr) {
-if (!step) return false;
-return step.done && (step.fecha === dateStr);
-}
-function calculateProgress(task, dateStr) {
-if (!task.steps || task.steps.length === 0) return 0;
-const doneCount = task.steps.filter(s => isStepDoneInActiveDate(s, dateStr)).length;
-return Math.round((doneCount / task.steps.length) * 100);
-}
-// RENDERIZADO DE TABLA DE FRENTES POR ÁREA
-function renderTableRows() {
-const tbody = document.getElementById('areaTableBody');
-const emptyDiv = document.getElementById('areaTableEmpty');
-tbody.innerHTML = '';
-let areaTasks = tasks.filter(t => t.area.includes(currentTab) && isTaskInActiveDate(t, activeDateString));
-if (filterSearchQuery) {
-const q = filterSearchQuery.toLowerCase();
-areaTasks = areaTasks.filter(t =>
-t.code.toLowerCase().includes(q) ||
-t.name.toLowerCase().includes(q) ||
-t.ejes.toLowerCase().includes(q) ||
-t.topografo.toLowerCase().includes(q)
-);
-}
-if (filterStatus === 'pending') {
-areaTasks = areaTasks.filter(t => calculateProgress(t, activeDateString) < 100);
-} else if (filterStatus === 'done') {
-areaTasks = areaTasks.filter(t => calculateProgress(t, activeDateString) === 100);
-}
-if (areaTasks.length === 0) {
-emptyDiv.classList.remove('hidden');
-return;
-}
-emptyDiv.classList.add('hidden');
-areaTasks.forEach(task => {
-const pFundacion = task.steps.find(s => s.name === 'fundacion');
-const pPrevaciado = task.steps.find(s => s.name === 'prevaciado');
-const pPostvaciado = task.steps.find(s => s.name === 'postvaciado');
-const isFundDone = isStepDoneInActiveDate(pFundacion, activeDateString);
-const isPreDone = isStepDoneInActiveDate(pPrevaciado, activeDateString);
-const isPostDone = isStepDoneInActiveDate(pPostvaciado, activeDateString);
-const progress = calculateProgress(task, activeDateString);
-const tr = document.createElement('tr');
-tr.className = 'hover:bg-slate-700/30 transition border-b border-slate-700/50';
-tr.innerHTML = `
-<td class="py-3 px-3">
-<div class="flex items-center gap-2">
-<span class="font-mono font-bold text-xs text-white bg-slate-900 px-2 py-0.5 rounded border border-slate-700">￼
-￼{escapeHtml(task.name)}</span>
-</div>
-<div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5">
-<i class="fa-solid fa-arrows-split-up-and-left text-[10px] text-slate-500"></i>
-<span>￼
-￼
-￼{escapeHtml(task.plano || 'S/P')}</span>
-</div>
-</td>
-<td class="py-3 px-2">
-<span class="text-xs text-slate-300 font-medium">${escapeHtml(task.topografo)}</span>
-</td>
-<td class="py-3 px-2 text-center">
-<button type="button" onclick="toggleTaskStep('${task.id}', 'fundacion')"
-${userRole !== 'admin' ? 'disabled' : ''}
-class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition {
-￼
-￼
-￼
-}">
-￼
-￼
-￼
-￼
-￼{isFundDone ? pFundacion.hora : 'Pendiente'}</span>
-</button>
-</td>
-<td class="py-3 px-2 text-center">
-<button type="button" onclick="toggleTaskStep('${task.id}', 'prevaciado')"
-${userRole !== 'admin' ? 'disabled' : ''}
-class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition {
-￼
-￼
-￼
-}">
-￼
-￼
-￼
-￼
-￼{isPreDone ? pPrevaciado.hora : 'Pendiente'}</span>
-</button>
-</td>
-<td class="py-3 px-2 text-center">
-<button type="button" onclick="toggleTaskStep('${task.id}', 'postvaciado')"
-${userRole !== 'admin' ? 'disabled' : ''}
-class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition {
-￼
-￼
-￼
-}">
-￼
-￼
-￼
-￼
-￼{isPostDone ? pPostvaciado.hora : 'Pendiente'}</span>
-</button>
-</td>
-<td class="py-3 px-2 text-center">
-<span class="px-2 py-0.5 rounded font-mono text-xs font-black ${progress === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-blue-400'}">
-${progress}%
-</span>
-</td>
-<td class="py-3 px-3 text-right">
-${userRole === 'admin' ? ⁠<button type="button" onclick="deleteFrontTask('${task.id}')" title="Eliminar frente" class="w-7 h-7 rounded bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 transition"> <i class="fa-regular fa-trash-can text-xs"></i> </button>⁠ : '<span class="text-[10px] text-slate-500">Solo Lectura</span>'}
-</td>
-`;
-tbody.appendChild(tr);
-});
-}
-function toggleTaskStep(taskId, stepName) {
-if (userRole !== 'admin') {
-showToast('Acción restringida para invitados');
-return;
-}
-const task = tasks.find(t => t.id === taskId);
-if (!task) return;
-const step = task.steps.find(s => s.name === stepName);
-if (!step) return;
-if (!step.done) {
-step.done = true;
-step.fecha = activeDateString;
-step.hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-showToast(⁠Liberado: ${stepName.toUpperCase()} en ${task.code}⁠, 'success');
-} else {
-step.done = false;
-step.fecha = null;
-step.hora = null;
-showToast(⁠Cancelado visto bueno en ${task.code}⁠);
-}
-saveTasksToStorage();
-renderActiveView();
-}
-// ACTUALIZACIÓN DE CONTADORES REACTIVOS POR ÁREA Y GENERALES
-function updateAllCounters() {
-// 1. Contadores reactivos en las pestañas de área (4680, 4652, 4653)
-['4680', '4652', '4653'].forEach(areaCode => {
-const badge = document.getElementById(⁠badge-${areaCode}⁠);
-if (badge) {
-const count = tasks.filter(t => t.area.includes(areaCode) && isTaskInActiveDate(t, activeDateString)).length;
-badge.textContent = count;
-}
-});
-// 2. Frentes del día para KPI
-const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
-const totalFrentes = dayTasks.length;
-let totalLiberacionesConcluidas = 0;
-let totalLiberacionesPendientes = 0;
-dayTasks.forEach(t => {
-t.steps.forEach(s => {
-if (isStepDoneInActiveDate(s, activeDateString)) {
-totalLiberacionesConcluidas++;
-} else {
-totalLiberacionesPendientes++;
-}
-});
-});
-const totalPossible = totalFrentes * 3;
-const percent = totalPossible > 0 ? Math.round((totalLiberacionesConcluidas / totalPossible) * 100) : 0;
-document.getElementById('kpiTotalDay').textContent = totalFrentes;
-document.getElementById('kpiReleasedDay').textContent = totalLiberacionesConcluidas;
-document.getElementById('kpiPendingDay').textContent = totalLiberacionesPendientes;
-document.getElementById('kpiPercentText').textContent = ⁠${percent}%⁠;
-document.getElementById('kpiProgressBar').style.width = ⁠${percent}%⁠;
-const badgePending = document.getElementById('badge-pending');
-if (badgePending) badgePending.textContent = totalLiberacionesPendientes;
-const pendingTotalBadge = document.getElementById('pendingTotalBadge');
-if (pendingTotalBadge) pendingTotalBadge.textContent = ⁠${totalLiberacionesPendientes} Pendientes⁠;
-const badgeBlueprints = document.getElementById('badge-blueprints');
-if (badgeBlueprints) badgeBlueprints.textContent = blueprints.length;
-}
-// MÓDULO ¿QUÉ ME FALTA?
-function renderPendingModule() {
-const listFundacion = document.getElementById('list-pending-fundacion');
-const listPrevaciado = document.getElementById('list-pending-prevaciado');
-const listPostvaciado = document.getElementById('list-pending-postvaciado');
-listFundacion.innerHTML = '';
-listPrevaciado.innerHTML = '';
-listPostvaciado.innerHTML = '';
-const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
-let cFund = 0, cPre = 0, cPost = 0;
-dayTasks.forEach(t => {
-const sFund = t.steps.find(s => s.name === 'fundacion');
-const sPre = t.steps.find(s => s.name === 'prevaciado');
-const sPost = t.steps.find(s => s.name === 'postvaciado');
-if (!isStepDoneInActiveDate(sFund, activeDateString)) {
-cFund++;
-listFundacion.appendChild(createPendingCard(t, 'fundacion'));
-}
-if (!isStepDoneInActiveDate(sPre, activeDateString)) {
-cPre++;
-listPrevaciado.appendChild(createPendingCard(t, 'prevaciado'));
-}
-if (!isStepDoneInActiveDate(sPost, activeDateString)) {
-cPost++;
-listPostvaciado.appendChild(createPendingCard(t, 'postvaciado'));
-}
-});
-document.getElementById('count-pending-fundacion').textContent = cFund;
-document.getElementById('count-pending-prevaciado').textContent = cPre;
-document.getElementById('count-pending-postvaciado').textContent = cPost;
-if (cFund === 0) listFundacion.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de fundación</p>';
-if (cPre === 0) listPrevaciado.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de pre-vaciado</p>';
-if (cPost === 0) listPostvaciado.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de post-vaciado</p>';
-}
-function createPendingCard(task, stepName) {
-const div = document.createElement('div');
-div.className = 'p-2 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-between gap-2';
-div.innerHTML = ⁠<div class="truncate"> <p class="font-bold text-white text-[11px] truncate">${escapeHtml(task.code)} • ${escapeHtml(task.name)}</p> <p class="text-[10px] text-slate-400 truncate">${escapeHtml(task.area.split('-')[0])} | ${escapeHtml(task.ejes)}</p> </div> ${userRole === 'admin' ?⁠
-<button type="button" onclick="toggleTaskStep('${task.id}', '${stepName}')"
-class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-bold shrink-0">
-Liberar
-</button>
-⁠: ''}⁠;
-return div;
-}
-// CALENDARIO E HISTORIAL
-function openCalendarModal() {
-document.getElementById('modalCalendar').classList.remove('hidden');
-renderCalendarDays();
-}
-function closeCalendarModal() {
-document.getElementById('modalCalendar').classList.add('hidden');
-}
-function changeMonthRelative(offset) {
-calendarViewMonth += offset;
-if (calendarViewMonth < 0) {
-calendarViewMonth = 11;
-calendarViewYear--;
-} else if (calendarViewMonth > 11) {
-calendarViewMonth = 0;
-calendarViewYear++;
-}
-renderCalendarDays();
-}
-function renderCalendarDays() {
-const grid = document.getElementById('calendarDaysGrid');
-grid.innerHTML = '';
-const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-document.getElementById('calendarMonthTitle').textContent = ⁠${monthNames[calendarViewMonth]} ${calendarViewYear}⁠;
-const firstDayIndex = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
-const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
-for (let i = 0; i < firstDayIndex; i++) {
-const emptyCell = document.createElement('div');
-emptyCell.className = 'h-14 rounded-lg bg-slate-900/40 border border-transparent';
-grid.appendChild(emptyCell);
-}
-for (let day = 1; day <= daysInMonth; day++) {
-const monthPad = String(calendarViewMonth + 1).padStart(2, '0');
-const dayPad = String(day).padStart(2, '0');
-const dateIso = ⁠${calendarViewYear}-${monthPad}-${dayPad}⁠;
-const frentesDia = tasks.filter(t => isTaskInActiveDate(t, dateIso)).length;
-let libDia = 0;
-tasks.forEach(t => {
-t.steps.forEach(s => {
-if (isStepDoneInActiveDate(s, dateIso)) libDia++;
-});
-});
-const isSelected = dateIso === activeDateString;
-const cell = document.createElement('div');
-cell.className = ⁠h-14 p-1 rounded-lg border transition cursor-pointer flex flex-col justify-between ${ isSelected  ? 'bg-blue-600/30 border-blue-400 text-white shadow-md'  : 'bg-slate-800/80 border-slate-700/80 hover:bg-slate-700 text-slate-300' }⁠;
-cell.onclick = () => {
-activeDateString = dateIso;
-document.getElementById('dateSelectorInput').value = activeDateString;
-updateActiveDateLabel();
-closeCalendarModal();
-renderActiveView();
-showToast(⁠Cambiado a: ${dayPad}/${monthPad}/${calendarViewYear}⁠);
-};
-cell.innerHTML = ⁠<div class="flex items-center justify-between"> <span class="font-bold text-[11px] ${isSelected ? 'text-blue-300' : 'text-slate-200'}">${day}</span> ${frentesDia > 0 ?⁠<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>⁠: ''} </div> <div class="text-[9px] font-mono space-y-0.5"> <div class="text-blue-300">F: ${frentesDia}</div> <div class="text-emerald-400">L: ${libDia}</div> </div>⁠;
-grid.appendChild(cell);
-}
-}
-function changeDayRelative(offsetDays) {
-const parts = activeDateString.split('-');
-const d = new Date(parts[0], parts[1] - 1, parts[2]);
-d.setDate(d.getDate() + offsetDays);
-const y = d.getFullYear();
-const m = String(d.getMonth() + 1).padStart(2, '0');
-const day = String(d.getDate()).padStart(2, '0');
-activeDateString = ⁠${y}-${m}-${day}⁠;
-document.getElementById('dateSelectorInput').value = activeDateString;
-updateActiveDateLabel();
-renderActiveView();
-}
-function onDateSelectorChange(newVal) {
-if (!newVal) return;
-activeDateString = newVal;
-updateActiveDateLabel();
-renderActiveView();
-}
-function goToToday() {
-activeDateString = new Date().toISOString().split('T')[0];
-document.getElementById('dateSelectorInput').value = activeDateString;
-updateActiveDateLabel();
-renderActiveView();
-showToast('Regresaste a la fecha de hoy');
-}
-// REGISTRO DE FRENTES
-function openAddModal() {
-if (userRole !== 'admin') {
-showToast('Acceso restringido para invitados');
-return;
-}
-document.getElementById('modalAddFront').classList.remove('hidden');
-document.getElementById('formNewFront').reset();
-document.getElementById('frontDateInput').value = activeDateString;
-const selArea = document.getElementById('frontAreaSelect');
-if (currentTab === '4652') selArea.value = '4652 - Taller de mantenimiento de equipo LESDE';
-else if (currentTab === '4653') selArea.value = '4653 - Almacén general';
-else selArea.value = '4680 - Almacén y descarga de ácidos';
-}
-function closeAddModal() {
-document.getElementById('modalAddFront').classList.add('hidden');
-}
-function saveNewFrontSubmit() {
-const area = document.getElementById('frontAreaSelect').value;
-const code = document.getElementById('frontCodeInput').value.trim();
-const name = document.getElementById('frontNameInput').value.trim();
-const ejes = document.getElementById('frontAxesInput').value.trim();
-const topografo = document.getElementById('frontSurveyorSelect').value;
-const fecha = document.getElementById('frontDateInput').value;
-const plano = document.getElementById('frontBlueprintInput').value.trim() || 'PL-GEN-01';
-if (!code || !name || !ejes) {
-showToast('Completa los campos obligatorios');
-return;
-}
-const newTask = {
-id: 'front-' + Date.now(),
-area: area,
-code: code,
-name: name,
-ejes: ejes,
-topografo: topografo,
-plano: plano,
-fechaCreacion: fecha,
-steps: [
-{ name: 'fundacion', done: false, fecha: null, hora: null },
-{ name: 'prevaciado', done: false, fecha: null, hora: null },
-{ name: 'postvaciado', done: false, fecha: null, hora: null }
-]
-};
-tasks.unshift(newTask);
-saveTasksToStorage();
-closeAddModal();
-showToast(⁠Frente ${code} creado correctamente⁠, 'success');
-if (fecha !== activeDateString) {
-activeDateString = fecha;
-document.getElementById('dateSelectorInput').value = fecha;
-updateActiveDateLabel();
-}
-renderActiveView();
-}
-function deleteFrontTask(id) {
-if (userRole !== 'admin') return;
-if (!confirm('¿Seguro que deseas eliminar este frente de trabajo?')) return;
-tasks = tasks.filter(t => t.id !== id);
-saveTasksToStorage();
-renderActiveView();
-showToast('Frente eliminado');
-}
-// PLANOS
-function openBlueprintModal() {
-document.getElementById('modalBlueprints').classList.remove('hidden');
-renderBlueprintsList();
-}
-function closeBlueprintModal() {
-document.getElementById('modalBlueprints').classList.add('hidden');
-}
-function renderBlueprintsList() {
-const cont = document.getElementById('blueprintsListContainer');
-cont.innerHTML = '';
-blueprints.forEach((bp, index) => {
-const item = document.createElement('div');
-item.className = 'p-2 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-between text-xs';
-item.innerHTML = ⁠<div> <span class="font-bold text-white font-mono">${escapeHtml(bp.code)}</span> <p class="text-[11px] text-slate-400">${escapeHtml(bp.title)}</p> </div> ${userRole === 'admin' ?⁠
-<button type="button" onclick="deleteBlueprint(${index})" class="text-rose-400 hover:text-rose-300">
-<i class="fa-solid fa-trash-can"></i>
-</button>
-⁠: ''}⁠;
-cont.appendChild(item);
-});
-}
-function saveNewBlueprint() {
-const code = document.getElementById('bpCode').value.trim();
-const title = document.getElementById('bpTitle').value.trim();
-if (!code || !title) return;
-blueprints.push({ code, title });
-localStorage.setItem(STORAGE_KEY_BLUEPRINTS, JSON.stringify(blueprints));
-document.getElementById('formAddBlueprint').reset();
-renderBlueprintsList();
-updateAllCounters();
-showToast('Plano registrado');
-}
-function deleteBlueprint(idx) {
-blueprints.splice(idx, 1);
-localStorage.setItem(STORAGE_KEY_BLUEPRINTS, JSON.stringify(blueprints));
-renderBlueprintsList();
-updateAllCounters();
-}
-// PERSONAL
-function openStaffModal() {
-document.getElementById('modalStaff').classList.remove('hidden');
-}
-function closeStaffModal() {
-document.getElementById('modalStaff').classList.add('hidden');
-}
-// WHATSAPP
-function openWhatsAppModal() {
-document.getElementById('modalWhatsApp').classList.remove('hidden');
-buildWhatsAppText();
-}
-function closeWhatsAppModal() {
-document.getElementById('modalWhatsApp').classList.add('hidden');
-}
-function buildWhatsAppText() {
-const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
-const [y, m, d] = activeDateString.split('-');
-let msg = ⁠*CONTROL TOPOGRÁFICO DIARIO*\n⁠;
-msg += ⁠📅 *Fecha:* ${d}/${m}/${y}\n⁠;
-msg += ⁠👷 *Topógrafos:* Ronald Zapana / Jhonatan Umaya\n⁠;
-msg += ⁠------------------------------------\n\n⁠;
-if (dayTasks.length === 0) {
-msg += ⁠No se registraron liberaciones en esta fecha.\n⁠;
-} else {
-const areas = ['4680', '4652', '4653'];
-areas.forEach(aCode => {
-const areaTasks = dayTasks.filter(t => t.area.includes(aCode));
-if (areaTasks.length > 0) {
-msg += ⁠📍 *ÁREA ${aCode}*\n⁠;
-areaTasks.forEach(t => {
-const f = isStepDoneInActiveDate(t.steps.find(s => s.name === 'fundacion'), activeDateString);
-const p = isStepDoneInActiveDate(t.steps.find(s => s.name === 'prevaciado'), activeDateString);
-const post = isStepDoneInActiveDate(t.steps.find(s => s.name === 'postvaciado'), activeDateString);
-msg += ⁠• *${t.code}* (${t.name} - ${t.ejes}):\n⁠;
-msg += ⁠  - Fundación: ${f ? '✅ Conforme' : '⏳ Pendiente'}\n⁠;
-msg += ⁠  - Pre-vaciado: ${p ? '✅ Conforme' : '⏳ Pendiente'}\n⁠;
-msg += ⁠  - Post-vaciado: ${post ? '✅ Conforme' : '⏳ Pendiente'}\n⁠;
-});
-msg += ⁠\n⁠;
-}
-});
-}
-msg += ⁠------------------------------------\n⁠;
-msg += ⁠*Reporte generado desde Control Topográfico Obra Civil*⁠;
-document.getElementById('whatsAppTextPreview').value = msg;
-}
-function copyWhatsAppToClipboard() {
-const txt = document.getElementById('whatsAppTextPreview');
-navigator.clipboard.writeText(txt.value).then(() => {
-showToast('Texto copiado al portapapeles', 'success');
-});
-}
-function sendWhatsAppDirect() {
-const txt = encodeURIComponent(document.getElementById('whatsAppTextPreview').value);
-window.open(⁠https://api.whatsapp.com/send?text=${txt}⁠, '_blank');
-}
-// EXPORTACIÓN A EXCEL (.xlsx)
-function exportTasksToExcel() {
-if (typeof XLSX === 'undefined') {
-showToast('Librería Excel no cargada aún');
-return;
-}
-const rows = [];
-tasks.forEach((t, index) => {
-const sFund = t.steps.find(s => s.name === 'fundacion') || {};
-const sPre = t.steps.find(s => s.name === 'prevaciado') || {};
-const sPost = t.steps.find(s => s.name === 'postvaciado') || {};
-rows.push({
-'N°': index + 1,
-'Área de Proyecto': t.area,
-'Código': t.code,
-'Elemento': t.name,
-'Ubicación / Ejes': t.ejes,
-'Topógrafo': t.topografo,
-'Plano Ref.': t.plano || 'S/P',
-'Fecha Creación': t.fechaCreacion,
-'1. Fundación': sFund.done ? ⁠Liberado (${sFund.fecha} ${sFund.hora})⁠ : 'Pendiente',
-'2. Pre-vaciado': sPre.done ? ⁠Liberado (${sPre.fecha} ${sPre.hora})⁠ : 'Pendiente',
-'3. Post-vaciado': sPost.done ? ⁠Liberado (${sPost.fecha} ${sPost.hora})⁠ : 'Pendiente',
-});
-});
-const worksheet = XLSX.utils.json_to_sheet(rows);
-const workbook = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(workbook, worksheet, 'Liberaciones');
-const fileName = ⁠Parte_Topografico_${activeDateString}.xlsx⁠;
-XLSX.writeFile(workbook, fileName);
-showToast(⁠Descargando ${fileName}⁠, 'success');
-}
-// FILTROS
-function onSearchFilterChange(val) {
-filterSearchQuery = val;
-renderTableRows();
-}
-function onStateFilterChange(val) {
-filterStatus = val;
-renderTableRows();
-}
-// UTILITARIOS
-function showToast(msg, type = 'info') {
-const toast = document.getElementById('toastNotification');
-const toastMsg = document.getElementById('toastMsg');
-const toastIcon = document.getElementById('toastIcon');
-toastMsg.textContent = msg;
-if (type === 'success') {
-toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
-} else {
-toastIcon.className = 'fa-solid fa-circle-info text-blue-400';
-}
-toast.classList.remove('translate-y-20', 'opacity-0');
-setTimeout(() => {
-toast.classList.add('translate-y-20', 'opacity-0');
-}, 2500);
-}
-function escapeHtml(text) {
-if (!text) return '';
-return String(text)
-.replace(/&/g, '&')
-.replace(/</g, '<')
-.replace(/>/g, '>')
-.replace(/"/g, '"')
-.replace(/'/g, ''');
-}
-</script>
+
+  <!-- CABECERA PRINCIPAL FIJA -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+      
+      <!-- Fila Superior: Título, Sesión y Acciones Principales -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-teal-500 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+            <i class="fa-solid fa-compass-drafting text-white text-base sm:text-lg"></i>
+          </div>
+          <div class="truncate">
+            <div class="flex items-center gap-2">
+              <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">CONTROL TOPOGRÁFICO</h1>
+              <span id="roleBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                Admin
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5">
+              <span>Proyecto Obra Civil</span>
+              <span class="w-1 h-1 rounded-full bg-slate-600"></span>
+              <span class="text-slate-300 font-medium">Ronald Zapana / Jhonatan Umaya</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Acciones Cabecera: Login/Rol, WhatsApp, Nuevo Frente -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button id="btnRoleToggle" type="button" onclick="openLoginModal(true)" title="Cambiar sesión o identificarse"
+            class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-user-shield text-blue-400"></i>
+            <span id="btnRoleText" class="hidden sm:inline">Admin</span>
+          </button>
+
+          <button id="btnOpenWhatsApp" type="button" onclick="openWhatsAppModal()"
+            class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 flex items-center gap-1.5 transition">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span class="hidden md:inline">Reporte WhatsApp</span>
+          </button>
+
+          <button id="btnOpenAddFront" type="button" onclick="openAddModal()"
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md shadow-blue-900/30 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>+ Frente</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Fecha y Navegación Diaria -->
+      <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1.5 bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">
+          <button type="button" onclick="changeDayRelative(-1)" title="Día anterior" class="w-7 h-7 rounded hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+            <i class="fa-solid fa-chevron-left text-[11px]"></i>
+          </button>
+          
+          <input type="date" id="dateSelectorInput" onchange="onDateSelectorChange(this.value)"
+            class="bg-transparent text-white font-semibold text-xs border-none focus:outline-none cursor-pointer">
+
+          <button type="button" onclick="changeDayRelative(1)" title="Día siguiente" class="w-7 h-7 rounded hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+            <i class="fa-solid fa-chevron-right text-[11px]"></i>
+          </button>
+
+          <button type="button" onclick="goToToday()" class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition">
+            Hoy
+          </button>
+        </div>
+
+        <!-- Botón Calendario Mensual -->
+        <button type="button" onclick="openCalendarModal()"
+          class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-regular fa-calendar-days text-indigo-400"></i>
+          <span>Calendario Mensual</span>
+          <span id="activeDateBadgeLabel" class="ml-1 text-[10px] text-blue-400 font-bold"></span>
+        </button>
+      </div>
+
+      <!-- NAVEGACIÓN PRINCIPAL ENTRE ÁREAS Y MÓDULOS -->
+      <nav class="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+        
+        <!-- Pestaña Área 4680 -->
+        <button id="tab-4680" type="button" onclick="switchTab('4680')"
+          class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-blue-600 text-white shadow-md shadow-blue-900/30 border border-blue-500/40">
+          <span class="w-2 h-2 rounded-full bg-cyan-300"></span>
+          <span>4680: Ácidos</span>
+          <span id="badge-4680" class="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-950 text-blue-200 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Área 4652 -->
+        <button id="tab-4652" type="button" onclick="switchTab('4652')"
+          class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700/80 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span>4652: LESDE</span>
+          <span id="badge-4652" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Área 4653 -->
+        <button id="tab-4653" type="button" onclick="switchTab('4653')"
+          class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700/80 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+          <span>4653: Almacén Gral.</span>
+          <span id="badge-4653" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-900 text-slate-400 font-mono">0</span>
+        </button>
+
+        <!-- Separador -->
+        <div class="h-5 w-px bg-slate-700 mx-1 shrink-0"></div>
+
+        <!-- Pestaña ¿Qué me falta? -->
+        <button id="tab-pending" type="button" onclick="switchTab('pending')"
+          class="tab-nav-btn px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-amber-300 hover:bg-slate-700/80 border border-amber-500/30">
+          <i class="fa-solid fa-clipboard-list text-amber-400"></i>
+          <span>¿Qué me falta?</span>
+          <span id="badge-pending" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-950/80 text-amber-200 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Planos -->
+        <button id="tab-blueprints" type="button" onclick="switchTab('blueprints')"
+          class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+          <i class="fa-regular fa-map text-slate-400"></i>
+          <span>Planos</span>
+          <span id="badge-blueprints" class="text-[10px] text-slate-400 font-mono">0</span>
+        </button>
+
+        <!-- Pestaña Topógrafos -->
+        <button id="tab-staff" type="button" onclick="switchTab('staff')"
+          class="tab-nav-btn px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 shrink-0 transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+          <i class="fa-solid fa-users-gear text-slate-400"></i>
+          <span>Topógrafos</span>
+        </button>
+
+        <!-- Pestaña Descargar Excel -->
+        <button id="btnExcelExport" type="button" onclick="exportTasksToExcel()"
+          class="px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shrink-0 transition bg-emerald-800/70 text-emerald-100 hover:bg-emerald-700 border border-emerald-600/50 ml-auto">
+          <i class="fa-solid fa-file-excel text-emerald-300"></i>
+          <span>Descargar Excel</span>
+        </button>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DINÁMICO -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex-1 w-full space-y-4">
+
+    <!-- BARRA DE KPIS DEL DÍA -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
+        <div>
+          <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Frentes del Día</p>
+          <p id="kpiTotalDay" class="text-lg sm:text-xl font-black text-white">0</p>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-layer-group text-sm"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
+        <div>
+          <p class="text-[10px] uppercase font-bold tracking-wider text-emerald-400">Liberados (Hoy)</p>
+          <p id="kpiReleasedDay" class="text-lg sm:text-xl font-black text-emerald-400">0</p>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-check-double text-sm"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
+        <div>
+          <p class="text-[10px] uppercase font-bold tracking-wider text-amber-400">Pendientes</p>
+          <p id="kpiPendingDay" class="text-lg sm:text-xl font-black text-amber-400">0</p>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-hourglass-half text-sm"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow flex items-center justify-between">
+        <div class="w-full">
+          <div class="flex items-center justify-between text-[10px] font-bold uppercase text-slate-400 mb-1">
+            <span>Cumplimiento</span>
+            <span id="kpiPercentText" class="text-blue-400 font-mono">0%</span>
+          </div>
+          <div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+            <div id="kpiProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: VISTA DE TABLA POR ÁREA ACTIVA (4680, 4652, 4653) -->
+    <section id="section-area-table" class="space-y-3">
+      
+      <!-- Filtros y Búsqueda -->
+      <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2">
+          <span id="areaHeaderTag" class="px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-600/30 text-blue-300 border border-blue-500/40">
+            Área 4680
+          </span>
+          <span id="areaHeaderSub" class="text-xs text-slate-300 font-medium hidden sm:inline">
+            Almacén y Descarga de Ácidos
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="areaSearchInput" oninput="onSearchFilterChange(this.value)" placeholder="Buscar elemento, eje, topógrafo..."
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+
+          <select id="areaStateFilter" onchange="onStateFilterChange(this.value)"
+            class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
+            <option value="all">Todos</option>
+            <option value="pending">Pendientes</option>
+            <option value="done">Concluidos (100%)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TABLA PRINCIPAL DE CONTROL TOPOGRÁFICO -->
+      <div class="bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-200 border-collapse">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-700">
+              <tr>
+                <th class="py-2.5 px-3">Elemento / Ejes</th>
+                <th class="py-2.5 px-2">Topógrafo</th>
+                <th class="py-2.5 px-2 text-center">1. Fundación</th>
+                <th class="py-2.5 px-2 text-center">2. Pre-vaciado</th>
+                <th class="py-2.5 px-2 text-center">3. Post-vaciado</th>
+                <th class="py-2.5 px-2 text-center">Avance</th>
+                <th class="py-2.5 px-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="areaTableBody" class="divide-y divide-slate-700/60 font-normal">
+              <!-- Render dinámico -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Estado vacío -->
+        <div id="areaTableEmpty" class="hidden p-8 text-center space-y-2">
+          <i class="fa-regular fa-folder-open text-3xl text-slate-600"></i>
+          <p class="text-xs text-slate-400 font-medium">No se encontraron frentes registrados para esta área en la fecha seleccionada.</p>
+          <button type="button" onclick="openAddModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition">
+            Registrar Frente en esta Fecha
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECCIÓN 2: MÓDULO "¿QUÉ ME FALTA?" (ESTRICTAMENTE AISLADO) -->
+    <section id="section-pending" class="hidden space-y-4">
+      <div class="bg-gradient-to-r from-amber-950/40 via-slate-800 to-slate-800 border border-amber-500/30 rounded-xl p-4 shadow">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <h2 class="text-base font-black text-amber-300 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-amber-400"></i>
+              <span>Diagnóstico de Frentes y Liberaciones Pendientes</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Identificación de puntos críticos de obra civil pendientes en la fecha activa.</p>
+          </div>
+          <span id="pendingTotalBadge" class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+            0 Pendientes
+          </span>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Diagnóstico de Alto Contraste -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- 1. Falta Fundación -->
+        <div class="bg-slate-800/90 border-2 border-blue-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+          <div class="flex items-center justify-between text-xs font-black text-blue-300 border-b border-slate-700/80 pb-2">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-trowel-bricks text-blue-400"></i>
+              <span>1. Falta Fundación</span>
+            </span>
+            <span id="count-pending-fundacion" class="px-2 py-0.5 rounded-full bg-blue-950 text-blue-200 font-mono text-[11px]">0</span>
+          </div>
+          <div id="list-pending-fundacion" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+
+        <!-- 2. Falta Pre-vaciado -->
+        <div class="bg-slate-800/90 border-2 border-amber-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+          <div class="flex items-center justify-between text-xs font-black text-amber-300 border-b border-slate-700/80 pb-2">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-clipboard-question text-amber-400"></i>
+              <span>2. Falta Pre-vaciado</span>
+            </span>
+            <span id="count-pending-prevaciado" class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 font-mono text-[11px]">0</span>
+          </div>
+          <div id="list-pending-prevaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+
+        <!-- 3. Falta Post-vaciado -->
+        <div class="bg-slate-800/90 border-2 border-purple-500/40 rounded-xl p-3.5 space-y-2 shadow-lg">
+          <div class="flex items-center justify-between text-xs font-black text-purple-300 border-b border-slate-700/80 pb-2">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-check-to-slot text-purple-400"></i>
+              <span>3. Falta Post-vaciado</span>
+            </span>
+            <span id="count-pending-postvaciado" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-200 font-mono text-[11px]">0</span>
+          </div>
+          <div id="list-pending-postvaciado" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALES DEL SISTEMA ==================== -->
+
+  <!-- 1. MODAL FORMAL DE LOGIN (USUARIO Y CONTRASEÑA) -->
+  <div id="modalLogin" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl p-5 space-y-4">
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg shadow-blue-500/30">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="text-base font-black text-white">Acceso al Sistema</h3>
+        <p class="text-xs text-slate-400">Ingresa tus credenciales técnicas de obra civil</p>
+      </div>
+
+      <form id="formLogin" onsubmit="event.preventDefault(); submitLoginForm();" class="space-y-3">
+        <!-- Campo Usuario -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Usuario</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input type="text" id="loginUsername" required placeholder="admin" autocomplete="username"
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Contraseña</label>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password"
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200">
+              <i id="loginEyeIcon" class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="loginErrorMsg" class="hidden text-[11px] text-rose-400 font-semibold text-center bg-rose-950/40 border border-rose-800/60 rounded-lg p-2">
+          Usuario o contraseña incorrectos. (Demo: admin / admin)
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="space-y-2 pt-1">
+          <button type="submit"
+            class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-lg shadow-lg shadow-blue-900/40 transition">
+            Iniciar Sesión como Admin
+          </button>
+
+          <button type="button" onclick="enterAsGuest()"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg border border-slate-700 transition">
+            Continuar en Modo Consulta (Solo Lectura)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. MODAL CALENDARIO / HISTORIAL MENSUAL -->
+  <div id="modalCalendar" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-calendar-days text-indigo-400 text-lg"></i>
+          <div>
+            <h3 class="text-sm font-black text-white">Historial y Calendario de Obra</h3>
+            <p class="text-[11px] text-slate-400">Auditoría día a día de liberaciones y frentes</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCalendarModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Controles de Mes -->
+      <div class="flex items-center justify-between bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+        <button type="button" onclick="changeMonthRelative(-1)" class="px-2 py-1 bg-slate-700 rounded hover:bg-slate-600 text-white font-bold">
+          <i class="fa-solid fa-chevron-left"></i> Mes Ant.
+        </button>
+        <span id="calendarMonthTitle" class="font-black text-white text-sm">Mes Año</span>
+        <button type="button" onclick="changeMonthRelative(1)" class="px-2 py-1 bg-slate-700 rounded hover:bg-slate-600 text-white font-bold">
+          Mes Sig. <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Grid de Días del Mes -->
+      <div class="space-y-1">
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black uppercase text-slate-400 py-1">
+          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
+      </div>
+
+      <div class="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-500"></span> F = Frentes en el día</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> L = Liberaciones aprobadas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL NUEVO FRENTE -->
+  <div id="modalAddFront" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 id="modalFrontTitle" class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-blue-400"></i>
+          <span>Registrar Nuevo Frente de Obra</span>
+        </h3>
+        <button type="button" onclick="closeAddModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <form id="formNewFront" onsubmit="event.preventDefault(); saveNewFrontSubmit();" class="space-y-2.5 text-xs">
+        <!-- Selector de Área Oficial -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Área Oficial del Proyecto</label>
+          <select id="frontAreaSelect" required
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-blue-500">
+            <option value="4680 - Almacén y descarga de ácidos">4680 - Almacén y descarga de ácidos</option>
+            <option value="4652 - Taller de mantenimiento de equipo LESDE">4652 - Taller de mantenimiento de equipo LESDE</option>
+            <option value="4653 - Almacén general">4653 - Almacén general</option>
+          </select>
+        </div>
+
+        <!-- Código y Nombre -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Código / ID</label>
+            <input type="text" id="frontCodeInput" required placeholder="Ej: Z-04, MC-02"
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Elemento</label>
+            <input type="text" id="frontNameInput" required placeholder="Ej: Zapata Aislada, Muro"
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Ejes / Ubicación -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Ubicación / Ejes</label>
+          <input type="text" id="frontAxesInput" required placeholder="Ej: Entre Ejes A-B / 3-4"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Topógrafo y Fecha -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Topógrafo a Cargo</label>
+            <select id="frontSurveyorSelect" required
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+              <option value="Ronald Zapana">Ronald Zapana</option>
+              <option value="Jhonatan Umaya">Jhonatan Umaya</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha de Registro</label>
+            <input type="date" id="frontDateInput" required
+              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Plano Vinculado -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Plano de Referencia</label>
+          <input type="text" id="frontBlueprintInput" placeholder="Ej: PL-STR-4680-01 Rev.B"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAddModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-md shadow-blue-900/30">
+            Guardar Frente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. MODAL PLANOS DE OBRA -->
+  <div id="modalBlueprints" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-regular fa-map text-teal-400"></i>
+          <span>Catálogo de Planos Técnicos Vigentes</span>
+        </h3>
+        <button type="button" onclick="closeBlueprintModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <form id="formAddBlueprint" onsubmit="event.preventDefault(); saveNewBlueprint();" class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 text-xs">
+        <input type="text" id="bpCode" required placeholder="Código (PL-4680-01)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+        <input type="text" id="bpTitle" required placeholder="Descripción del Plano" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+        <button type="submit" class="bg-teal-600 hover:bg-teal-500 text-white font-bold rounded px-2 py-1">
+          + Agregar
+        </button>
+      </form>
+
+      <div id="blueprintsListContainer" class="space-y-1.5 text-xs max-h-60 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- 5. MODAL TOPÓGRAFOS / PERSONAL -->
+  <div id="modalStaff" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-users-gear text-blue-400"></i>
+          <span>Personal de Topografía</span>
+        </h3>
+        <button type="button" onclick="closeStaffModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">RZ</div>
+            <div>
+              <p class="font-bold text-white">Ronald Zapana</p>
+              <p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4680 / 4653</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">JU</div>
+            <div>
+              <p class="font-bold text-white">Jhonatan Umaya</p>
+              <p class="text-[10px] text-slate-400">Topógrafo Titular • Área 4652</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Activo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. MODAL WHATSAPP TÉCNICO -->
+  <div id="modalWhatsApp" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-brands fa-whatsapp text-emerald-400 text-base"></i>
+          <span>Reporte Técnico para WhatsApp</span>
+        </h3>
+        <button type="button" onclick="closeWhatsAppModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <p class="text-[11px] text-slate-400">Previsualización del parte oficial de liberaciones para el grupo de obra:</p>
+        <textarea id="whatsAppTextPreview" rows="10" readonly
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-[11px] focus:outline-none select-all"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button type="button" onclick="copyWhatsAppToClipboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold text-xs">
+          <i class="fa-regular fa-copy mr-1"></i> Copiar Texto
+        </button>
+        <button type="button" onclick="sendWhatsAppDirect()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1.5">
+          <i class="fa-brands fa-whatsapp"></i> Abrir WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN -->
+  <div id="toastNotification" class="fixed bottom-4 right-4 z-50 bg-slate-800 border border-slate-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">Acción completada</span>
+  </div>
+
+  <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
+  <script>
+    const STORAGE_KEY_TASKS = 'topografia_tasks_v6_clean';
+    const STORAGE_KEY_ROLE = 'topografia_user_role';
+    const STORAGE_KEY_BLUEPRINTS = 'topografia_blueprints_v6';
+
+    let userRole = 'admin';
+    let currentTab = '4680';
+    let activeDateString = new Date().toISOString().split('T')[0];
+    let calendarViewYear = new Date().getFullYear();
+    let calendarViewMonth = new Date().getMonth();
+
+    let filterSearchQuery = '';
+    let filterStatus = 'all';
+
+    const INITIAL_TASKS = [
+      {
+        id: '4680-Z1',
+        area: '4680 - Almacén y descarga de ácidos',
+        code: 'Z-01',
+        name: 'Zapata Aislada Z-1',
+        ejes: 'Ejes A-B / 1-2',
+        topografo: 'Ronald Zapana',
+        plano: 'PL-STR-4680-01',
+        fechaCreacion: new Date().toISOString().split('T')[0],
+        steps: [
+          { name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '08:30 AM' },
+          { name: 'prevaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '11:15 AM' },
+          { name: 'postvaciado', done: false, fecha: null, hora: null }
+        ]
+      },
+      {
+        id: '4680-Z4',
+        area: '4680 - Almacén y descarga de ácidos',
+        code: 'Z-04',
+        name: 'Zapata Z-4 de Contención',
+        ejes: 'Ejes C-D / 4-5',
+        topografo: 'Ronald Zapana',
+        plano: 'PL-STR-4680-02',
+        fechaCreacion: new Date().toISOString().split('T')[0],
+        steps: [
+          { name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '09:00 AM' },
+          { name: 'prevaciado', done: false, fecha: null, hora: null },
+          { name: 'postvaciado', done: false, fecha: null, hora: null }
+        ]
+      },
+      {
+        id: '4652-ZL1',
+        area: '4652 - Taller de mantenimiento de equipo LESDE',
+        code: 'Z-LESDE-01',
+        name: 'Zapata Corrida Principal',
+        ejes: 'Ejes 1-3 / Taller',
+        topografo: 'Jhonatan Umaya',
+        plano: 'PL-LESDE-04',
+        fechaCreacion: new Date().toISOString().split('T')[0],
+        steps: [
+          { name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '07:45 AM' },
+          { name: 'prevaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '10:20 AM' },
+          { name: 'postvaciado', done: true, fecha: new Date().toISOString().split('T')[0], hora: '03:15 PM' }
+        ]
+      },
+      {
+        id: '4652-FOS1',
+        area: '4652 - Taller de mantenimiento de equipo LESDE',
+        code: 'FOSO-01',
+        name: 'Foso de Inspección Mecánica',
+        ejes: 'Eje F / Bahía 2',
+        topografo: 'Jhonatan Umaya',
+        plano: 'PL-LESDE-06',
+        fechaCreacion: new Date().toISOString().split('T')[0],
+        steps: [
+          { name: 'fundacion', done: false, fecha: null, hora: null },
+          { name: 'prevaciado', done: false, fecha: null, hora: null },
+          { name: 'postvaciado', done: false, fecha: null, hora: null }
+        ]
+      },
+      {
+        id: '4653-Z101',
+        area: '4653 - Almacén general',
+        code: 'Z-101',
+        name: 'Zapata Cimentación Nave',
+        ejes: 'Ejes G-H / 8-9',
+        topografo: 'Ronald Zapana',
+        plano: 'PL-ALM-101',
+        fechaCreacion: new Date().toISOString().split('T')[0],
+        steps: [
+          { name: 'fundacion', done: true, fecha: new Date().toISOString().split('T')[0], hora: '10:00 AM' },
+          { name: 'prevaciado', done: false, fecha: null, hora: null },
+          { name: 'postvaciado', done: false, fecha: null, hora: null }
+        ]
+      }
+    ];
+
+    let tasks = [];
+    let blueprints = [
+      { code: 'PL-STR-4680-01', title: 'Cimentaciones Nave de Ácidos Rev.B' },
+      { code: 'PL-LESDE-04', title: 'Fundaciones Taller y Fosos LESDE' },
+      { code: 'PL-ALM-101', title: 'Estructuras Generales Almacén Central' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStorageData();
+      initDateInputs();
+      applyUserRoleUI();
+      openLoginModal(false);
+      switchTab('4680');
+      updateAllCounters();
+    });
+
+    function loadStorageData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_TASKS);
+        tasks = saved ? JSON.parse(saved) : INITIAL_TASKS;
+      } catch (e) {
+        tasks = INITIAL_TASKS;
+      }
+
+      try {
+        const savedBp = localStorage.getItem(STORAGE_KEY_BLUEPRINTS);
+        if (savedBp) blueprints = JSON.parse(savedBp);
+      } catch (e) {}
+
+      const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
+      if (savedRole === 'guest' || savedRole === 'admin') {
+        userRole = savedRole;
+      }
+    }
+
+    function saveTasksToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+      } catch (e) {}
+      updateAllCounters();
+    }
+
+    function initDateInputs() {
+      const dateInput = document.getElementById('dateSelectorInput');
+      if (dateInput) {
+        dateInput.value = activeDateString;
+      }
+      updateActiveDateLabel();
+    }
+
+    function updateActiveDateLabel() {
+      const lbl = document.getElementById('activeDateBadgeLabel');
+      if (lbl) {
+        const [y, m, d] = activeDateString.split('-');
+        lbl.textContent = `(${d}/${m}/${y})`;
+      }
+    }
+
+    // GESTIÓN DE LOGIN FORMAL
+    function openLoginModal(canClose = true) {
+      const modal = document.getElementById('modalLogin');
+      modal.classList.remove('hidden');
+      document.getElementById('loginErrorMsg').classList.add('hidden');
+      document.getElementById('loginUsername').value = userRole === 'admin' ? 'admin' : '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function closeLoginModal() {
+      document.getElementById('modalLogin').classList.add('hidden');
+    }
+
+    function togglePasswordVisibility() {
+      const pass = document.getElementById('loginPassword');
+      const icon = document.getElementById('loginEyeIcon');
+      if (pass.type === 'password') {
+        pass.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        pass.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function submitLoginForm() {
+      const user = document.getElementById('loginUsername').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+
+      if (user === 'admin' && pass === 'admin') {
+        userRole = 'admin';
+        localStorage.setItem(STORAGE_KEY_ROLE, 'admin');
+        applyUserRoleUI();
+        closeLoginModal();
+        showToast('Sesión iniciada como Administrador', 'success');
+        renderActiveView();
+      } else {
+        document.getElementById('loginErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    function enterAsGuest() {
+      userRole = 'guest';
+      localStorage.setItem(STORAGE_KEY_ROLE, 'guest');
+      applyUserRoleUI();
+      closeLoginModal();
+      showToast('Acceso en Modo Consulta (Solo Lectura)');
+      renderActiveView();
+    }
+
+    function applyUserRoleUI() {
+      const roleBadge = document.getElementById('roleBadge');
+      const btnRoleText = document.getElementById('btnRoleText');
+      const btnAddFront = document.getElementById('btnOpenAddFront');
+
+      if (userRole === 'admin') {
+        roleBadge.textContent = 'Admin';
+        roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        btnRoleText.textContent = 'Admin';
+        btnAddFront.classList.remove('hidden');
+      } else {
+        roleBadge.textContent = 'Invitado';
+        roleBadge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        btnRoleText.textContent = 'Invitado';
+        btnAddFront.classList.add('hidden');
+      }
+    }
+
+    // NAVEGACIÓN Y CONTROL ESTRICTO DE VISIBILIDAD DE MÓDULOS
+    function switchTab(tabId) {
+      currentTab = tabId;
+
+      const sectionPending = document.getElementById('section-pending');
+      const sectionAreaTable = document.getElementById('section-area-table');
+
+      // Actualizar estilos de los botones de navegación
+      ['4680', '4652', '4653', 'pending', 'blueprints', 'staff'].forEach(id => {
+        const btn = document.getElementById(`tab-${id}`);
+        if (!btn) return;
+        if (id === tabId) {
+          btn.classList.add('bg-blue-600', 'text-white', 'border-blue-500/40');
+          btn.classList.remove('bg-slate-800', 'text-slate-300');
+        } else {
+          btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500/40');
+          btn.classList.add('bg-slate-800', 'text-slate-300');
+        }
+      });
+
+      // AISLAMIENTO TOTAL: "¿Qué me falta?" solo se muestra en tabId === 'pending'
+      if (tabId === '4680' || tabId === '4652' || tabId === '4653') {
+        sectionAreaTable.classList.remove('hidden');
+        sectionPending.classList.add('hidden');
+        updateAreaHeaderTitles(tabId);
+        renderTableRows();
+      } else if (tabId === 'pending') {
+        sectionAreaTable.classList.add('hidden');
+        sectionPending.classList.remove('hidden');
+        renderPendingModule();
+      } else if (tabId === 'blueprints') {
+        sectionAreaTable.classList.remove('hidden');
+        sectionPending.classList.add('hidden');
+        openBlueprintModal();
+      } else if (tabId === 'staff') {
+        sectionAreaTable.classList.remove('hidden');
+        sectionPending.classList.add('hidden');
+        openStaffModal();
+      }
+
+      updateAllCounters();
+    }
+
+    function updateAreaHeaderTitles(areaCode) {
+      const tag = document.getElementById('areaHeaderTag');
+      const sub = document.getElementById('areaHeaderSub');
+      if (areaCode === '4680') {
+        tag.textContent = 'Área 4680';
+        sub.textContent = 'Almacén y Descarga de Ácidos';
+      } else if (areaCode === '4652') {
+        tag.textContent = 'Área 4652';
+        sub.textContent = 'Taller de Mantenimiento LESDE';
+      } else if (areaCode === '4653') {
+        tag.textContent = 'Área 4653';
+        sub.textContent = 'Almacén General';
+      }
+    }
+
+    function renderActiveView() {
+      if (currentTab === 'pending') {
+        renderPendingModule();
+      } else {
+        renderTableRows();
+      }
+      updateAllCounters();
+    }
+
+    function isTaskInActiveDate(task, dateStr) {
+      if (task.fechaCreacion === dateStr) return true;
+      if (task.steps && task.steps.some(s => s.fecha === dateStr)) return true;
+      return false;
+    }
+
+    function isStepDoneInActiveDate(step, dateStr) {
+      if (!step) return false;
+      return step.done && (step.fecha === dateStr);
+    }
+
+    function calculateProgress(task, dateStr) {
+      if (!task.steps || task.steps.length === 0) return 0;
+      const doneCount = task.steps.filter(s => isStepDoneInActiveDate(s, dateStr)).length;
+      return Math.round((doneCount / task.steps.length) * 100);
+    }
+
+    // RENDERIZADO DE TABLA DE FRENTES POR ÁREA
+    function renderTableRows() {
+      const tbody = document.getElementById('areaTableBody');
+      const emptyDiv = document.getElementById('areaTableEmpty');
+      tbody.innerHTML = '';
+
+      let areaTasks = tasks.filter(t => t.area.includes(currentTab) && isTaskInActiveDate(t, activeDateString));
+
+      if (filterSearchQuery) {
+        const q = filterSearchQuery.toLowerCase();
+        areaTasks = areaTasks.filter(t => 
+          t.code.toLowerCase().includes(q) ||
+          t.name.toLowerCase().includes(q) ||
+          t.ejes.toLowerCase().includes(q) ||
+          t.topografo.toLowerCase().includes(q)
+        );
+      }
+
+      if (filterStatus === 'pending') {
+        areaTasks = areaTasks.filter(t => calculateProgress(t, activeDateString) < 100);
+      } else if (filterStatus === 'done') {
+        areaTasks = areaTasks.filter(t => calculateProgress(t, activeDateString) === 100);
+      }
+
+      if (areaTasks.length === 0) {
+        emptyDiv.classList.remove('hidden');
+        return;
+      }
+      emptyDiv.classList.add('hidden');
+
+      areaTasks.forEach(task => {
+        const pFundacion = task.steps.find(s => s.name === 'fundacion');
+        const pPrevaciado = task.steps.find(s => s.name === 'prevaciado');
+        const pPostvaciado = task.steps.find(s => s.name === 'postvaciado');
+
+        const isFundDone = isStepDoneInActiveDate(pFundacion, activeDateString);
+        const isPreDone = isStepDoneInActiveDate(pPrevaciado, activeDateString);
+        const isPostDone = isStepDoneInActiveDate(pPostvaciado, activeDateString);
+
+        const progress = calculateProgress(task, activeDateString);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-700/30 transition border-b border-slate-700/50';
+
+        tr.innerHTML = `
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-xs text-white bg-slate-900 px-2 py-0.5 rounded border border-slate-700">${escapeHtml(task.code)}</span>
+              <span class="font-bold text-slate-100 text-xs">${escapeHtml(task.name)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-arrows-split-up-and-left text-[10px] text-slate-500"></i>
+              <span>${escapeHtml(task.ejes)}</span>
+              <span class="text-slate-600">•</span>
+              <span class="text-slate-500">${escapeHtml(task.plano || 'S/P')}</span>
+            </div>
+          </td>
+
+          <td class="py-3 px-2">
+            <span class="text-xs text-slate-300 font-medium">${escapeHtml(task.topografo)}</span>
+          </td>
+
+          <td class="py-3 px-2 text-center">
+            <button type="button" onclick="toggleTaskStep('${task.id}', 'fundacion')"
+              ${userRole !== 'admin' ? 'disabled' : ''}
+              class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition ${
+                isFundDone 
+                  ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 shadow-sm shadow-emerald-950 animate-pop'
+                  : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
+              }">
+              <span class="flex items-center gap-1">
+                <i class="fa-solid ${isFundDone ? 'fa-circle-check text-emerald-400' : 'fa-circle-dot text-slate-600'}"></i>
+                <span>Fundación</span>
+              </span>
+              <span class="text-[9px] font-mono text-slate-400 mt-0.5">${isFundDone ? pFundacion.hora : 'Pendiente'}</span>
+            </button>
+          </td>
+
+          <td class="py-3 px-2 text-center">
+            <button type="button" onclick="toggleTaskStep('${task.id}', 'prevaciado')"
+              ${userRole !== 'admin' ? 'disabled' : ''}
+              class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition ${
+                isPreDone 
+                  ? 'bg-amber-600/30 text-amber-300 border border-amber-500/50 shadow-sm shadow-amber-950 animate-pop'
+                  : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
+              }">
+              <span class="flex items-center gap-1">
+                <i class="fa-solid ${isPreDone ? 'fa-circle-check text-amber-400' : 'fa-circle-dot text-slate-600'}"></i>
+                <span>Pre-vaciado</span>
+              </span>
+              <span class="text-[9px] font-mono text-slate-400 mt-0.5">${isPreDone ? pPrevaciado.hora : 'Pendiente'}</span>
+            </button>
+          </td>
+
+          <td class="py-3 px-2 text-center">
+            <button type="button" onclick="toggleTaskStep('${task.id}', 'postvaciado')"
+              ${userRole !== 'admin' ? 'disabled' : ''}
+              class="w-full max-w-[120px] mx-auto py-1.5 px-2 rounded-lg font-bold text-[10px] flex flex-col items-center justify-center transition ${
+                isPostDone 
+                  ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-sm shadow-purple-950 animate-pop'
+                  : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
+              }">
+              <span class="flex items-center gap-1">
+                <i class="fa-solid ${isPostDone ? 'fa-circle-check text-purple-400' : 'fa-circle-dot text-slate-600'}"></i>
+                <span>Post-vaciado</span>
+              </span>
+              <span class="text-[9px] font-mono text-slate-400 mt-0.5">${isPostDone ? pPostvaciado.hora : 'Pendiente'}</span>
+            </button>
+          </td>
+
+          <td class="py-3 px-2 text-center">
+            <span class="px-2 py-0.5 rounded font-mono text-xs font-black ${progress === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-blue-400'}">
+              ${progress}%
+            </span>
+          </td>
+
+          <td class="py-3 px-3 text-right">
+            ${userRole === 'admin' ? `
+              <button type="button" onclick="deleteFrontTask('${task.id}')" title="Eliminar frente"
+                class="w-7 h-7 rounded bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 transition">
+                <i class="fa-regular fa-trash-can text-xs"></i>
+              </button>
+            ` : '<span class="text-[10px] text-slate-500">Solo Lectura</span>'}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleTaskStep(taskId, stepName) {
+      if (userRole !== 'admin') {
+        showToast('Acción restringida para invitados');
+        return;
+      }
+
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const step = task.steps.find(s => s.name === stepName);
+      if (!step) return;
+
+      if (!step.done) {
+        step.done = true;
+        step.fecha = activeDateString;
+        step.hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        showToast(`Liberado: ${stepName.toUpperCase()} en ${task.code}`, 'success');
+      } else {
+        step.done = false;
+        step.fecha = null;
+        step.hora = null;
+        showToast(`Cancelado visto bueno en ${task.code}`);
+      }
+
+      saveTasksToStorage();
+      renderActiveView();
+    }
+
+    // ACTUALIZACIÓN DE CONTADORES REACTIVOS POR ÁREA Y GENERALES
+    function updateAllCounters() {
+      // 1. Contadores reactivos en las pestañas de área (4680, 4652, 4653)
+      ['4680', '4652', '4653'].forEach(areaCode => {
+        const badge = document.getElementById(`badge-${areaCode}`);
+        if (badge) {
+          const count = tasks.filter(t => t.area.includes(areaCode) && isTaskInActiveDate(t, activeDateString)).length;
+          badge.textContent = count;
+        }
+      });
+
+      // 2. Frentes del día para KPI
+      const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
+      const totalFrentes = dayTasks.length;
+
+      let totalLiberacionesConcluidas = 0;
+      let totalLiberacionesPendientes = 0;
+
+      dayTasks.forEach(t => {
+        t.steps.forEach(s => {
+          if (isStepDoneInActiveDate(s, activeDateString)) {
+            totalLiberacionesConcluidas++;
+          } else {
+            totalLiberacionesPendientes++;
+          }
+        });
+      });
+
+      const totalPossible = totalFrentes * 3;
+      const percent = totalPossible > 0 ? Math.round((totalLiberacionesConcluidas / totalPossible) * 100) : 0;
+
+      document.getElementById('kpiTotalDay').textContent = totalFrentes;
+      document.getElementById('kpiReleasedDay').textContent = totalLiberacionesConcluidas;
+      document.getElementById('kpiPendingDay').textContent = totalLiberacionesPendientes;
+      document.getElementById('kpiPercentText').textContent = `${percent}%`;
+      document.getElementById('kpiProgressBar').style.width = `${percent}%`;
+
+      const badgePending = document.getElementById('badge-pending');
+      if (badgePending) badgePending.textContent = totalLiberacionesPendientes;
+      const pendingTotalBadge = document.getElementById('pendingTotalBadge');
+      if (pendingTotalBadge) pendingTotalBadge.textContent = `${totalLiberacionesPendientes} Pendientes`;
+
+      const badgeBlueprints = document.getElementById('badge-blueprints');
+      if (badgeBlueprints) badgeBlueprints.textContent = blueprints.length;
+    }
+
+    // MÓDULO ¿QUÉ ME FALTA?
+    function renderPendingModule() {
+      const listFundacion = document.getElementById('list-pending-fundacion');
+      const listPrevaciado = document.getElementById('list-pending-prevaciado');
+      const listPostvaciado = document.getElementById('list-pending-postvaciado');
+
+      listFundacion.innerHTML = '';
+      listPrevaciado.innerHTML = '';
+      listPostvaciado.innerHTML = '';
+
+      const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
+
+      let cFund = 0, cPre = 0, cPost = 0;
+
+      dayTasks.forEach(t => {
+        const sFund = t.steps.find(s => s.name === 'fundacion');
+        const sPre = t.steps.find(s => s.name === 'prevaciado');
+        const sPost = t.steps.find(s => s.name === 'postvaciado');
+
+        if (!isStepDoneInActiveDate(sFund, activeDateString)) {
+          cFund++;
+          listFundacion.appendChild(createPendingCard(t, 'fundacion'));
+        }
+        if (!isStepDoneInActiveDate(sPre, activeDateString)) {
+          cPre++;
+          listPrevaciado.appendChild(createPendingCard(t, 'prevaciado'));
+        }
+        if (!isStepDoneInActiveDate(sPost, activeDateString)) {
+          cPost++;
+          listPostvaciado.appendChild(createPendingCard(t, 'postvaciado'));
+        }
+      });
+
+      document.getElementById('count-pending-fundacion').textContent = cFund;
+      document.getElementById('count-pending-prevaciado').textContent = cPre;
+      document.getElementById('count-pending-postvaciado').textContent = cPost;
+
+      if (cFund === 0) listFundacion.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de fundación</p>';
+      if (cPre === 0) listPrevaciado.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de pre-vaciado</p>';
+      if (cPost === 0) listPostvaciado.innerHTML = '<p class="text-slate-500 italic py-2 text-center">Sin pendientes de post-vaciado</p>';
+    }
+
+    function createPendingCard(task, stepName) {
+      const div = document.createElement('div');
+      div.className = 'p-2 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-between gap-2';
+      div.innerHTML = `
+        <div class="truncate">
+          <p class="font-bold text-white text-[11px] truncate">${escapeHtml(task.code)} • ${escapeHtml(task.name)}</p>
+          <p class="text-[10px] text-slate-400 truncate">${escapeHtml(task.area.split('-')[0])} | ${escapeHtml(task.ejes)}</p>
+        </div>
+        ${userRole === 'admin' ? `
+          <button type="button" onclick="toggleTaskStep('${task.id}', '${stepName}')"
+            class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-bold shrink-0">
+            Liberar
+          </button>
+        ` : ''}
+      `;
+      return div;
+    }
+
+    // CALENDARIO E HISTORIAL
+    function openCalendarModal() {
+      document.getElementById('modalCalendar').classList.remove('hidden');
+      renderCalendarDays();
+    }
+
+    function closeCalendarModal() {
+      document.getElementById('modalCalendar').classList.add('hidden');
+    }
+
+    function changeMonthRelative(offset) {
+      calendarViewMonth += offset;
+      if (calendarViewMonth < 0) {
+        calendarViewMonth = 11;
+        calendarViewYear--;
+      } else if (calendarViewMonth > 11) {
+        calendarViewMonth = 0;
+        calendarViewYear++;
+      }
+      renderCalendarDays();
+    }
+
+    function renderCalendarDays() {
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      document.getElementById('calendarMonthTitle').textContent = `${monthNames[calendarViewMonth]} ${calendarViewYear}`;
+
+      const firstDayIndex = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
+      const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'h-14 rounded-lg bg-slate-900/40 border border-transparent';
+        grid.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const monthPad = String(calendarViewMonth + 1).padStart(2, '0');
+        const dayPad = String(day).padStart(2, '0');
+        const dateIso = `${calendarViewYear}-${monthPad}-${dayPad}`;
+
+        const frentesDia = tasks.filter(t => isTaskInActiveDate(t, dateIso)).length;
+        let libDia = 0;
+        tasks.forEach(t => {
+          t.steps.forEach(s => {
+            if (isStepDoneInActiveDate(s, dateIso)) libDia++;
+          });
+        });
+
+        const isSelected = dateIso === activeDateString;
+
+        const cell = document.createElement('div');
+        cell.className = `h-14 p-1 rounded-lg border transition cursor-pointer flex flex-col justify-between ${
+          isSelected 
+            ? 'bg-blue-600/30 border-blue-400 text-white shadow-md' 
+            : 'bg-slate-800/80 border-slate-700/80 hover:bg-slate-700 text-slate-300'
+        }`;
+
+        cell.onclick = () => {
+          activeDateString = dateIso;
+          document.getElementById('dateSelectorInput').value = activeDateString;
+          updateActiveDateLabel();
+          closeCalendarModal();
+          renderActiveView();
+          showToast(`Cambiado a: ${dayPad}/${monthPad}/${calendarViewYear}`);
+        };
+
+        cell.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-[11px] ${isSelected ? 'text-blue-300' : 'text-slate-200'}">${day}</span>
+            ${frentesDia > 0 ? `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>` : ''}
+          </div>
+          <div class="text-[9px] font-mono space-y-0.5">
+            <div class="text-blue-300">F: ${frentesDia}</div>
+            <div class="text-emerald-400">L: ${libDia}</div>
+          </div>
+        `;
+
+        grid.appendChild(cell);
+      }
+    }
+
+    function changeDayRelative(offsetDays) {
+      const parts = activeDateString.split('-');
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setDate(d.getDate() + offsetDays);
+
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+
+      activeDateString = `${y}-${m}-${day}`;
+      document.getElementById('dateSelectorInput').value = activeDateString;
+      updateActiveDateLabel();
+      renderActiveView();
+    }
+
+    function onDateSelectorChange(newVal) {
+      if (!newVal) return;
+      activeDateString = newVal;
+      updateActiveDateLabel();
+      renderActiveView();
+    }
+
+    function goToToday() {
+      activeDateString = new Date().toISOString().split('T')[0];
+      document.getElementById('dateSelectorInput').value = activeDateString;
+      updateActiveDateLabel();
+      renderActiveView();
+      showToast('Regresaste a la fecha de hoy');
+    }
+
+    // REGISTRO DE FRENTES
+    function openAddModal() {
+      if (userRole !== 'admin') {
+        showToast('Acceso restringido para invitados');
+        return;
+      }
+      document.getElementById('modalAddFront').classList.remove('hidden');
+      document.getElementById('formNewFront').reset();
+      document.getElementById('frontDateInput').value = activeDateString;
+      
+      const selArea = document.getElementById('frontAreaSelect');
+      if (currentTab === '4652') selArea.value = '4652 - Taller de mantenimiento de equipo LESDE';
+      else if (currentTab === '4653') selArea.value = '4653 - Almacén general';
+      else selArea.value = '4680 - Almacén y descarga de ácidos';
+    }
+
+    function closeAddModal() {
+      document.getElementById('modalAddFront').classList.add('hidden');
+    }
+
+    function saveNewFrontSubmit() {
+      const area = document.getElementById('frontAreaSelect').value;
+      const code = document.getElementById('frontCodeInput').value.trim();
+      const name = document.getElementById('frontNameInput').value.trim();
+      const ejes = document.getElementById('frontAxesInput').value.trim();
+      const topografo = document.getElementById('frontSurveyorSelect').value;
+      const fecha = document.getElementById('frontDateInput').value;
+      const plano = document.getElementById('frontBlueprintInput').value.trim() || 'PL-GEN-01';
+
+      if (!code || !name || !ejes) {
+        showToast('Completa los campos obligatorios');
+        return;
+      }
+
+      const newTask = {
+        id: 'front-' + Date.now(),
+        area: area,
+        code: code,
+        name: name,
+        ejes: ejes,
+        topografo: topografo,
+        plano: plano,
+        fechaCreacion: fecha,
+        steps: [
+          { name: 'fundacion', done: false, fecha: null, hora: null },
+          { name: 'prevaciado', done: false, fecha: null, hora: null },
+          { name: 'postvaciado', done: false, fecha: null, hora: null }
+        ]
+      };
+
+      tasks.unshift(newTask);
+      saveTasksToStorage();
+      closeAddModal();
+      showToast(`Frente ${code} creado correctamente`, 'success');
+
+      if (fecha !== activeDateString) {
+        activeDateString = fecha;
+        document.getElementById('dateSelectorInput').value = fecha;
+        updateActiveDateLabel();
+      }
+
+      renderActiveView();
+    }
+
+    function deleteFrontTask(id) {
+      if (userRole !== 'admin') return;
+      if (!confirm('¿Seguro que deseas eliminar este frente de trabajo?')) return;
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasksToStorage();
+      renderActiveView();
+      showToast('Frente eliminado');
+    }
+
+    // PLANOS
+    function openBlueprintModal() {
+      document.getElementById('modalBlueprints').classList.remove('hidden');
+      renderBlueprintsList();
+    }
+    function closeBlueprintModal() {
+      document.getElementById('modalBlueprints').classList.add('hidden');
+    }
+
+    function renderBlueprintsList() {
+      const cont = document.getElementById('blueprintsListContainer');
+      cont.innerHTML = '';
+      blueprints.forEach((bp, index) => {
+        const item = document.createElement('div');
+        item.className = 'p-2 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-between text-xs';
+        item.innerHTML = `
+          <div>
+            <span class="font-bold text-white font-mono">${escapeHtml(bp.code)}</span>
+            <p class="text-[11px] text-slate-400">${escapeHtml(bp.title)}</p>
+          </div>
+          ${userRole === 'admin' ? `
+            <button type="button" onclick="deleteBlueprint(${index})" class="text-rose-400 hover:text-rose-300">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          ` : ''}
+        `;
+        cont.appendChild(item);
+      });
+    }
+
+    function saveNewBlueprint() {
+      const code = document.getElementById('bpCode').value.trim();
+      const title = document.getElementById('bpTitle').value.trim();
+      if (!code || !title) return;
+      blueprints.push({ code, title });
+      localStorage.setItem(STORAGE_KEY_BLUEPRINTS, JSON.stringify(blueprints));
+      document.getElementById('formAddBlueprint').reset();
+      renderBlueprintsList();
+      updateAllCounters();
+      showToast('Plano registrado');
+    }
+
+    function deleteBlueprint(idx) {
+      blueprints.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY_BLUEPRINTS, JSON.stringify(blueprints));
+      renderBlueprintsList();
+      updateAllCounters();
+    }
+
+    // PERSONAL
+    function openStaffModal() {
+      document.getElementById('modalStaff').classList.remove('hidden');
+    }
+    function closeStaffModal() {
+      document.getElementById('modalStaff').classList.add('hidden');
+    }
+
+    // WHATSAPP
+    function openWhatsAppModal() {
+      document.getElementById('modalWhatsApp').classList.remove('hidden');
+      buildWhatsAppText();
+    }
+    function closeWhatsAppModal() {
+      document.getElementById('modalWhatsApp').classList.add('hidden');
+    }
+
+    function buildWhatsAppText() {
+      const dayTasks = tasks.filter(t => isTaskInActiveDate(t, activeDateString));
+      const [y, m, d] = activeDateString.split('-');
+
+      let msg = `*CONTROL TOPOGRÁFICO DIARIO*\n`;
+      msg += `📅 *Fecha:* ${d}/${m}/${y}\n`;
+      msg += `👷 *Topógrafos:* Ronald Zapana / Jhonatan Umaya\n`;
+      msg += `------------------------------------\n\n`;
+
+      if (dayTasks.length === 0) {
+        msg += `No se registraron liberaciones en esta fecha.\n`;
+      } else {
+        const areas = ['4680', '4652', '4653'];
+        areas.forEach(aCode => {
+          const areaTasks = dayTasks.filter(t => t.area.includes(aCode));
+          if (areaTasks.length > 0) {
+            msg += `📍 *ÁREA ${aCode}*\n`;
+            areaTasks.forEach(t => {
+              const f = isStepDoneInActiveDate(t.steps.find(s => s.name === 'fundacion'), activeDateString);
+              const p = isStepDoneInActiveDate(t.steps.find(s => s.name === 'prevaciado'), activeDateString);
+              const post = isStepDoneInActiveDate(t.steps.find(s => s.name === 'postvaciado'), activeDateString);
+              msg += `• *${t.code}* (${t.name} - ${t.ejes}):\n`;
+              msg += `  - Fundación: ${f ? '✅ Conforme' : '⏳ Pendiente'}\n`;
+              msg += `  - Pre-vaciado: ${p ? '✅ Conforme' : '⏳ Pendiente'}\n`;
+              msg += `  - Post-vaciado: ${post ? '✅ Conforme' : '⏳ Pendiente'}\n`;
+            });
+            msg += `\n`;
+          }
+        });
+      }
+
+      msg += `------------------------------------\n`;
+      msg += `*Reporte generado desde Control Topográfico Obra Civil*`;
+
+      document.getElementById('whatsAppTextPreview').value = msg;
+    }
+
+    function copyWhatsAppToClipboard() {
+      const txt = document.getElementById('whatsAppTextPreview');
+      navigator.clipboard.writeText(txt.value).then(() => {
+        showToast('Texto copiado al portapapeles', 'success');
+      });
+    }
+
+    function sendWhatsAppDirect() {
+      const txt = encodeURIComponent(document.getElementById('whatsAppTextPreview').value);
+      window.open(`https://api.whatsapp.com/send?text=${txt}`, '_blank');
+    }
+
+    // EXPORTACIÓN A EXCEL (.xlsx)
+    function exportTasksToExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Librería Excel no cargada aún');
+        return;
+      }
+
+      const rows = [];
+      tasks.forEach((t, index) => {
+        const sFund = t.steps.find(s => s.name === 'fundacion') || {};
+        const sPre = t.steps.find(s => s.name === 'prevaciado') || {};
+        const sPost = t.steps.find(s => s.name === 'postvaciado') || {};
+
+        rows.push({
+          'N°': index + 1,
+          'Área de Proyecto': t.area,
+          'Código': t.code,
+          'Elemento': t.name,
+          'Ubicación / Ejes': t.ejes,
+          'Topógrafo': t.topografo,
+          'Plano Ref.': t.plano || 'S/P',
+          'Fecha Creación': t.fechaCreacion,
+          '1. Fundación': sFund.done ? `Liberado (${sFund.fecha} ${sFund.hora})` : 'Pendiente',
+          '2. Pre-vaciado': sPre.done ? `Liberado (${sPre.fecha} ${sPre.hora})` : 'Pendiente',
+          '3. Post-vaciado': sPost.done ? `Liberado (${sPost.fecha} ${sPost.hora})` : 'Pendiente',
+        });
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Liberaciones');
+
+      const fileName = `Parte_Topografico_${activeDateString}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      showToast(`Descargando ${fileName}`, 'success');
+    }
+
+    // FILTROS
+    function onSearchFilterChange(val) {
+      filterSearchQuery = val;
+      renderTableRows();
+    }
+    function onStateFilterChange(val) {
+      filterStatus = val;
+      renderTableRows();
+    }
+
+    // UTILITARIOS
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = msg;
+      if (type === 'success') {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-info text-blue-400';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
 </body>
 </html>
