@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control Topográfico Diario • Obras Civiles</title>
+  <title>Control Topográfico Diario • Áreas de Obra</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,13 +14,9 @@
         extend: {
           colors: {
             brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a'
+              4680: '#2563eb', // Azul Técnico (Ácidos)
+              4652: '#4f46e5', // Índigo Vibrante (LESDE)
+              4653: '#0d9488'  // Teal / Esmeralda (Almacén General)
             }
           }
         }
@@ -31,130 +27,130 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- SheetJS para exportación a Excel -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- SheetJS para Exportación Excel nativa -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    /* Ocultar barra de scroll en contenedores horizontales */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    /* Tipografía y optimizaciones táctiles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Animación suave para transiciones */
-    .transition-custom {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    /* Prevenir selección accidental en botones rápidos de campo */
     .btn-touch {
       touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+      transition: all 0.15s ease-in-out;
+    }
+    .btn-touch:active {
+      transform: scale(0.97);
     }
   </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200 antialiased overflow-x-hidden">
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col overflow-x-hidden">
 
   <!-- ==========================================
        CABECERA PRINCIPAL (STICKY)
        ========================================== -->
-  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-xs">
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3">
       
-      <!-- Identidad y Título -->
+      <!-- Identidad y Título Técnico -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-sm shrink-0">
-          <i class="fa-solid fa-compass-drafting text-lg"></i>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-sm shrink-0 border border-white/20">
+          <i class="fa-solid fa-compass-drafting text-base"></i>
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-base font-extrabold tracking-tight truncate text-slate-900 dark:text-white">Control Topográfico Diario</h1>
-            <span id="roleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+            <h1 class="text-sm sm:text-base font-black tracking-tight truncate text-slate-900 dark:text-white">Control Topográfico Diario</h1>
+            <span id="roleBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
               Admin
             </span>
           </div>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Liberación: Fundación • Pre-vaciado • Post-vaciado</p>
+          <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate flex items-center gap-1.5">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Liberación: Fundación • Pre-vaciado • Post-vaciado</span>
+          </p>
         </div>
       </div>
 
-      <!-- Acciones de Cabecera (Botones compactos) -->
+      <!-- Acciones de Cabecera (Botones Ergonómicos) -->
       <div class="flex items-center gap-1.5 shrink-0">
         <!-- Botón + Frente (Admin) -->
-        <button id="headerAddBtn" type="button" class="btn-touch px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs flex items-center gap-1 transition-custom">
+        <button id="headerAddBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs flex items-center gap-1.5">
           <i class="fa-solid fa-plus text-xs"></i>
           <span class="hidden sm:inline">Nuevo Frente</span>
         </button>
 
         <!-- Botón WhatsApp -->
-        <button id="headerWhatsAppBtn" type="button" class="btn-touch px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1 transition-custom" title="Enviar reporte por WhatsApp">
+        <button id="headerWhatsAppBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5" title="Enviar reporte por WhatsApp">
           <i class="fa-brands fa-whatsapp text-sm"></i>
           <span class="hidden sm:inline">WhatsApp</span>
         </button>
 
         <!-- Alternar Tema Oscuro/Claro -->
-        <button id="themeToggleBtn" type="button" class="btn-touch w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-custom" title="Cambiar tema">
+        <button id="themeToggleBtn" type="button" class="btn-touch w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-700" title="Cambiar tema">
           <i class="fa-solid fa-moon text-xs dark:hidden"></i>
           <i class="fa-solid fa-sun text-xs hidden dark:block text-amber-400"></i>
         </button>
 
         <!-- Botón Perfil / Iniciar Sesión -->
-        <button id="openLoginModalBtn" type="button" class="btn-touch w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-custom" title="Cambiar usuario o rol">
-          <i class="fa-solid fa-user-gear text-xs"></i>
+        <button id="openLoginModalBtn" type="button" class="btn-touch w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-700" title="Perfil y Sesión">
+          <i class="fa-solid fa-user-shield text-xs"></i>
         </button>
       </div>
     </div>
 
     <!-- ==========================================
-         BARRA DE NAVEGACIÓN ENTRE MÓDULOS
+         BARRA DE NAVEGACIÓN ENTRE MÓDULOS DE ÁREA
          ========================================== -->
-    <div class="border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+    <div class="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/60">
       <div class="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         <nav class="flex items-center gap-1.5 shrink-0" id="mainTabNavigation">
-          <!-- Pestaña Área 4680 -->
-          <button type="button" data-tab="area-4680" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-xs">
+          <!-- Pestaña Área 4680 (Ácidos) -->
+          <button type="button" data-tab="area-4680" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-blue-600 bg-blue-600 text-white shadow-xs">
             <i class="fa-solid fa-flask text-xs"></i>
             <span>Área 4680</span>
-            <span id="badge-4680" class="px-1.5 py-0.2 text-[10px] rounded-full bg-white/20 text-white font-mono">0</span>
+            <span id="badge-4680" class="px-1.5 py-0.2 text-[10px] rounded-full bg-white/20 font-mono font-bold">0</span>
           </button>
 
-          <!-- Pestaña Área 4652 -->
-          <button type="button" data-tab="area-4652" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <!-- Pestaña Área 4652 (LESDE) -->
+          <button type="button" data-tab="area-4652" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-solid fa-truck-monster text-xs"></i>
             <span>Área 4652</span>
-            <span id="badge-4652" class="px-1.5 py-0.2 text-[10px] rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono">0</span>
+            <span id="badge-4652" class="px-1.5 py-0.2 text-[10px] rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-bold">0</span>
           </button>
 
-          <!-- Pestaña Área 4653 -->
-          <button type="button" data-tab="area-4653" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <!-- Pestaña Área 4653 (Almacén General) -->
+          <button type="button" data-tab="area-4653" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-solid fa-boxes-stacked text-xs"></i>
             <span>Área 4653</span>
-            <span id="badge-4653" class="px-1.5 py-0.2 text-[10px] rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono">0</span>
+            <span id="badge-4653" class="px-1.5 py-0.2 text-[10px] rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-bold">0</span>
           </button>
 
           <!-- Pestaña ¿Qué me falta? -->
-          <button type="button" data-tab="pending" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <button type="button" data-tab="pending" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
             <span>¿Qué me falta?</span>
-            <span id="badge-pending" class="px-1.5 py-0.2 text-[10px] rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-mono">0</span>
+            <span id="badge-pending" class="px-1.5 py-0.2 text-[10px] rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-mono font-bold">0</span>
           </button>
 
           <!-- Pestaña Planos -->
-          <button type="button" data-tab="blueprints" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <button type="button" data-tab="blueprints" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-regular fa-map text-xs"></i>
             <span>Planos</span>
           </button>
 
           <!-- Pestaña Topógrafos (Admin) -->
-          <button type="button" data-tab="staff" class="tab-btn admin-only px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <button type="button" data-tab="staff" class="tab-btn admin-only px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-solid fa-users text-xs"></i>
             <span>Topógrafos</span>
           </button>
 
           <!-- Pestaña Reporte Excel -->
-          <button type="button" data-tab="excel" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+          <button type="button" data-tab="excel" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300">
             <i class="fa-solid fa-file-excel text-emerald-600 text-xs"></i>
             <span>Excel</span>
           </button>
@@ -164,78 +160,82 @@
   </header>
 
   <!-- ==========================================
-       BARRA DE FECHA, HISTORIAL Y CALENDARIO
+       BARRA DE FECHA, HISTÓRICO Y CALENDARIO
        ========================================== -->
-  <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-2 shadow-2xs">
-    <div class="max-w-7xl mx-auto px-3 sm:px-4 flex flex-wrap items-center justify-between gap-2.5">
+  <div class="bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800/80 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2.5">
       
       <!-- Navegación de Fecha Rápida -->
       <div class="flex items-center gap-1.5">
-        <button id="prevDayBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-custom" title="Día anterior">
+        <button id="prevDayBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-700" title="Día anterior">
           <i class="fa-solid fa-chevron-left text-xs"></i>
         </button>
 
-        <div class="relative flex items-center">
-          <input type="date" id="activeDateInput" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-blue-500 cursor-pointer">
+        <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+          <i class="fa-regular fa-calendar-days text-blue-600 text-xs"></i>
+          <input type="date" id="activeDatePicker" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-hidden cursor-pointer">
         </div>
 
-        <button id="nextDayBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-custom" title="Día siguiente">
+        <button id="nextDayBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-700" title="Día siguiente">
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
 
-        <button id="todayQuickBtn" type="button" class="btn-touch px-2 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition-custom">
+        <button id="todayQuickBtn" type="button" class="btn-touch px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
           Hoy
         </button>
       </div>
 
-      <!-- Botón Calendario Mensual e Historial -->
+      <!-- Indicador de Día y Botón Calendario Mensual -->
       <div class="flex items-center gap-2">
-        <div class="text-[11px] text-slate-500 dark:text-slate-400 hidden md:block">
-          Mostrando liberaciones de: <span id="currentDateDisplay" class="font-bold text-slate-800 dark:text-slate-200"></span>
+        <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hidden sm:block">
+          Mostrando liberaciones de: <span id="currentDateDisplayLabel" class="font-bold text-slate-900 dark:text-white"></span>
         </div>
-        <button id="openCalendarModalBtn" type="button" class="btn-touch px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 hover:bg-indigo-100 flex items-center gap-1.5 transition-custom">
-          <i class="fa-regular fa-calendar-days text-xs"></i>
-          <span>Calendario Mensual</span>
-          <span id="headerMonthLibBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-600 text-white font-mono">0</span>
+
+        <button id="openCalendarModalBtn" type="button" class="btn-touch px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-calendar-check text-xs"></i>
+          <span>Historial / Calendario</span>
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- ==========================================
        CONTENIDO PRINCIPAL DINÁMICO
        ========================================== -->
-  <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-4 flex-1">
-    
-    <!-- CONTENIDO: ÁREAS DE PROYECTO (4680, 4652, 4653) -->
-    <section id="section-areaView" class="space-y-4">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 space-y-4">
+
+    <!-- SECCIÓN 1: VISTA DE TABLA POR ÁREA (4680, 4652, 4653) -->
+    <div id="section-areaView" class="space-y-4">
       
-      <!-- Banner de Información de Área Activa -->
-      <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <!-- Banner del Área Seleccionada -->
+      <div id="areaHeaderBanner" class="p-3.5 sm:p-4 rounded-2xl border shadow-xs flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-3">
-          <div id="areaHeaderIcon" class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg">
+          <div id="areaBannerIcon" class="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow-sm">
             <i class="fa-solid fa-flask"></i>
           </div>
           <div>
-            <h2 id="areaHeaderTitle" class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">4680 - Almacén y descarga de ácidos</h2>
-            <p id="areaHeaderSubtitle" class="text-xs text-slate-500 dark:text-slate-400">Control de fundación, pre-vaciado y post-vaciado topográfico</p>
+            <h2 id="areaBannerTitle" class="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+              Área 4680: Almacén y Descarga de Ácidos
+            </h2>
+            <p id="areaBannerSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Control técnico de zapatas, muros de contención y pedestales
+            </p>
           </div>
         </div>
 
-        <!-- Buscador Rápido de Elementos -->
-        <div class="relative w-full sm:w-64">
+        <!-- Buscador Rápido del Área -->
+        <div class="w-full sm:w-64 relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
-          <input type="text" id="areaSearchInput" placeholder="Buscar elemento, zapata, eje..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-hidden focus:ring-1 focus:ring-blue-500">
+          <input type="text" id="areaSearchInput" placeholder="Buscar por código, elemento o ejes..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
         </div>
       </div>
 
-      <!-- Tabla Técnica de Liberaciones del Área -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+      <!-- Tabla Técnica de Liberaciones -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-700 dark:text-slate-200 border-collapse">
-            <thead class="bg-slate-50 dark:bg-slate-800/80 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
-              <tr>
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
                 <th class="py-2.5 px-3">Código</th>
                 <th class="py-2.5 px-3">Elemento</th>
                 <th class="py-2.5 px-3">Ubicación / Ejes</th>
@@ -247,316 +247,224 @@
                 <th class="py-2.5 px-3 text-right">Acción</th>
               </tr>
             </thead>
-            <tbody id="areaTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-              <!-- Se inyecta dinámicamente -->
+            <tbody id="areaTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium text-slate-700 dark:text-slate-300">
+              <!-- Renderizado dinámico vía JavaScript -->
             </tbody>
           </table>
         </div>
+
+        <!-- Estado vacío si no hay registros -->
+        <div id="areaEmptyState" class="hidden py-12 px-4 text-center">
+          <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center text-xl mb-2">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">Sin frentes registrados para este día</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+            Usa el botón "+ Nuevo Frente" para agregar un elemento en esta fecha, o selecciona otro día en el calendario.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: ¿QUÉ ME FALTA? (ALERTAS DE ALTO CONTRASTE) -->
+    <div id="section-pending" class="hidden space-y-4">
+      <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-black text-amber-900 dark:text-amber-200">
+              Diagnóstico de Pendientes de Liberación
+            </h2>
+            <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+              Identifica rápidamente qué frentes no pueden vaciarse o no cuentan con visto bueno.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de 4 Estados de Alto Contraste -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         
-        <!-- Mensaje cuando no hay registros en la fecha -->
-        <div id="areaEmptyState" class="hidden py-10 px-4 text-center">
-          <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
-            <i class="fa-solid fa-clipboard-question text-xl"></i>
+        <!-- Tarjeta 1: Falta Fundación -->
+        <div class="p-4 rounded-2xl bg-blue-600/10 border-2 border-blue-600/30 dark:border-blue-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-cube text-xs"></i> 1. Falta Fundación
+            </span>
+            <span id="count-missing-fundacion" class="text-xs font-mono font-extrabold px-2 py-0.5 rounded-full bg-blue-600 text-white">0</span>
           </div>
-          <p class="text-xs font-bold text-slate-700 dark:text-slate-300">No se encontraron liberaciones registradas en esta fecha</p>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Usa el botón "+ Nuevo Frente" para agregar un elemento o navega en el calendario.</p>
+          <div id="list-missing-fundacion" class="space-y-1.5 max-h-60 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+
+        <!-- Tarjeta 2: Falta Pre-vaciado -->
+        <div class="p-4 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 dark:border-amber-500/50 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-clipboard-check text-xs"></i> 2. Falta Pre-vaciado
+            </span>
+            <span id="count-missing-prevaciado" class="text-xs font-mono font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white">0</span>
+          </div>
+          <div id="list-missing-prevaciado" class="space-y-1.5 max-h-60 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+
+        <!-- Tarjeta 3: Falta Post-vaciado -->
+        <div class="p-4 rounded-2xl bg-purple-600/10 border-2 border-purple-600/30 dark:border-purple-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-xs"></i> 3. Falta Post-vaciado
+            </span>
+            <span id="count-missing-postvaciado" class="text-xs font-mono font-extrabold px-2 py-0.5 rounded-full bg-purple-600 text-white">0</span>
+          </div>
+          <div id="list-missing-postvaciado" class="space-y-1.5 max-h-60 overflow-y-auto no-scrollbar text-xs"></div>
+        </div>
+
+        <!-- Tarjeta 4: 100% Concluidos -->
+        <div class="p-4 rounded-2xl bg-emerald-600/10 border-2 border-emerald-600/30 dark:border-emerald-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-xs"></i> Concluidos (3/3)
+            </span>
+            <span id="count-completed-items" class="text-xs font-mono font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white">0</span>
+          </div>
+          <div id="list-completed-items" class="space-y-1.5 max-h-60 overflow-y-auto no-scrollbar text-xs"></div>
         </div>
       </div>
+    </div>
 
-    </section>
-
-    <!-- CONTENIDO: MÓDULO "¿QUÉ ME FALTA?" (ALTA VISIBILIDAD) -->
-    <section id="section-pending" class="hidden space-y-4">
-      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
-        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-          Diagnóstico Operativo: Elementos Pendientes de Liberación
-        </h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Identifica rápidamente los cuellos de botella para coordinar con topografía y calidad en campo.</p>
-      </div>
-
-      <!-- Rejilla de Tarjetas de Alto Contraste -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5" id="pendingCardsContainer">
-        <!-- Tarjeta: Falta Fundación -->
-        <div class="p-3.5 rounded-xl border-2 border-blue-500/30 bg-blue-50/60 dark:bg-blue-950/20 shadow-xs">
-          <div class="flex items-center justify-between pb-2 border-b border-blue-200 dark:border-blue-900">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center text-xs">🏗️</span>
-              <h3 class="text-xs font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider">Falta Fundación</h3>
-            </div>
-            <span id="pendingCount-fundacion" class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-600 text-white font-mono">0</span>
-          </div>
-          <div id="pendingList-fundacion" class="mt-2.5 space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
-        </div>
-
-        <!-- Tarjeta: Falta Pre-vaciado -->
-        <div class="p-3.5 rounded-xl border-2 border-amber-500/40 bg-amber-50/60 dark:bg-amber-950/20 shadow-xs">
-          <div class="flex items-center justify-between pb-2 border-b border-amber-200 dark:border-amber-900">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-md bg-amber-500 text-white flex items-center justify-center text-xs">📋</span>
-              <h3 class="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider">Falta Pre-vaciado</h3>
-            </div>
-            <span id="pendingCount-prevaciado" class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white font-mono">0</span>
-          </div>
-          <div id="pendingList-prevaciado" class="mt-2.5 space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
-        </div>
-
-        <!-- Tarjeta: Falta Post-vaciado -->
-        <div class="p-3.5 rounded-xl border-2 border-purple-500/30 bg-purple-50/60 dark:bg-purple-950/20 shadow-xs">
-          <div class="flex items-center justify-between pb-2 border-b border-purple-200 dark:border-purple-900">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-md bg-purple-600 text-white flex items-center justify-center text-xs">📐</span>
-              <h3 class="text-xs font-black text-purple-900 dark:text-purple-300 uppercase tracking-wider">Falta Post-vaciado</h3>
-            </div>
-            <span id="pendingCount-postvaciado" class="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-600 text-white font-mono">0</span>
-          </div>
-          <div id="pendingList-postvaciado" class="mt-2.5 space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONTENIDO: MÓDULO DE PLANOS TÉCNICOS -->
-    <section id="section-blueprints" class="hidden space-y-4">
-      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
+    <!-- SECCIÓN 3: PLANOS TÉCNICOS -->
+    <div id="section-blueprints" class="hidden space-y-4">
+      <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3">
         <div>
-          <h2 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-regular fa-map text-blue-600"></i>
-            Catálogo de Planos Vigentes
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control de códigos y revisiones para evitar replanteos con planos obsoletos.</p>
+          <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Planos Técnicos del Proyecto</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Catálogo oficial de planos y revisiones aprobadas para terreno</p>
         </div>
-        <button id="addBlueprintBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-custom">
+        <button id="addBlueprintBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5">
           <i class="fa-solid fa-plus text-xs"></i>
           <span>Registrar Plano</span>
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="blueprintsGrid">
-        <!-- Renderizado dinámico -->
-      </div>
-    </section>
+      <div id="blueprintsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+    </div>
 
-    <!-- CONTENIDO: MÓDULO DE TOPÓGRAFOS Y PERSONAL -->
-    <section id="section-staff" class="hidden space-y-4">
-      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
+    <!-- SECCIÓN 4: GESTIÓN DE TOPÓGRAFOS (ADMIN) -->
+    <div id="section-staff" class="hidden space-y-4">
+      <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3">
         <div>
-          <h2 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-users text-blue-600"></i>
-            Equipo de Topografía en Obra
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gestión de brigadas, asignación de frentes y teléfonos de contacto.</p>
+          <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Equipo Técnico de Topografía</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gestión de personal de campo y frentes asignados</p>
         </div>
-        <button id="addStaffBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-custom">
+        <button id="addStaffBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5">
           <i class="fa-solid fa-user-plus text-xs"></i>
           <span>Nuevo Topógrafo</span>
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="staffGrid">
-        <!-- Renderizado dinámico -->
-      </div>
-    </section>
+      <div id="staffGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+    </div>
 
-    <!-- CONTENIDO: MÓDULO EXCEL -->
-    <section id="section-excel" class="hidden space-y-4">
-      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-file-excel text-emerald-600"></i>
-            Descarga de Parte Oficial en Excel
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Genera la planilla electrónica estructurada para archivar o remitir a supervisión.</p>
+    <!-- SECCIÓN 5: REPORTE Y EXPORTACIÓN EXCEL -->
+    <div id="section-excel" class="hidden space-y-4">
+      <div class="p-4 rounded-2xl bg-emerald-600/10 border border-emerald-600/30 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-file-excel"></i>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-black text-emerald-950 dark:text-emerald-200">
+              Parte Diario Oficial en Excel
+            </h2>
+            <p class="text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">
+              Genera la planilla técnica estructurada con fecha, horas y firmas
+            </p>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="downloadExcelDailyBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-custom shadow-xs">
-            <i class="fa-solid fa-file-arrow-down text-xs"></i>
-            <span>Exportar Día Seleccionado (.xlsx)</span>
-          </button>
-          <button id="downloadExcelAllBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 flex items-center gap-1.5 transition-custom">
-            <i class="fa-solid fa-database text-xs"></i>
-            <span>Exportar Histórico Completo</span>
-          </button>
-        </div>
+
+        <button id="downloadExcelBtn" type="button" class="btn-touch px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center gap-2">
+          <i class="fa-solid fa-file-arrow-down text-sm"></i>
+          <span>Descargar Parte en Excel (.xlsx)</span>
+        </button>
       </div>
 
       <!-- Vista Previa de la Planilla -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs p-4">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Previsualización del Parte de Trabajo</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border border-slate-200 dark:border-slate-800 border-collapse">
-            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border-b">
-              <tr>
-                <th class="p-2 border">Área</th>
-                <th class="p-2 border">Código</th>
-                <th class="p-2 border">Elemento</th>
-                <th class="p-2 border">Ubicación / Ejes</th>
-                <th class="p-2 border">Topógrafo</th>
-                <th class="p-2 border text-center">Fundación</th>
-                <th class="p-2 border text-center">Pre-vaciado</th>
-                <th class="p-2 border text-center">Post-vaciado</th>
-                <th class="p-2 border text-center">Estado</th>
-              </tr>
-            </thead>
-            <tbody id="excelPreviewBody" class="divide-y divide-slate-100 dark:divide-slate-800">
-              <!-- Renderizado dinámico -->
-            </tbody>
-          </table>
-        </div>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3">
+        <h3 class="text-xs font-extrabold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+          Previsualización de Filas a Exportar
+        </h3>
+        <div id="excelPreviewContainer" class="overflow-x-auto max-h-96 text-xs font-mono"></div>
       </div>
-    </section>
+    </div>
 
   </main>
 
   <!-- ==========================================
-       MODAL 1: CALENDARIO MENSUAL E HISTÓRICO
+       MODAL 1: NUEVO FRENTE DE TRABAJO
        ========================================== -->
-  <div id="calendarModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center p-3">
+  <div id="addModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3">
     <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       
-      <!-- Cabecera del Calendario -->
-      <div class="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+      <!-- Cabecera del Modal -->
+      <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <button id="calPrevMonthBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 flex items-center justify-center">
-            <i class="fa-solid fa-chevron-left text-xs"></i>
-          </button>
-          <span id="calMonthYearTitle" class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white capitalize"></span>
-          <button id="calNextMonthBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 flex items-center justify-center">
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
+          <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-plus"></i>
+          </div>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white">Registrar Elemento / Frente</h3>
         </div>
-        <button id="closeCalendarModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
+        <button id="closeAddModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <!-- Cuerpo del Calendario (Grid) -->
-      <div class="p-3.5 overflow-y-auto">
-        <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase pb-2">
-          <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
-        </div>
-        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1">
-          <!-- Celdas de días renderizadas con conteo -->
-        </div>
-      </div>
-
-      <!-- Pie del Calendario -->
-      <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-[11px]">
-        <div class="flex items-center gap-1.5 text-slate-500">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-          <span>Días con liberaciones aprobadas</span>
-        </div>
-        <button id="calTodayBtn" type="button" class="btn-touch font-bold text-blue-600 dark:text-blue-400 hover:underline">
-          Ir al mes actual
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ==========================================
-       MODAL 2: LOGIN Y CONTROL DE ROLES
-       ========================================== -->
-  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-5 space-y-4">
-      <div class="text-center">
-        <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white mx-auto flex items-center justify-center text-xl shadow-md mb-2">
-          <i class="fa-solid fa-user-lock"></i>
-        </div>
-        <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Acceso al Sistema</h3>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Selecciona tu perfil de trabajo para continuar</p>
-      </div>
-
-      <div class="space-y-3 pt-2">
-        <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Ingreso Administrador (Topógrafo / Jefe)</label>
-          <input type="password" id="adminPasswordInput" placeholder="Contraseña (admin)" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-1 focus:ring-blue-500">
-          <button id="loginAdminSubmitBtn" type="button" class="btn-touch w-full py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-custom">
-            Iniciar como Administrador
-          </button>
-        </div>
-
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-          <span class="shrink-0 px-2 text-[10px] uppercase font-bold text-slate-400">O bien</span>
-          <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-        </div>
-
-        <button id="loginGuestBtn" type="button" class="btn-touch w-full py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-custom flex items-center justify-center gap-2">
-          <i class="fa-solid fa-eye text-xs text-slate-400"></i>
-          <span>Ingresar como Modo Invitado (Solo Lectura)</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
-       MODAL 3: AGREGAR / EDITAR FRENTE
-       ========================================== -->
-  <div id="addTaskModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
-        <h3 id="taskModalTitle" class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid fa-plus-circle text-blue-600"></i>
-          <span>Registrar Nuevo Frente / Elemento</span>
-        </h3>
-        <button id="closeTaskModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <form id="taskForm" class="p-4 space-y-3 overflow-y-auto">
-        <input type="hidden" id="taskFormId">
-
-        <!-- Selector de Área Oficial -->
+      <!-- Formulario de Registro -->
+      <form id="addFrontForm" class="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
+        
+        <!-- Área de Destino -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Área Oficial del Proyecto *</label>
-          <select id="taskFormArea" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <option value="4680">4680 - Almacén y descarga de ácidos</option>
-            <option value="4652">4652 - Taller de mantenimiento de equipo LESDE</option>
-            <option value="4653">4653 - Almacén general</option>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Área Oficial del Proyecto</label>
+          <select id="modalAreaSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500/20">
+            <option value="4680">Área 4680 - Almacén y descarga de ácidos</option>
+            <option value="4652">Área 4652 - Taller de mantenimiento de equipo LESDE</option>
+            <option value="4653">Área 4653 - Almacén general</option>
           </select>
         </div>
 
-        <!-- Código de Identificación -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Código del Frente / Elemento *</label>
-          <input type="text" id="taskFormCode" placeholder="Ej: Z-04, MC-02, P-01, ZJ-03" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-
-        <!-- Nombre / Tipo de Elemento -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tipo o Descripción del Elemento *</label>
-          <input type="text" id="taskFormTitle" placeholder="Ej: Zapata aislada, Muro de contención, Pedestal" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <!-- Código y Nombre del Elemento -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Código (ej. Z-04)</label>
+            <input type="text" id="modalCodeInput" required placeholder="Z-04" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-bold uppercase focus:outline-hidden focus:ring-2 focus:ring-blue-500/20">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Elemento Estructural</label>
+            <input type="text" id="modalTitleInput" required placeholder="Zapata Aislada" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20">
+          </div>
         </div>
 
         <!-- Ubicación / Ejes -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ubicación / Ejes Topográficos</label>
-          <input type="text" id="taskFormAxes" placeholder="Ej: Entre Ejes A-B / 1-2" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Ubicación / Ejes (ej. Entre Ejes A-B / 1-2)</label>
+          <input type="text" id="modalAxesInput" placeholder="Ejes A-B / 1-2" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20">
         </div>
 
-        <!-- Topógrafo Encargado -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Topógrafo Asignado</label>
-          <select id="taskFormStaff" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <!-- Rellenado dinámico desde la lista de topógrafos -->
-          </select>
+        <!-- Topógrafo y Plano Asignado -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Topógrafo Encargado</label>
+            <select id="modalStaffSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Plano de Referencia</label>
+            <select id="modalBlueprintSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"></select>
+          </div>
         </div>
 
-        <!-- Plano Vinculado -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Plano de Referencia</label>
-          <select id="taskFormBlueprint" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <!-- Rellenado dinámico desde planos -->
-          </select>
-        </div>
-
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" id="cancelTaskFormBtn" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            Cancelar
-          </button>
-          <button type="submit" class="btn-touch px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white">
-            Guardar Elemento
+        <div class="pt-2">
+          <button type="submit" class="btn-touch w-full py-2.5 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-md flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Guardar y Publicar Frente</span>
           </button>
         </div>
       </form>
@@ -564,31 +472,138 @@
   </div>
 
   <!-- ==========================================
-       MODAL 4: WHATSAPP (REPORTE DE LIBERACIONES)
+       MODAL 2: INICIO DE SESIÓN Y ROLES
        ========================================== -->
-  <div id="whatsAppModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
-          <span>Enviar Reporte de Liberaciones</span>
-        </h3>
+  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-5 space-y-4 relative overflow-hidden">
+      
+      <!-- Borde superior con gradiente de ingeniería -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-emerald-500"></div>
+
+      <!-- Botón de cierre para usuarios ya autenticados -->
+      <button id="closeLoginModalBtn" type="button" class="btn-touch absolute top-3.5 right-3.5 w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center hidden" title="Cerrar">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="text-center pt-2">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white mx-auto flex items-center justify-center text-xl shadow-md shadow-blue-500/20 mb-2">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-base font-black tracking-tight text-slate-900 dark:text-white">Acceso al Sistema</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control y Registro de Liberaciones Topográficas</p>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <!-- Acceso Administrador -->
+        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">
+              <i class="fa-solid fa-user-gear text-blue-600 mr-1"></i> Perfil Administrador
+            </label>
+            <span class="text-[10px] text-slate-400">Edición completa</span>
+          </div>
+
+          <div class="relative">
+            <input type="password" id="adminPasswordInput" placeholder="Ingresa tu clave de acceso" class="w-full pl-3 pr-9 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500">
+            <button type="button" id="togglePassVisibilityBtn" class="btn-touch absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <i class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
+
+          <button id="loginAdminSubmitBtn" type="button" class="btn-touch w-full py-2 rounded-lg text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-custom flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-right-to-bracket text-xs"></i>
+            <span>Iniciar como Administrador</span>
+          </button>
+        </div>
+
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+          <span class="shrink-0 px-2.5 text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider">o continuar como</span>
+          <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+
+        <!-- Modo Consulta (Invitado) -->
+        <button id="loginGuestBtn" type="button" class="btn-touch w-full py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-custom flex items-center justify-center gap-2">
+          <i class="fa-solid fa-eye text-xs text-amber-500"></i>
+          <span>Modo Consulta / Auditoría (Solo Lectura)</span>
+        </button>
+      </div>
+
+      <div class="pt-2 text-center text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80">
+        Sesión activa: <span id="loginSessionState" class="font-bold text-slate-700 dark:text-slate-300">No iniciada</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: CALENDARIO MENSUAL E HISTÓRICO
+       ========================================== -->
+  <div id="calendarModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 sm:p-5 space-y-3">
+      
+      <!-- Cabecera Mes/Año -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button id="calPrevMonthBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <h3 id="calMonthYearTitle" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white capitalize"></h3>
+          <button id="calNextMonthBtn" type="button" class="btn-touch w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <button id="closeCalendarModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Cuadrícula Semanal -->
+      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400 uppercase py-1">
+        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+      </div>
+
+      <!-- Cuadrícula de Días con Conteo -->
+      <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
+
+      <div class="pt-2 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+          <span>Frentes asignados</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+          <span>Liberaciones</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 4: ENVÍO A WHATSAPP
+       ========================================== -->
+  <div id="whatsappModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 sm:p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white">Reporte de Campo por WhatsApp</h3>
+        </div>
         <button id="closeWhatsAppModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Mensaje Preformateado</label>
-        <textarea id="whatsAppMessageText" rows="9" class="w-full p-2.5 text-[11px] font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden"></textarea>
-      </div>
+      <textarea id="whatsappMessagePreview" rows="8" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-hidden"></textarea>
 
-      <div class="flex items-center justify-between pt-2">
-        <button id="copyWhatsAppBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="copyWhatsAppBtn" type="button" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5">
           <i class="fa-regular fa-copy text-xs"></i>
           <span>Copiar Texto</span>
         </button>
-        <button id="sendWhatsAppBtn" type="button" class="btn-touch px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-xs">
+        <button id="sendWhatsAppBtn" type="button" class="btn-touch px-4 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-sm">
           <i class="fa-brands fa-whatsapp text-sm"></i>
           <span>Abrir WhatsApp</span>
         </button>
@@ -596,951 +611,464 @@
     </div>
   </div>
 
-  <!-- ==========================================
-       MODAL 5: AGREGAR PLANO
-       ========================================== -->
-  <div id="blueprintModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="fa-regular fa-map text-blue-600"></i>
-          <span>Registrar Plano Técnico</span>
-        </h3>
-        <button id="closeBlueprintModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <form id="blueprintForm" class="space-y-2.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Código del Plano *</label>
-          <input type="text" id="bpFormCode" placeholder="Ej: PL-4680-EST-001" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Descripción / Disciplina</label>
-          <input type="text" id="bpFormTitle" placeholder="Ej: Cimentaciones y zapatas" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Revisión</label>
-            <input type="text" id="bpFormRev" value="Rev. 0" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Área</label>
-            <select id="bpFormArea" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-              <option value="4680">4680</option>
-              <option value="4652">4652</option>
-              <option value="4653">4653</option>
-            </select>
-          </div>
-        </div>
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" id="cancelBlueprintFormBtn" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800">Cancelar</button>
-          <button type="submit" class="btn-touch px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white">Guardar Plano</button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <!-- Toast de Notificaciones -->
+  <div id="toastNotification" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2.5 rounded-xl shadow-lg text-xs font-extrabold text-white transition-all transform duration-200 flex items-center gap-2"></div>
 
   <!-- ==========================================
-       MODAL 6: AGREGAR / EDITAR TOPÓGRAFO
-       ========================================== -->
-  <div id="staffModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid fa-user-plus text-blue-600"></i>
-          <span>Registrar Perfil de Topógrafo</span>
-        </h3>
-        <button id="closeStaffModalBtn" type="button" class="btn-touch w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <form id="staffForm" class="space-y-2.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre Completo *</label>
-          <input type="text" id="staffFormName" placeholder="Ej: Ronald Zapana" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cargo / Especialidad</label>
-          <input type="text" id="staffFormRole" value="Topógrafo Titular" required class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Teléfono Móvil (WhatsApp)</label>
-          <input type="text" id="staffFormPhone" placeholder="+51 987654321" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Área Habitual de Trabajo</label>
-          <select id="staffFormDefaultArea" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <option value="4680">4680 - Almacén y descarga de ácidos</option>
-            <option value="4652">4652 - Taller LESDE</option>
-            <option value="4653">4653 - Almacén general</option>
-          </select>
-        </div>
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" id="cancelStaffFormBtn" class="btn-touch px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800">Cancelar</button>
-          <button type="submit" class="btn-touch px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white">Guardar Perfil</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICACIÓN -->
-  <div id="toastNotification" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <div class="px-4 py-2.5 rounded-xl shadow-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold flex items-center gap-2 border border-slate-800 dark:border-slate-200">
-      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-500"></i>
-      <span id="toastMessage">Operación realizada con éxito</span>
-    </div>
-  </div>
-
-  <!-- ==========================================
-       LÓGICA JAVASCRIPT COMPLETA
+       LÓGICA JAVASCRIPT COMPLETA Y UNIFICADA
        ========================================== -->
   <script>
     // ----------------------------------------------------
-    // ESTADO GLOBAL Y DEFINICIÓN DE DATOS INICIALES
+    // CONSTANTES Y CONFIGURACIÓN DE ÁREAS
     // ----------------------------------------------------
-    function getTodayDateString() {
+    const AREA_CONFIG = {
+      '4680': {
+        title: 'Área 4680: Almacén y Descarga de Ácidos',
+        subtitle: 'Control técnico de zapatas, muros de contención y pedestales',
+        icon: 'fa-flask',
+        colorClass: 'bg-blue-600',
+        activeBtn: ['bg-blue-600', 'text-white', 'border-blue-600']
+      },
+      '4652': {
+        title: 'Área 4652: Taller de Mantenimiento LESDE',
+        subtitle: 'Control de fundaciones de fosas, losas pesadas y anclajes',
+        icon: 'fa-truck-monster',
+        colorClass: 'bg-indigo-600',
+        activeBtn: ['bg-indigo-600', 'text-white', 'border-indigo-600']
+      },
+      '4653': {
+        title: 'Área 4653: Almacén General de Materiales',
+        subtitle: 'Control de niveles de solado, zapatas z-101 y columnas',
+        icon: 'fa-boxes-stacked',
+        colorClass: 'bg-teal-600',
+        activeBtn: ['bg-teal-600', 'text-white', 'border-teal-600']
+      }
+    };
+
+    // Función para obtener la fecha de hoy en formato ISO (YYYY-MM-DD)
+    function getTodayString() {
       const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
-    let activeDateString = getTodayDateString();
-    let currentActiveTab = 'area-4680';
-    let currentUserRole = 'admin'; // 'admin' o 'guest'
+    // Hora formateada estándar (HH:MM AM/PM)
+    function getCurrentTimeString() {
+      return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
 
-    // Variables de navegación del modal de calendario
-    let calendarViewYear = new Date().getFullYear();
-    let calendarViewMonth = new Date().getMonth();
+    // ----------------------------------------------------
+    // ESTADO GLOBAL DE LA APLICACIÓN
+    // ----------------------------------------------------
+    let currentUserRole = 'admin'; // 'admin' | 'guest'
+    let currentActiveTab = 'area-4680'; // 'area-4680' | 'area-4652' | 'area-4653' | 'pending' | 'blueprints' | 'staff' | 'excel'
+    let activeDateString = getTodayString();
+    let calendarViewDate = new Date();
 
-    // Topógrafos oficiales
-    const defaultStaff = [
-      { id: 'st-1', name: 'Ronald Zapana', role: 'Topógrafo Jefe de Frente', phone: '+51950000001', defaultArea: '4680' },
-      { id: 'st-2', name: 'Jhonatan Umaya', role: 'Topógrafo Titular', phone: '+51950000002', defaultArea: '4652' }
+    // Catálogo de personal inicial
+    let staffList = [
+      { id: 'st-1', name: 'Ronald Zapana', role: 'Topógrafo Principal', phone: '+51 987 654 321', active: true },
+      { id: 'st-2', name: 'Jhonatan Umaya', role: 'Topógrafo de Campo', phone: '+51 912 345 678', active: true }
     ];
 
-    // Planos oficiales
-    const defaultBlueprints = [
-      { id: 'bp-1', code: '4680-CIV-PL-001', title: 'Cimentaciones y Zapatas de Ácidos', rev: 'Rev. 2', area: '4680' },
-      { id: 'bp-2', code: '4652-CIV-PL-010', title: 'Taller Mantenimiento LESDE Estructuras', rev: 'Rev. 1', area: '4652' },
-      { id: 'bp-3', code: '4653-CIV-PL-005', title: 'Almacén General Losa y Pedestales', rev: 'Rev. 0', area: '4653' }
+    // Catálogo de planos
+    let blueprintsList = [
+      { id: 'bp-1', code: 'PL-4680-EST-001', rev: 'Rev. 2', title: 'Cimentaciones y Zapatas - Descarga de Ácidos' },
+      { id: 'bp-2', code: 'PL-4652-EST-004', rev: 'Rev. 1', title: 'Fosas de Mantenimiento y Pedestales LESDE' },
+      { id: 'bp-3', code: 'PL-4653-EST-010', rev: 'Rev. 0', title: 'Almacén General - Detalles de Solados y Columnas' }
     ];
 
-    // Ejemplos reales permanentes para las 3 áreas con sus 3 hitos
-    const defaultTasks = [
-      // ÁREA 4680
+    // Ejemplos permanentes estructurados por los 3 hitos clave
+    const DEFAULT_TASKS = [
       {
         id: 'task-4680-1',
-        area: '4680',
+        areaCode: '4680',
         code: 'Z-01',
-        title: 'Zapata Aislada Z-1',
+        title: 'Zapata Aislada Z-01',
         axes: 'Entre Ejes A-B / 1-2',
         staff: 'Ronald Zapana',
-        blueprint: '4680-CIV-PL-001',
-        createdDate: getTodayDateString(),
+        blueprint: 'PL-4680-EST-001',
+        createdDate: getTodayString(),
         steps: {
-          fundacion: { done: true, fecha: getTodayDateString(), hora: '08:30 AM' },
-          prevaciado: { done: true, fecha: getTodayDateString(), hora: '11:15 AM' },
-          postvaciado: { done: false, fecha: null, hora: null }
+          fundacion: { status: 'conforme', fecha: getTodayString(), hora: '08:30' },
+          prevaciado: { status: 'conforme', fecha: getTodayString(), hora: '11:15' },
+          postvaciado: { status: 'pendiente', fecha: null, hora: null }
         }
       },
       {
         id: 'task-4680-2',
-        area: '4680',
+        areaCode: '4680',
         code: 'Z-04',
-        title: 'Zapata Central Z-4',
-        axes: 'Entre Ejes B-C / 2-3',
+        title: 'Zapata Combinada Z-04',
+        axes: 'Entre Ejes C-D / 3-4',
         staff: 'Ronald Zapana',
-        blueprint: '4680-CIV-PL-001',
-        createdDate: getTodayDateString(),
+        blueprint: 'PL-4680-EST-001',
+        createdDate: getTodayString(),
         steps: {
-          fundacion: { done: true, fecha: getTodayDateString(), hora: '09:00 AM' },
-          prevaciado: { done: false, fecha: null, hora: null },
-          postvaciado: { done: false, fecha: null, hora: null }
+          fundacion: { status: 'conforme', fecha: getTodayString(), hora: '09:00' },
+          prevaciado: { status: 'pendiente', fecha: null, hora: null },
+          postvaciado: { status: 'pendiente', fecha: null, hora: null }
         }
       },
-      {
-        id: 'task-4680-3',
-        area: '4680',
-        code: 'MC-01',
-        title: 'Muro de Contención Ácidos',
-        axes: 'Eje 1 / Entre A-D',
-        staff: 'Ronald Zapana',
-        blueprint: '4680-CIV-PL-001',
-        createdDate: getTodayDateString(),
-        steps: {
-          fundacion: { done: false, fecha: null, hora: null },
-          prevaciado: { done: false, fecha: null, hora: null },
-          postvaciado: { done: false, fecha: null, hora: null }
-        }
-      },
-
-      // ÁREA 4652
       {
         id: 'task-4652-1',
-        area: '4652',
-        code: 'Z-LESDE-01',
-        title: 'Zapata Principal Taller',
-        axes: 'Ejes 2-3 / E-F',
-        staff: 'Jhonatan Umaya',
-        blueprint: '4652-CIV-PL-010',
-        createdDate: getTodayDateString(),
-        steps: {
-          fundacion: { done: true, fecha: getTodayDateString(), hora: '08:45 AM' },
-          prevaciado: { done: true, fecha: getTodayDateString(), hora: '10:30 AM' },
-          postvaciado: { done: true, fecha: getTodayDateString(), hora: '04:15 PM' }
-        }
-      },
-      {
-        id: 'task-4652-2',
-        area: '4652',
+        areaCode: '4652',
         code: 'FOSO-01',
-        title: 'Foso de Mantenimiento LESDE',
-        axes: 'Eje Central Taller',
+        title: 'Foso de Mantenimiento Pesado',
+        axes: 'Ejes 2-5 / F-H',
         staff: 'Jhonatan Umaya',
-        blueprint: '4652-CIV-PL-010',
-        createdDate: getTodayDateString(),
+        blueprint: 'PL-4652-EST-004',
+        createdDate: getTodayString(),
         steps: {
-          fundacion: { done: true, fecha: getTodayDateString(), hora: '09:40 AM' },
-          prevaciado: { done: false, fecha: null, hora: null },
-          postvaciado: { done: false, fecha: null, hora: null }
+          fundacion: { status: 'conforme', fecha: getTodayString(), hora: '07:45' },
+          prevaciado: { status: 'conforme', fecha: getTodayString(), hora: '10:30' },
+          postvaciado: { status: 'conforme', fecha: getTodayString(), hora: '15:20' }
         }
       },
-
-      // ÁREA 4653
       {
         id: 'task-4653-1',
-        area: '4653',
-        code: 'P-04',
-        title: 'Pedestal Metálico Almacén',
-        axes: 'Eje A-3',
+        areaCode: '4653',
+        code: 'Z-101',
+        title: 'Zapata Tipica Z-101',
+        axes: 'Eje 1 / A-K',
         staff: 'Ronald Zapana',
-        blueprint: '4653-CIV-PL-005',
-        createdDate: getTodayDateString(),
+        blueprint: 'PL-4653-EST-010',
+        createdDate: getTodayString(),
         steps: {
-          fundacion: { done: true, fecha: getTodayDateString(), hora: '07:50 AM' },
-          prevaciado: { done: true, fecha: getTodayDateString(), hora: '01:20 PM' },
-          postvaciado: { done: false, fecha: null, hora: null }
-        }
-      },
-      {
-        id: 'task-4653-2',
-        area: '4653',
-        code: 'LOSA-01',
-        title: 'Losa de Rodadura Almacén',
-        axes: 'Sector Norte 4653',
-        staff: 'Jhonatan Umaya',
-        blueprint: '4653-CIV-PL-005',
-        createdDate: getTodayDateString(),
-        steps: {
-          fundacion: { done: false, fecha: null, hora: null },
-          prevaciado: { done: false, fecha: null, hora: null },
-          postvaciado: { done: false, fecha: null, hora: null }
+          fundacion: { status: 'pendiente', fecha: null, hora: null },
+          prevaciado: { status: 'pendiente', fecha: null, hora: null },
+          postvaciado: { status: 'pendiente', fecha: null, hora: null }
         }
       }
     ];
 
-    // Carga de LocalStorage con salvaguardas
-    let staffList = JSON.parse(localStorage.getItem('topografia_staff') || 'null') || defaultStaff;
-    let blueprints = JSON.parse(localStorage.getItem('topografia_blueprints') || 'null') || defaultBlueprints;
-    let tasks = JSON.parse(localStorage.getItem('topografia_tasks') || 'null') || defaultTasks;
+    let tasks = [];
 
-    function saveAllToStorage() {
+    // ----------------------------------------------------
+    // INICIALIZACIÓN Y PERSISTENCIA
+    // ----------------------------------------------------
+    function initDatabase() {
       try {
-        localStorage.setItem('topografia_tasks', JSON.stringify(tasks));
-        localStorage.setItem('topografia_staff', JSON.stringify(staffList));
-        localStorage.setItem('topografia_blueprints', JSON.stringify(blueprints));
-      } catch (err) {
-        console.error('Error guardando en localStorage:', err);
+        const storedTasks = localStorage.getItem('topografia_tasks_db');
+        if (storedTasks) {
+          tasks = JSON.parse(storedTasks);
+        } else {
+          tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+          saveTasksToStorage();
+        }
+
+        const storedStaff = localStorage.getItem('topografia_staff_db');
+        if (storedStaff) staffList = JSON.parse(storedStaff);
+
+        const storedBp = localStorage.getItem('topografia_blueprints_db');
+        if (storedBp) blueprintsList = JSON.parse(storedBp);
+      } catch (e) {
+        console.error('Error al inicializar la base local:', e);
+        tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+      }
+    }
+
+    function saveTasksToStorage() {
+      try {
+        localStorage.setItem('topografia_tasks_db', JSON.stringify(tasks));
+      } catch (e) {
+        console.error('Error al guardar datos:', e);
       }
     }
 
     // ----------------------------------------------------
-    // LÓGICA DE AUDITORÍA Y FILTRADO POR FECHA
+    // AYUDAS DE CÁLCULO ESTRICTO POR FECHA
     // ----------------------------------------------------
-    // Una liberación cuenta para la fecha seleccionada si ocurrió en esa fecha
-    function isStepDoneAtDate(stepObj, targetDateStr) {
-      if (!stepObj || !stepObj.done) return false;
-      return stepObj.fecha === targetDateStr;
+    function isStepDoneAtDate(step, dateStr) {
+      if (!step || step.status !== 'conforme') return false;
+      return step.fecha === dateStr;
     }
 
-    // Total de liberaciones aprobadas en un día específico (para el calendario)
-    function getLiberationCountForDate(targetDateStr) {
-      if (!tasks || !Array.isArray(tasks)) return 0;
+    function taskBelongsToDate(task, dateStr) {
+      if (task.createdDate === dateStr) return true;
+      if (isStepDoneAtDate(task.steps?.fundacion, dateStr)) return true;
+      if (isStepDoneAtDate(task.steps?.prevaciado, dateStr)) return true;
+      if (isStepDoneAtDate(task.steps?.postvaciado, dateStr)) return true;
+      return false;
+    }
+
+    function countDayLiberations(dateStr) {
       let count = 0;
       tasks.forEach(task => {
-        if (!task.steps) return;
-        ['fundacion', 'prevaciado', 'postvaciado'].forEach(stepKey => {
-          const s = task.steps[stepKey];
-          if (s && s.done && s.fecha === targetDateStr) {
-            count++;
-          }
-        });
+        if (isStepDoneAtDate(task.steps?.fundacion, dateStr)) count++;
+        if (isStepDoneAtDate(task.steps?.prevaciado, dateStr)) count++;
+        if (isStepDoneAtDate(task.steps?.postvaciado, dateStr)) count++;
       });
       return count;
     }
 
-    function setActiveDate(newDateStr) {
-      if (!newDateStr) return;
-      activeDateString = newDateStr;
-      
-      const input = document.getElementById('activeDateInput');
-      if (input) input.value = activeDateString;
-
-      const display = document.getElementById('currentDateDisplay');
-      if (display) display.textContent = activeDateString;
-
-      // Actualizar todas las vistas dependientes de la fecha
-      renderCurrentAreaTable();
-      renderPendingModule();
-      renderExcelPreview();
-      updateBadgesAndCounters();
-      renderCalendarView();
+    function countDayFronts(dateStr) {
+      return tasks.filter(t => taskBelongsToDate(t, dateStr)).length;
     }
 
     // ----------------------------------------------------
-    // RENDERIZADO DE TABLAS DE ÁREAS (4680, 4652, 4653)
+    // RENDERIZADO DE TABLA POR ÁREA
     // ----------------------------------------------------
-    const areaMeta = {
-      'area-4680': {
-        code: '4680',
-        title: '4680 - Almacén y descarga de ácidos',
-        sub: 'Control de fundación, pre-vaciado y post-vaciado topográfico',
-        icon: '<i class="fa-solid fa-flask"></i>'
-      },
-      'area-4652': {
-        code: '4652',
-        title: '4652 - Taller de mantenimiento de equipo LESDE',
-        sub: 'Liberación de zapatas pesadas, fosos y pedestales',
-        icon: '<i class="fa-solid fa-truck-monster"></i>'
-      },
-      'area-4653': {
-        code: '4653',
-        title: '4653 - Almacén general',
-        sub: 'Liberación de losas de patio, cimentaciones y plataformas',
-        icon: '<i class="fa-solid fa-boxes-stacked"></i>'
+    function renderAreaTable() {
+      const areaCode = currentActiveTab.replace('area-', '');
+      const config = AREA_CONFIG[areaCode];
+      if (!config) return;
+
+      // Actualizar Banner de Información
+      const bannerIcon = document.getElementById('areaBannerIcon');
+      if (bannerIcon) {
+        bannerIcon.className = `w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow-sm ${config.colorClass}`;
+        bannerIcon.innerHTML = `<i class="fa-solid ${config.icon}"></i>`;
       }
-    };
+      document.getElementById('areaBannerTitle').textContent = config.title;
+      document.getElementById('areaBannerSubtitle').textContent = config.subtitle;
 
-    function renderCurrentAreaTable() {
-      const meta = areaMeta[currentActiveTab];
-      if (!meta) return;
-
-      // Actualizar cabecera del área
-      document.getElementById('areaHeaderTitle').textContent = meta.title;
-      document.getElementById('areaHeaderSubtitle').textContent = meta.sub;
-      document.getElementById('areaHeaderIcon').innerHTML = meta.icon;
+      // Filtro de búsqueda y fecha
+      const searchVal = (document.getElementById('areaSearchInput')?.value || '').toLowerCase().trim();
+      const filteredTasks = tasks.filter(t => {
+        if (t.areaCode !== areaCode) return false;
+        if (!taskBelongsToDate(t, activeDateString)) return false;
+        if (searchVal) {
+          const matchCode = (t.code || '').toLowerCase().includes(searchVal);
+          const matchTitle = (t.title || '').toLowerCase().includes(searchVal);
+          const matchAxes = (t.axes || '').toLowerCase().includes(searchVal);
+          const matchStaff = (t.staff || '').toLowerCase().includes(searchVal);
+          return matchCode || matchTitle || matchAxes || matchStaff;
+        }
+        return true;
+      });
 
       const tbody = document.getElementById('areaTableBody');
       const emptyState = document.getElementById('areaEmptyState');
-      const searchVal = (document.getElementById('areaSearchInput')?.value || '').toLowerCase().trim();
+      if (!tbody) return;
 
       tbody.innerHTML = '';
 
-      // Filtrar elementos del área activa
-      let areaTasks = tasks.filter(t => t.area === meta.code);
-
-      if (searchVal) {
-        areaTasks = areaTasks.filter(t => 
-          t.code.toLowerCase().includes(searchVal) ||
-          t.title.toLowerCase().includes(searchVal) ||
-          (t.axes && t.axes.toLowerCase().includes(searchVal)) ||
-          (t.staff && t.staff.toLowerCase().includes(searchVal))
-        );
-      }
-
-      if (areaTasks.length === 0) {
-        emptyState.classList.remove('hidden');
+      if (filteredTasks.length === 0) {
+        emptyState?.classList.remove('hidden');
         return;
-      } else {
-        emptyState.classList.add('hidden');
       }
+      emptyState?.classList.add('hidden');
 
-      areaTasks.forEach(task => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors';
-
-        // Evaluar estado para la fecha actual
+      filteredTasks.forEach(task => {
         const isFundDone = isStepDoneAtDate(task.steps.fundacion, activeDateString);
         const isPreDone = isStepDoneAtDate(task.steps.prevaciado, activeDateString);
         const isPostDone = isStepDoneAtDate(task.steps.postvaciado, activeDateString);
 
-        // Calcular porcentaje
-        let completedSteps = 0;
-        if (isFundDone) completedSteps++;
-        if (isPreDone) completedSteps++;
-        if (isPostDone) completedSteps++;
-        const percent = Math.round((completedSteps / 3) * 100);
+        const doneCount = (isFundDone ? 1 : 0) + (isPreDone ? 1 : 0) + (isPostDone ? 1 : 0);
+        const percent = Math.round((doneCount / 3) * 100);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors border-b border-slate-100 dark:border-slate-800/60';
 
         tr.innerHTML = `
-          <td class="py-2.5 px-3 font-mono font-bold text-blue-700 dark:text-blue-400">
-            ${task.code}
+          <td class="py-2.5 px-3 font-mono font-bold text-blue-700 dark:text-blue-400 whitespace-nowrap">
+            <span class="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60">${task.code}</span>
           </td>
           <td class="py-2.5 px-3">
-            <div class="font-extrabold text-slate-900 dark:text-white">${task.title}</div>
-            <div class="text-[10px] text-slate-400">Plano: ${task.blueprint || 'S/P'}</div>
+            <div class="font-black text-slate-900 dark:text-white leading-tight">${task.title}</div>
+            <div class="text-[10px] text-slate-400 font-mono mt-0.5">Plano: ${task.blueprint || 'S/P'}</div>
           </td>
-          <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300">
-            ${task.axes || '<span class="text-slate-400 italic">No especificado</span>'}
+          <td class="py-2.5 px-3 text-slate-700 dark:text-slate-300 font-medium">
+            ${task.axes ? `<span class="inline-flex items-center gap-1"><i class="fa-solid fa-arrows-to-dot text-[10px] text-slate-400"></i> ${task.axes}</span>` : '<span class="text-slate-400 italic">No especificado</span>'}
           </td>
-          <td class="py-2.5 px-3">
-            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-              <i class="fa-solid fa-user-circle text-xs text-blue-500"></i>
+          <td class="py-2.5 px-3 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60">
+              <i class="fa-solid fa-user text-[10px] text-blue-500"></i>
               ${task.staff || 'Sin asignar'}
             </span>
           </td>
 
           <!-- 1. Fundación -->
-          <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="toggleStep('${task.id}', 'fundacion')" class="btn-touch px-2 py-1 rounded-md text-[10px] font-bold transition-custom ${
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <button type="button" onclick="toggleStep('${task.id}', 'fundacion')" class="btn-touch px-2.5 py-1.5 rounded-lg text-[10px] font-bold tracking-wide transition-all border ${
               isFundDone 
-                ? 'bg-emerald-600 text-white shadow-2xs' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-xs ring-1 ring-emerald-400/30' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
             }">
-              <i class="fa-solid ${isFundDone ? 'fa-check-circle' : 'fa-circle'} mr-1"></i>
-              ${isFundDone ? (task.steps.fundacion.hora || 'Liberado') : 'Pendiente'}
+              <i class="fa-solid ${isFundDone ? 'fa-check text-[11px]' : 'fa-clock text-[10px] opacity-60'} mr-1"></i>
+              <span>${isFundDone ? (task.steps.fundacion.hora || 'Liberado') : 'Pendiente'}</span>
             </button>
           </td>
 
           <!-- 2. Pre-vaciado -->
-          <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="toggleStep('${task.id}', 'prevaciado')" class="btn-touch px-2 py-1 rounded-md text-[10px] font-bold transition-custom ${
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <button type="button" onclick="toggleStep('${task.id}', 'prevaciado')" class="btn-touch px-2.5 py-1.5 rounded-lg text-[10px] font-bold tracking-wide transition-all border ${
               isPreDone 
-                ? 'bg-amber-500 text-white shadow-2xs' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-xs ring-1 ring-amber-400/30' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
             }">
-              <i class="fa-solid ${isPreDone ? 'fa-check-circle' : 'fa-circle'} mr-1"></i>
-              ${isPreDone ? (task.steps.prevaciado.hora || 'Liberado') : 'Pendiente'}
+              <i class="fa-solid ${isPreDone ? 'fa-check text-[11px]' : 'fa-clock text-[10px] opacity-60'} mr-1"></i>
+              <span>${isPreDone ? (task.steps.prevaciado.hora || 'Liberado') : 'Pendiente'}</span>
             </button>
           </td>
 
           <!-- 3. Post-vaciado -->
-          <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="toggleStep('${task.id}', 'postvaciado')" class="btn-touch px-2 py-1 rounded-md text-[10px] font-bold transition-custom ${
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <button type="button" onclick="toggleStep('${task.id}', 'postvaciado')" class="btn-touch px-2.5 py-1.5 rounded-lg text-[10px] font-bold tracking-wide transition-all border ${
               isPostDone 
-                ? 'bg-purple-600 text-white shadow-2xs' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-600 shadow-xs ring-1 ring-purple-400/30' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
             }">
-              <i class="fa-solid ${isPostDone ? 'fa-check-circle' : 'fa-circle'} mr-1"></i>
-              ${isPostDone ? (task.steps.postvaciado.hora || 'Liberado') : 'Pendiente'}
+              <i class="fa-solid ${isPostDone ? 'fa-check text-[11px]' : 'fa-clock text-[10px] opacity-60'} mr-1"></i>
+              <span>${isPostDone ? (task.steps.postvaciado.hora || 'Liberado') : 'Pendiente'}</span>
             </button>
           </td>
 
-          <!-- Porcentaje de Avance -->
-          <td class="py-2.5 px-3 text-center">
+          <!-- Avance -->
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
             <div class="inline-flex items-center gap-1.5">
-              <div class="w-12 bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                <div class="h-full ${percent === 100 ? 'bg-emerald-500' : 'bg-blue-600'}" style="width: ${percent}%"></div>
+              <div class="w-14 bg-slate-200 dark:bg-slate-700/80 h-2 rounded-full overflow-hidden">
+                <div class="h-full transition-all duration-300 ${percent === 100 ? 'bg-emerald-500' : 'bg-blue-600'}" style="width: ${percent}%"></div>
               </div>
-              <span class="font-mono text-[10px] font-bold ${percent === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}">${percent}%</span>
+              <span class="font-mono text-[10px] font-black ${percent === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}">${percent}%</span>
             </div>
           </td>
 
           <!-- Acciones -->
-          <td class="py-2.5 px-3 text-right">
-            <button type="button" onclick="deleteTaskPrompt('${task.id}')" class="btn-touch text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 p-1 rounded-md" title="Eliminar elemento">
-              <i class="fa-solid fa-trash-can text-xs"></i>
+          <td class="py-2.5 px-3 text-right whitespace-nowrap">
+            <button type="button" onclick="deleteTaskPrompt('${task.id}')" class="btn-touch w-7 h-7 inline-flex items-center justify-center text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg" title="Eliminar elemento">
+              <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </td>
         `;
-
         tbody.appendChild(tr);
       });
     }
 
-    // Toggle de paso interactivo
+    // ----------------------------------------------------
+    // CHECK INTERACTIVO DE LIBERACIÓN
+    // ----------------------------------------------------
     window.toggleStep = function(taskId, stepKey) {
       if (currentUserRole !== 'admin') {
-        showToast('Acceso denegado: Inicia como Administrador para marcar liberaciones', 'warning');
+        showToast('Acceso denegado: Modo Invitado de solo lectura', 'warning');
         return;
       }
 
       const task = tasks.find(t => t.id === taskId);
-      if (!task || !task.steps) return;
+      if (!task || !task.steps || !task.steps[stepKey]) return;
 
-      const now = new Date();
-      const horaStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const isCurrentDone = (task.steps[stepKey].status === 'conforme' && task.steps[stepKey].fecha === activeDateString);
 
-      const current = task.steps[stepKey];
-      if (current && current.done && current.fecha === activeDateString) {
+      if (isCurrentDone) {
         // Desmarcar
-        current.done = false;
-        current.fecha = null;
-        current.hora = null;
-        showToast(`Liberación retirada de ${task.code}`, 'info');
+        task.steps[stepKey].status = 'pendiente';
+        task.steps[stepKey].fecha = null;
+        task.steps[stepKey].hora = null;
+        showToast(`Check de ${stepKey} retirado`, 'info');
       } else {
-        // Marcar en la fecha activa
-        task.steps[stepKey] = {
-          done: true,
-          fecha: activeDateString,
-          hora: horaStr
-        };
-        showToast(`✓ ${stepKey.toUpperCase()} liberado en ${task.code} (${horaStr})`, 'success');
+        // Marcar liberación vinculada estrictamente al día activo
+        task.steps[stepKey].status = 'conforme';
+        task.steps[stepKey].fecha = activeDateString;
+        task.steps[stepKey].hora = getCurrentTimeString();
+        showToast(`Liberación de ${stepKey} aprobada (${task.steps[stepKey].hora})`, 'success');
       }
 
-      saveAllToStorage();
-      renderCurrentAreaTable();
+      saveTasksToStorage();
+      updateBadges();
+      renderAreaTable();
       renderPendingModule();
-      renderExcelPreview();
-      updateBadgesAndCounters();
       renderCalendarView();
     };
 
+    // ----------------------------------------------------
+    // ELIMINAR ELEMENTO
+    // ----------------------------------------------------
     window.deleteTaskPrompt = function(taskId) {
       if (currentUserRole !== 'admin') {
-        showToast('Solo administradores pueden eliminar frentes', 'warning');
+        showToast('Acceso denegado: Solo el Administrador puede eliminar', 'warning');
         return;
       }
       tasks = tasks.filter(t => t.id !== taskId);
-      saveAllToStorage();
-      renderCurrentAreaTable();
+      saveTasksToStorage();
+      showToast('Elemento eliminado del registro', 'info');
+      updateBadges();
+      renderAreaTable();
       renderPendingModule();
-      renderExcelPreview();
-      updateBadgesAndCounters();
       renderCalendarView();
-      showToast('Elemento eliminado correctamente', 'info');
     };
 
     // ----------------------------------------------------
-    // MÓDULO ¿QUÉ ME FALTA? (ALTO CONTRASTE)
+    // MÓDULO: ¿QUÉ ME FALTA?
     // ----------------------------------------------------
     function renderPendingModule() {
-      const fundList = document.getElementById('pendingList-fundacion');
-      const preList = document.getElementById('pendingList-prevaciado');
-      const postList = document.getElementById('pendingList-postvaciado');
+      const activeTasks = tasks.filter(t => taskBelongsToDate(t, activeDateString));
 
-      fundList.innerHTML = '';
-      preList.innerHTML = '';
-      postList.innerHTML = '';
+      const missFund = [];
+      const missPre = [];
+      const missPost = [];
+      const completed = [];
 
-      let cFund = 0, cPre = 0, cPost = 0;
+      activeTasks.forEach(t => {
+        const fDone = isStepDoneAtDate(t.steps.fundacion, activeDateString);
+        const pDone = isStepDoneAtDate(t.steps.prevaciado, activeDateString);
+        const postDone = isStepDoneAtDate(t.steps.postvaciado, activeDateString);
 
-      tasks.forEach(task => {
-        const isFundDone = isStepDoneAtDate(task.steps.fundacion, activeDateString);
-        const isPreDone = isStepDoneAtDate(task.steps.prevaciado, activeDateString);
-        const isPostDone = isStepDoneAtDate(task.steps.postvaciado, activeDateString);
-
-        // Tarjeta para Falta Fundación
-        if (!isFundDone) {
-          cFund++;
-          fundList.appendChild(createPendingItem(task, 'fundacion', 'Falta alineamiento / sello'));
-        }
-
-        // Tarjeta para Falta Pre-vaciado
-        if (!isPreDone) {
-          cPre++;
-          preList.appendChild(createPendingItem(task, 'prevaciado', 'Falta encofrado / armadura'));
-        }
-
-        // Tarjeta para Falta Post-vaciado
-        if (!isPostDone) {
-          cPost++;
-          postList.appendChild(createPendingItem(task, 'postvaciado', 'Falta control de niveles post'));
-        }
+        if (!fDone) missFund.push(t);
+        else if (!pDone) missPre.push(t);
+        else if (!postDone) missPost.push(t);
+        else completed.push(t);
       });
 
-      document.getElementById('pendingCount-fundacion').textContent = cFund;
-      document.getElementById('pendingCount-prevaciado').textContent = cPre;
-      document.getElementById('pendingCount-postvaciado').textContent = cPost;
-      document.getElementById('badge-pending').textContent = (cFund + cPre + cPost);
+      document.getElementById('count-missing-fundacion').textContent = missFund.length;
+      document.getElementById('count-missing-prevaciado').textContent = missPre.length;
+      document.getElementById('count-missing-postvaciado').textContent = missPost.length;
+      document.getElementById('count-completed-items').textContent = completed.length;
 
-      if (cFund === 0) fundList.innerHTML = '<p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold py-2">✓ Todas las fundaciones liberadas</p>';
-      if (cPre === 0) preList.innerHTML = '<p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold py-2">✓ Todos los pre-vaciados liberados</p>';
-      if (cPost === 0) postList.innerHTML = '<p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold py-2">✓ Todos los post-vaciados concluidos</p>';
-    }
-
-    function createPendingItem(task, stepKey, reason) {
-      const div = document.createElement('div');
-      div.className = 'p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex items-center justify-between gap-2';
-      div.innerHTML = `
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-              Área ${task.area}
-            </span>
-            <span class="text-xs font-black text-slate-900 dark:text-white truncate">${task.code}</span>
-          </div>
-          <p class="text-[10px] text-slate-500 truncate">${task.title} • ${task.staff}</p>
-        </div>
-        <button type="button" onclick="toggleStep('${task.id}', '${stepKey}')" class="btn-touch px-2 py-1 rounded text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white shrink-0">
-          Liberar
-        </button>
-      `;
-      return div;
-    }
-
-    // ----------------------------------------------------
-    // CALENDARIO MENSUAL E HISTÓRICO DINÁMICO
-    // ----------------------------------------------------
-    const monthNames = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-
-    function renderCalendarView() {
-      const title = document.getElementById('calMonthYearTitle');
-      if (title) title.textContent = `${monthNames[calendarViewMonth]} ${calendarViewYear}`;
-
-      const grid = document.getElementById('calendarDaysGrid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      const firstDayOfMonth = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
-      const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
-
-      // Celdas vacías antes del día 1
-      for (let i = 0; i < firstDayOfMonth; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'h-14 rounded-lg bg-slate-50/50 dark:bg-slate-800/20';
-        grid.appendChild(emptyCell);
-      }
-
-      // Conteo acumulado de liberaciones en el mes visible
-      let totalMonthLiberations = 0;
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const cellMonthStr = String(calendarViewMonth + 1).padStart(2, '0');
-        const cellDayStr = String(d).padStart(2, '0');
-        const cellDate = `${calendarViewYear}-${cellMonthStr}-${cellDayStr}`;
-
-        const libCount = getLiberationCountForDate(cellDate);
-        totalMonthLiberations += libCount;
-
-        const isSelected = (cellDate === activeDateString);
-        const isToday = (cellDate === getTodayDateString());
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `btn-touch h-14 p-1 rounded-lg border text-left flex flex-col justify-between transition-custom ${
-          isSelected 
-            ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-            : isToday 
-              ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800 text-slate-800 dark:text-slate-100' 
-              : 'bg-white dark:bg-slate-800/70 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
-        }`;
-
-        btn.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold font-mono ${isSelected ? 'text-white' : ''}">${d}</span>
-            ${isToday ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}"></span>` : ''}
-          </div>
-          <div>
-            ${libCount > 0 
-              ? `<span class="inline-block px-1 py-0.2 rounded text-[9px] font-black font-mono ${
-                  isSelected ? 'bg-white text-blue-800' : 'bg-emerald-500 text-white'
-                }">${libCount} lib.</span>`
-              : `<span class="text-[9px] ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}">0</span>`
-            }
-          </div>
-        `;
-
-        btn.addEventListener('click', () => {
-          setActiveDate(cellDate);
-          closeCalendarModal();
-          showToast(`Fecha cambiada a: ${cellDate}`, 'info');
-        });
-
-        grid.appendChild(btn);
-      }
-
-      // Actualizar contador mensual en cabecera
-      const badge = document.getElementById('headerMonthLibBadge');
-      if (badge) badge.textContent = `${totalMonthLiberations} en mes`;
-    }
-
-    function openCalendarModal() {
-      if (activeDateString) {
-        const parts = activeDateString.split('-');
-        if (parts.length === 3) {
-          calendarViewYear = parseInt(parts[0], 10);
-          calendarViewMonth = parseInt(parts[1], 10) - 1;
-        }
-      }
-      renderCalendarView();
-      const modal = document.getElementById('calendarModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
-    }
-
-    function closeCalendarModal() {
-      const modal = document.getElementById('calendarModal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    // ----------------------------------------------------
-    // PLANOS Y TOPÓGRAFOS
-    // ----------------------------------------------------
-    function renderBlueprintsGrid() {
-      const container = document.getElementById('blueprintsGrid');
-      if (!container) return;
-      container.innerHTML = '';
-
-      blueprints.forEach(bp => {
-        const card = document.createElement('div');
-        card.className = 'p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center justify-between gap-3';
-        card.innerHTML = `
-          <div class="min-w-0">
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono">
-              Área ${bp.area} • ${bp.rev}
-            </span>
-            <h4 class="text-xs font-black text-slate-900 dark:text-white mt-1 truncate">${bp.code}</h4>
-            <p class="text-[11px] text-slate-500 truncate">${bp.title}</p>
-          </div>
-          <button type="button" onclick="deleteBlueprint('${bp.id}')" class="btn-touch text-slate-400 hover:text-rose-500 p-1">
-            <i class="fa-solid fa-trash-can text-xs"></i>
-          </button>
-        `;
-        container.appendChild(card);
-      });
-
-      // Actualizar select de nuevo frente
-      const sel = document.getElementById('taskFormBlueprint');
-      if (sel) {
-        sel.innerHTML = blueprints.map(b => `<option value="${b.code}">${b.code} (${b.rev}) - ${b.title}</option>`).join('');
-      }
-    }
-
-    window.deleteBlueprint = function(bpId) {
-      if (currentUserRole !== 'admin') return;
-      blueprints = blueprints.filter(b => b.id !== bpId);
-      saveAllToStorage();
-      renderBlueprintsGrid();
-      showToast('Plano eliminado', 'info');
-    };
-
-    function renderStaffGrid() {
-      const container = document.getElementById('staffGrid');
-      if (!container) return;
-      container.innerHTML = '';
-
-      staffList.forEach(st => {
-        // Conteo de frentes asignados
-        const assignedTasks = tasks.filter(t => t.staff === st.name).length;
-
-        const card = document.createElement('div');
-        card.className = 'p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-2';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
-                ${st.name.charAt(0)}
-              </div>
-              <div>
-                <h4 class="text-xs font-black text-slate-900 dark:text-white">${st.name}</h4>
-                <p class="text-[10px] text-slate-500">${st.role}</p>
-              </div>
-            </div>
-            <button type="button" onclick="deleteStaff('${st.id}')" class="btn-touch text-slate-400 hover:text-rose-500 p-1">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-          </div>
-          <div class="pt-1 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between">
-            <span>Frentes asignados: <strong class="font-mono text-blue-600">${assignedTasks}</strong></span>
-            <span>Área: <strong class="font-mono">${st.defaultArea}</strong></span>
-          </div>
-          <div class="text-[10px] text-slate-400 flex items-center gap-1">
-            <i class="fa-solid fa-phone text-[9px]"></i>
-            <span>${st.phone || 'Sin teléfono'}</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      // Actualizar select de nuevo frente
-      const sel = document.getElementById('taskFormStaff');
-      if (sel) {
-        sel.innerHTML = staffList.map(s => `<option value="${s.name}">${s.name} (${s.role})</option>`).join('');
-      }
-    }
-
-    window.deleteStaff = function(stId) {
-      if (currentUserRole !== 'admin') return;
-      staffList = staffList.filter(s => s.id !== stId);
-      saveAllToStorage();
-      renderStaffGrid();
-      showToast('Topógrafo eliminado', 'info');
-    };
-
-    // ----------------------------------------------------
-    // PREVISUALIZACIÓN Y EXPORTACIÓN A EXCEL (.XLSX)
-    // ----------------------------------------------------
-    function renderExcelPreview() {
-      const tbody = document.getElementById('excelPreviewBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      tasks.forEach(t => {
-        const isFundDone = isStepDoneAtDate(t.steps.fundacion, activeDateString);
-        const isPreDone = isStepDoneAtDate(t.steps.prevaciado, activeDateString);
-        const isPostDone = isStepDoneAtDate(t.steps.postvaciado, activeDateString);
-
-        let statusText = 'En proceso';
-        if (isFundDone && isPreDone && isPostDone) statusText = '100% Concluido';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2 border font-mono font-bold">${t.area}</td>
-          <td class="p-2 border font-mono font-bold text-blue-600">${t.code}</td>
-          <td class="p-2 border font-medium">${t.title}</td>
-          <td class="p-2 border text-slate-500">${t.axes || '-'}</td>
-          <td class="p-2 border">${t.staff || '-'}</td>
-          <td class="p-2 border text-center ${isFundDone ? 'text-emerald-600 font-bold' : 'text-slate-400'}">${isFundDone ? (t.steps.fundacion.hora || 'OK') : 'Pendiente'}</td>
-          <td class="p-2 border text-center ${isPreDone ? 'text-emerald-600 font-bold' : 'text-slate-400'}">${isPreDone ? (t.steps.prevaciado.hora || 'OK') : 'Pendiente'}</td>
-          <td class="p-2 border text-center ${isPostDone ? 'text-emerald-600 font-bold' : 'text-slate-400'}">${isPostDone ? (t.steps.postvaciado.hora || 'OK') : 'Pendiente'}</td>
-          <td class="p-2 border text-center font-bold text-[10px] ${statusText === '100% Concluido' ? 'text-emerald-600' : 'text-amber-600'}">${statusText}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function exportToExcel(allHistorical = false) {
-      if (typeof XLSX === 'undefined') {
-        showToast('Librería Excel cargando... intenta de nuevo', 'warning');
-        return;
-      }
-
-      const rows = [];
-      rows.push(['PARTE OFICIAL DE CONTROL TOPOGRÁFICO DE OBRAS CIVILES']);
-      rows.push([allHistorical ? 'HISTÓRICO COMPLETO DE LIBERACIONES' : `FECHA DEL PARTE: ${activeDateString}`]);
-      rows.push(['Generado por:', currentUserRole === 'admin' ? 'Administración Técnica' : 'Modo Consulta']);
-      rows.push([]); // Espacio
-
-      // Encabezados formales
-      rows.push([
-        'Área',
-        'Código Elemento',
-        'Descripción del Elemento',
-        'Ubicación / Ejes',
-        'Topógrafo Encargado',
-        'Plano Referencia',
-        '1. Fundación (Hora / Fecha)',
-        '2. Pre-vaciado (Hora / Fecha)',
-        '3. Post-vaciado (Hora / Fecha)',
-        'Estado Final'
-      ]);
-
-      tasks.forEach(t => {
-        let fHora = 'Pendiente';
-        let prHora = 'Pendiente';
-        let poHora = 'Pendiente';
-
-        if (allHistorical) {
-          if (t.steps.fundacion?.done) fHora = `${t.steps.fundacion.fecha} ${t.steps.fundacion.hora || ''}`;
-          if (t.steps.prevaciado?.done) prHora = `${t.steps.prevaciado.fecha} ${t.steps.prevaciado.hora || ''}`;
-          if (t.steps.postvaciado?.done) poHora = `${t.steps.postvaciado.fecha} ${t.steps.postvaciado.hora || ''}`;
-        } else {
-          if (isStepDoneAtDate(t.steps.fundacion, activeDateString)) fHora = t.steps.fundacion.hora || 'Aprobado';
-          if (isStepDoneAtDate(t.steps.prevaciado, activeDateString)) prHora = t.steps.prevaciado.hora || 'Aprobado';
-          if (isStepDoneAtDate(t.steps.postvaciado, activeDateString)) poHora = t.steps.postvaciado.hora || 'Aprobado';
-        }
-
-        const isDone = (fHora !== 'Pendiente' && prHora !== 'Pendiente' && poHora !== 'Pendiente');
-
-        rows.push([
-          t.area,
-          t.code,
-          t.title,
-          t.axes || 'N/A',
-          t.staff || 'N/A',
-          t.blueprint || 'N/A',
-          fHora,
-          prHora,
-          poHora,
-          isDone ? 'CONCLUIDO' : 'EN PROCESO'
-        ]);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Control_Topografico');
-
-      const fileName = allHistorical 
-        ? `Parte_Topografia_HISTORICO.xlsx` 
-        : `Parte_Topografia_${activeDateString}.xlsx`;
-
-      XLSX.writeFile(wb, fileName);
-      showToast(`Archivo ${fileName} descargado con éxito`, 'success');
-    }
-
-    // ----------------------------------------------------
-    // MENSAJERÍA WHATSAPP PREFORMATEADA
-    // ----------------------------------------------------
-    function generateWhatsAppMessage() {
-      let msg = `*REPORTE TOPOGRÁFICO DIARIO*\n`;
-      msg += `📅 *Fecha:* ${activeDateString}\n`;
-      msg += `👷 *Topógrafos:* Ronald Zapana / Jhonatan Umaya\n`;
-      msg += `------------------------------------\n\n`;
-
-      ['4680', '4652', '4653'].forEach(areaCode => {
-        const areaTasks = tasks.filter(t => t.area === areaCode);
-        msg += `📍 *ÁREA ${areaCode}*\n`;
-
-        if (areaTasks.length === 0) {
-          msg += `_Sin actividades registradas_\n\n`;
+      const buildItemList = (containerId, list, badgeColor) => {
+        const box = document.getElementById(containerId);
+        if (!box) return;
+        box.innerHTML = '';
+        if (list.length === 0) {
+          box.innerHTML = '<div class="text-slate-400 italic text-[11px] py-1">Ninguno en esta categoría</div>';
           return;
         }
-
-        areaTasks.forEach(t => {
-          const f = isStepDoneAtDate(t.steps.fundacion, activeDateString) ? `✅ Fund. (${t.steps.fundacion.hora || 'OK'})` : `⏳ Fund. Pend.`;
-          const pr = isStepDoneAtDate(t.steps.prevaciado, activeDateString) ? `✅ Pre-vac. (${t.steps.prevaciado.hora || 'OK'})` : `⏳ Pre-vac. Pend.`;
-          const po = isStepDoneAtDate(t.steps.postvaciado, activeDateString) ? `✅ Post-vac. (${t.steps.postvaciado.hora || 'OK'})` : `⏳ Post-vac. Pend.`;
-
-          msg += `• *${t.code}* (${t.title}): ${f} | ${pr} | ${po}\n`;
+        list.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex items-center justify-between gap-1';
+          div.innerHTML = `
+            <div class="min-w-0">
+              <span class="font-mono font-bold text-slate-900 dark:text-white">${item.code}</span>
+              <span class="text-[10px] text-slate-500 truncate block">${item.title}</span>
+            </div>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor} shrink-0">Área ${item.areaCode}</span>
+          `;
+          box.appendChild(div);
         });
-        msg += `\n`;
-      });
+      };
 
-      msg += `_Reporte emitido desde Control Topográfico Digital_`;
-      return msg;
-    }
-
-    function openWhatsAppModal() {
-      const txt = document.getElementById('whatsAppMessageText');
-      if (txt) txt.value = generateWhatsAppMessage();
-      const modal = document.getElementById('whatsAppModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
+      buildItemList('list-missing-fundacion', missFund, 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200');
+      buildItemList('list-missing-prevaciado', missPre, 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200');
+      buildItemList('list-missing-postvaciado', missPost, 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200');
+      buildItemList('list-completed-items', completed, 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200');
     }
 
     // ----------------------------------------------------
-    // CONTADORES Y GESTIÓN DE ROLES
+    // ACTUALIZACIÓN DE INSIGNIAS Y CONTADORES
     // ----------------------------------------------------
-    function updateBadgesAndCounters() {
+    function updateBadges() {
       ['4680', '4652', '4653'].forEach(code => {
-        const c = tasks.filter(t => t.area === code).length;
-        const badge = document.getElementById(`badge-${code}`);
-        if (badge) badge.textContent = c;
+        const count = tasks.filter(t => t.areaCode === code && taskBelongsToDate(t, activeDateString)).length;
+        const el = document.getElementById(`badge-${code}`);
+        if (el) el.textContent = count;
       });
-    }
 
-    function updateRoleUI() {
-      const badge = document.getElementById('roleBadge');
-      if (currentUserRole === 'admin') {
-        badge.textContent = 'Admin';
-        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-        document.getElementById('headerAddBtn')?.classList.remove('hidden');
-      } else {
-        badge.textContent = 'Invitado (Lectura)';
-        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-        document.getElementById('headerAddBtn')?.classList.add('hidden');
-      }
+      const activeToday = tasks.filter(t => taskBelongsToDate(t, activeDateString));
+      const pendingTotal = activeToday.filter(t => {
+        const isAllDone = isStepDoneAtDate(t.steps.fundacion, activeDateString) &&
+                          isStepDoneAtDate(t.steps.prevaciado, activeDateString) &&
+                          isStepDoneAtDate(t.steps.postvaciado, activeDateString);
+        return !isAllDone;
+      }).length;
+
+      const pBadge = document.getElementById('badge-pending');
+      if (pBadge) pBadge.textContent = pendingTotal;
     }
 
     // ----------------------------------------------------
-    // NAVEGACIÓN ENTRE PESTAÑAS
+    // NAVEGACIÓN Y CAMBIO DE PESTAÑAS
     // ----------------------------------------------------
     function switchTab(tabKey) {
       currentActiveTab = tabKey;
@@ -1552,22 +1080,20 @@
       document.getElementById('section-staff')?.classList.add('hidden');
       document.getElementById('section-excel')?.classList.add('hidden');
 
-      // Actualizar estilo visual de las pestañas
+      // Actualizar pestañas en el menú
       document.querySelectorAll('.tab-btn').forEach(btn => {
         const isMatch = btn.getAttribute('data-tab') === tabKey;
         if (isMatch) {
-          btn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-xs');
-          btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200');
+          btn.className = 'tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-blue-600 bg-blue-600 text-white shadow-xs';
         } else {
-          btn.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-xs');
-          btn.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200');
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/70 text-slate-700 dark:text-slate-300';
         }
       });
 
-      // Mostrar sección correspondiente
+      // Mostrar sección seleccionada
       if (tabKey.startsWith('area-')) {
         document.getElementById('section-areaView')?.classList.remove('hidden');
-        renderCurrentAreaTable();
+        renderAreaTable();
       } else if (tabKey === 'pending') {
         document.getElementById('section-pending')?.classList.remove('hidden');
         renderPendingModule();
@@ -1583,367 +1109,517 @@
       }
     }
 
-    // Toast de notificaciones
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toastNotification');
-      const msgEl = document.getElementById('toastMessage');
-      const iconEl = document.getElementById('toastIcon');
+    // ----------------------------------------------------
+    // CONTROL DE FECHAS
+    // ----------------------------------------------------
+    function setActiveDate(dateStr) {
+      activeDateString = dateStr;
+      const picker = document.getElementById('activeDatePicker');
+      if (picker) picker.value = dateStr;
 
-      msgEl.textContent = message;
+      const dateObj = new Date(dateStr + 'T00:00:00');
+      const label = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('currentDateDisplayLabel').textContent = label;
 
-      if (type === 'success') {
-        iconEl.className = 'fa-solid fa-circle-check text-emerald-500';
-      } else if (type === 'warning') {
-        iconEl.className = 'fa-solid fa-triangle-exclamation text-amber-500';
-      } else {
-        iconEl.className = 'fa-solid fa-circle-info text-blue-500';
+      updateBadges();
+      if (currentActiveTab.startsWith('area-')) renderAreaTable();
+      else if (currentActiveTab === 'pending') renderPendingModule();
+      else if (currentActiveTab === 'excel') renderExcelPreview();
+    }
+
+    // ----------------------------------------------------
+    // CALENDARIO MENSUAL CON CONTEO DE FRENTES Y LIBERACIONES
+    // ----------------------------------------------------
+    function renderCalendarView() {
+      const grid = document.getElementById('calDaysGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const year = calendarViewDate.getFullYear();
+      const month = calendarViewDate.getMonth();
+
+      const title = document.getElementById('calMonthYearTitle');
+      if (title) {
+        title.textContent = new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
       }
 
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Días vacíos previos
+      for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'h-14 rounded-lg bg-slate-50 dark:bg-slate-900/40 opacity-30';
+        grid.appendChild(blank);
+      }
+
+      // Días del mes
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const frontsCount = countDayFronts(dayStr);
+        const libCount = countDayLiberations(dayStr);
+        const isSelected = (dayStr === activeDateString);
+        const isToday = (dayStr === getTodayString());
+
+        const dayBtn = document.createElement('button');
+        dayBtn.type = 'button';
+        dayBtn.className = `btn-touch h-14 p-1 rounded-xl flex flex-col justify-between items-center border transition-all text-[11px] ${
+          isSelected 
+            ? 'bg-blue-600 text-white border-blue-600 shadow-md font-black' 
+            : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80 hover:border-blue-400 text-slate-800 dark:text-slate-200'
+        }`;
+
+        dayBtn.onclick = () => {
+          setActiveDate(dayStr);
+          document.getElementById('calendarModal')?.classList.add('hidden');
+          document.getElementById('calendarModal')?.classList.remove('flex');
+        };
+
+        dayBtn.innerHTML = `
+          <div class="flex items-center justify-between w-full px-0.5">
+            <span class="${isToday && !isSelected ? 'text-blue-600 font-extrabold' : ''}">${day}</span>
+            ${isToday ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>' : ''}
+          </div>
+          <div class="flex flex-col items-center gap-0.5 w-full">
+            ${frontsCount > 0 ? `<span class="px-1 py-0.2 rounded text-[9px] font-mono leading-tight ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold'}">F:${frontsCount}</span>` : ''}
+            ${libCount > 0 ? `<span class="px-1 py-0.2 rounded text-[9px] font-mono leading-tight ${isSelected ? 'bg-emerald-400 text-slate-950 font-black' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold'}">L:${libCount}</span>` : ''}
+          </div>
+        `;
+        grid.appendChild(dayBtn);
+      }
+    }
+
+    // ----------------------------------------------------
+    // PLANOS Y TOPÓGRAFOS
+    // ----------------------------------------------------
+    function renderBlueprintsGrid() {
+      const grid = document.getElementById('blueprintsGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      blueprintsList.forEach(bp => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-1.5';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-xs text-blue-600 dark:text-blue-400">${bp.code}</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${bp.rev}</span>
+          </div>
+          <div class="font-bold text-xs text-slate-900 dark:text-white leading-tight">${bp.title}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderStaffGrid() {
+      const grid = document.getElementById('staffGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      staffList.forEach(st => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between';
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 flex items-center justify-center text-sm font-bold">
+              ${st.name.charAt(0)}
+            </div>
+            <div>
+              <div class="font-bold text-xs text-slate-900 dark:text-white">${st.name}</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">${st.role}</div>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Activo</span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function populateModalSelects() {
+      const staffSel = document.getElementById('modalStaffSelect');
+      const bpSel = document.getElementById('modalBlueprintSelect');
+      if (staffSel) {
+        staffSel.innerHTML = staffList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+      }
+      if (bpSel) {
+        bpSel.innerHTML = blueprintsList.map(b => `<option value="${b.code}">${b.code} (${b.rev})</option>`).join('');
+      }
+    }
+
+    // ----------------------------------------------------
+    // EXPORTACIÓN EXCEL
+    // ----------------------------------------------------
+    function getExcelDataRows() {
+      const dayTasks = tasks.filter(t => taskBelongsToDate(t, activeDateString));
+      return dayTasks.map((t, idx) => ({
+        'N°': idx + 1,
+        'Fecha de Corte': activeDateString,
+        'Área': `Área ${t.areaCode}`,
+        'Código': t.code,
+        'Elemento Estructural': t.title,
+        'Ubicación / Ejes': t.axes || 'N/A',
+        'Topógrafo': t.staff,
+        'Plano Ref.': t.blueprint || 'S/P',
+        '1. Fundación': isStepDoneAtDate(t.steps.fundacion, activeDateString) ? `LIBERADO (${t.steps.fundacion.hora})` : 'PENDIENTE',
+        '2. Pre-vaciado': isStepDoneAtDate(t.steps.prevaciado, activeDateString) ? `LIBERADO (${t.steps.prevaciado.hora})` : 'PENDIENTE',
+        '3. Post-vaciado': isStepDoneAtDate(t.steps.postvaciado, activeDateString) ? `LIBERADO (${t.steps.postvaciado.hora})` : 'PENDIENTE'
+      }));
+    }
+
+    function renderExcelPreview() {
+      const container = document.getElementById('excelPreviewContainer');
+      if (!container) return;
+      const rows = getExcelDataRows();
+      if (rows.length === 0) {
+        container.innerHTML = '<div class="py-6 text-center text-slate-400 italic">No hay liberaciones registradas en esta fecha para exportar.</div>';
+        return;
+      }
+
+      let html = '<table class="w-full text-left border-collapse border border-slate-200 dark:border-slate-700"><thead><tr class="bg-slate-100 dark:bg-slate-800">';
+      Object.keys(rows[0]).forEach(k => {
+        html += `<th class="border border-slate-200 dark:border-slate-700 p-2 font-bold">${k}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+      rows.forEach(r => {
+        html += '<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">';
+        Object.values(r).forEach(v => {
+          html += `<td class="border border-slate-200 dark:border-slate-700 p-2">${v}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function exportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Error: Librería Excel no cargada', 'warning');
+        return;
+      }
+      const data = getExcelDataRows();
+      if (data.length === 0) {
+        showToast('No hay datos registrados en esta fecha', 'warning');
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Parte_${activeDateString}`);
+      XLSX.writeFile(wb, `Parte_Topografico_${activeDateString}.xlsx`);
+      showToast('Descarga iniciada con éxito', 'success');
+    }
+
+    // ----------------------------------------------------
+    // WHATSAPP
+    // ----------------------------------------------------
+    function generateWhatsAppMessage() {
+      const dayTasks = tasks.filter(t => taskBelongsToDate(t, activeDateString));
+      let msg = `*REPORTE TOPOGRÁFICO DIARIO*\n`;
+      msg += `📅 *Fecha:* ${activeDateString}\n`;
+      msg += `------------------------------------\n\n`;
+
+      ['4680', '4652', '4653'].forEach(area => {
+        const areaTasks = dayTasks.filter(t => t.areaCode === area);
+        if (areaTasks.length > 0) {
+          msg += `🏗️ *ÁREA ${area}:*\n`;
+          areaTasks.forEach(t => {
+            const f = isStepDoneAtDate(t.steps.fundacion, activeDateString) ? `✅ ${t.steps.fundacion.hora}` : '❌ Pend';
+            const p = isStepDoneAtDate(t.steps.prevaciado, activeDateString) ? `✅ ${t.steps.prevaciado.hora}` : '❌ Pend';
+            const post = isStepDoneAtDate(t.steps.postvaciado, activeDateString) ? `✅ ${t.steps.postvaciado.hora}` : '❌ Pend';
+            msg += `• *${t.code}* (${t.title}):\n  - Fund: ${f} | Pre: ${p} | Post: ${post}\n`;
+          });
+          msg += `\n`;
+        }
+      });
+
+      msg += `👷‍♂️ *Topografía en Campo:* Ronald Zapana / Jhonatan Umaya`;
+      return msg;
+    }
+
+    // ----------------------------------------------------
+    // TOAST NOTIFICATIONS
+    // ----------------------------------------------------
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toastNotification');
+      if (!toast) return;
+
+      const colors = {
+        success: 'bg-emerald-600',
+        warning: 'bg-amber-600',
+        info: 'bg-blue-600'
+      };
+
+      toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-xl shadow-xl text-xs font-black text-white flex items-center gap-2 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${message}</span>`;
+      toast.classList.remove('hidden');
 
       setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-        toast.classList.remove('translate-y-0', 'opacity-100');
-      }, 2500);
+        toast.classList.add('hidden');
+      }, 3000);
     }
 
     // ----------------------------------------------------
     // ASIGNACIÓN DE EVENTOS PRINCIPALES
     // ----------------------------------------------------
     function setupEventListeners() {
-      // 1. Pestañas de navegación
+      // Pestañas
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const targetTab = btn.getAttribute('data-tab');
-          if (targetTab) switchTab(targetTab);
+          const tab = btn.getAttribute('data-tab');
+          if (tab) switchTab(tab);
         });
       });
 
-      // 2. Control de Fechas
-      const dateInput = document.getElementById('activeDateInput');
-      if (dateInput) {
-        dateInput.value = activeDateString;
-        dateInput.addEventListener('change', (e) => {
-          setActiveDate(e.target.value);
-        });
-      }
+      // Fechas
+      document.getElementById('activeDatePicker')?.addEventListener('change', (e) => {
+        if (e.target.value) setActiveDate(e.target.value);
+      });
 
       document.getElementById('prevDayBtn')?.addEventListener('click', () => {
-        const cur = new Date(activeDateString + 'T00:00:00');
-        cur.setDate(cur.getDate() - 1);
-        const y = cur.getFullYear();
-        const m = String(cur.getMonth() + 1).padStart(2, '0');
-        const d = String(cur.getDate()).padStart(2, '0');
-        setActiveDate(`${y}-${m}-${d}`);
+        const d = new Date(activeDateString + 'T00:00:00');
+        d.setDate(d.getDate() - 1);
+        setActiveDate(d.toISOString().split('T')[0]);
       });
 
       document.getElementById('nextDayBtn')?.addEventListener('click', () => {
-        const cur = new Date(activeDateString + 'T00:00:00');
-        cur.setDate(cur.getDate() + 1);
-        const y = cur.getFullYear();
-        const m = String(cur.getMonth() + 1).padStart(2, '0');
-        const d = String(cur.getDate()).padStart(2, '0');
-        setActiveDate(`${y}-${m}-${d}`);
+        const d = new Date(activeDateString + 'T00:00:00');
+        d.setDate(d.getDate() + 1);
+        setActiveDate(d.toISOString().split('T')[0]);
       });
 
       document.getElementById('todayQuickBtn')?.addEventListener('click', () => {
-        const today = getTodayDateString();
-        setActiveDate(today);
-        showToast(`Fecha restablecida a hoy (${today})`, 'info');
+        setActiveDate(getTodayString());
       });
 
-      // 3. Modal de Calendario
-      document.getElementById('openCalendarModalBtn')?.addEventListener('click', openCalendarModal);
-      document.getElementById('closeCalendarModalBtn')?.addEventListener('click', closeCalendarModal);
-      
-      document.getElementById('calPrevMonthBtn')?.addEventListener('click', () => {
-        calendarViewMonth--;
-        if (calendarViewMonth < 0) {
-          calendarViewMonth = 11;
-          calendarViewYear--;
+      // Búsqueda en área
+      document.getElementById('areaSearchInput')?.addEventListener('input', () => {
+        renderAreaTable();
+      });
+
+      // Modal Nuevo Frente
+      document.getElementById('headerAddBtn')?.addEventListener('click', () => {
+        populateModalSelects();
+        const activeAreaCode = currentActiveTab.replace('area-', '');
+        const sel = document.getElementById('modalAreaSelect');
+        if (sel && ['4680', '4652', '4653'].includes(activeAreaCode)) {
+          sel.value = activeAreaCode;
         }
+        const modal = document.getElementById('addModal');
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+      });
+
+      document.getElementById('closeAddModalBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('addModal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      document.getElementById('addFrontForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const areaCode = document.getElementById('modalAreaSelect')?.value || '4680';
+        const code = document.getElementById('modalCodeInput')?.value.trim().toUpperCase() || 'E-01';
+        const title = document.getElementById('modalTitleInput')?.value.trim() || 'Elemento de Obra';
+        const axes = document.getElementById('modalAxesInput')?.value.trim() || '';
+        const staff = document.getElementById('modalStaffSelect')?.value || 'Ronald Zapana';
+        const blueprint = document.getElementById('modalBlueprintSelect')?.value || 'S/P';
+
+        const newTask = {
+          id: 'task-' + Date.now(),
+          areaCode,
+          code,
+          title,
+          axes,
+          staff,
+          blueprint,
+          createdDate: activeDateString,
+          steps: {
+            fundacion: { status: 'pendiente', fecha: null, hora: null },
+            prevaciado: { status: 'pendiente', fecha: null, hora: null },
+            postvaciado: { status: 'pendiente', fecha: null, hora: null }
+          }
+        };
+
+        tasks.unshift(newTask);
+        saveTasksToStorage();
+        showToast('Frente de trabajo registrado', 'success');
+
+        const modal = document.getElementById('addModal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        document.getElementById('addFrontForm')?.reset();
+
+        switchTab(`area-${areaCode}`);
+        updateBadges();
+        renderAreaTable();
+        renderCalendarView();
+      });
+
+      // Modal Calendario
+      document.getElementById('openCalendarModalBtn')?.addEventListener('click', () => {
+        calendarViewDate = new Date(activeDateString + 'T00:00:00');
+        renderCalendarView();
+        const modal = document.getElementById('calendarModal');
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+      });
+
+      document.getElementById('closeCalendarModalBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('calendarModal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      document.getElementById('calPrevMonthBtn')?.addEventListener('click', () => {
+        calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
         renderCalendarView();
       });
 
       document.getElementById('calNextMonthBtn')?.addEventListener('click', () => {
-        calendarViewMonth++;
-        if (calendarViewMonth > 11) {
-          calendarViewMonth = 0;
-          calendarViewYear++;
-        }
+        calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
         renderCalendarView();
       });
 
-      document.getElementById('calTodayBtn')?.addEventListener('click', () => {
-        const now = new Date();
-        calendarViewYear = now.getFullYear();
-        calendarViewMonth = now.getMonth();
-        renderCalendarView();
+      // Modal WhatsApp
+      document.getElementById('headerWhatsAppBtn')?.addEventListener('click', () => {
+        const txt = document.getElementById('whatsappMessagePreview');
+        if (txt) txt.value = generateWhatsAppMessage();
+        const modal = document.getElementById('whatsappModal');
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
       });
 
-      // 4. Modal de Login
+      document.getElementById('closeWhatsAppModalBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('whatsappModal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      document.getElementById('copyWhatsAppBtn')?.addEventListener('click', () => {
+        const txt = document.getElementById('whatsappMessagePreview');
+        if (!txt) return;
+        txt.select();
+        document.execCommand('copy');
+        showToast('Mensaje copiado al portapapeles', 'info');
+      });
+
+      document.getElementById('sendWhatsAppBtn')?.addEventListener('click', () => {
+        const msg = document.getElementById('whatsappMessagePreview')?.value || '';
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+      });
+
+      // Exportar Excel
+      document.getElementById('downloadExcelBtn')?.addEventListener('click', exportToExcel);
+
+      // Tema
+      document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
+
+      // Login
       document.getElementById('openLoginModalBtn')?.addEventListener('click', () => {
         const modal = document.getElementById('loginModal');
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+      });
+
+      document.getElementById('closeLoginModalBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('loginModal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      document.getElementById('togglePassVisibilityBtn')?.addEventListener('click', () => {
+        const inp = document.getElementById('adminPasswordInput');
+        const icon = document.getElementById('togglePassVisibilityBtn')?.querySelector('i');
+        if (!inp) return;
+        if (inp.type === 'password') {
+          inp.type = 'text';
+          if (icon) icon.className = 'fa-regular fa-eye-slash text-xs';
+        } else {
+          inp.type = 'password';
+          if (icon) icon.className = 'fa-regular fa-eye text-xs';
+        }
+      });
+
+      document.getElementById('adminPasswordInput')?.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('loginAdminSubmitBtn')?.click();
         }
       });
 
       document.getElementById('loginAdminSubmitBtn')?.addEventListener('click', () => {
-        const passInput = document.getElementById('adminPasswordInput');
-        const pass = passInput ? passInput.value.trim() : '';
+        const pass = (document.getElementById('adminPasswordInput')?.value || '').trim();
         if (pass === 'admin') {
           currentUserRole = 'admin';
+          localStorage.setItem('topografia_user_role', 'admin');
           updateRoleUI();
           const modal = document.getElementById('loginModal');
-          if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-          }
-          if (passInput) passInput.value = '';
+          modal?.classList.add('hidden');
+          modal?.classList.remove('flex');
+          document.getElementById('adminPasswordInput').value = '';
           showToast('Sesión de Administrador iniciada', 'success');
         } else {
-          showToast('Contraseña incorrecta (usa: admin)', 'warning');
+          showToast('Contraseña incorrecta', 'warning');
         }
       });
 
       document.getElementById('loginGuestBtn')?.addEventListener('click', () => {
         currentUserRole = 'guest';
+        localStorage.setItem('topografia_user_role', 'guest');
         updateRoleUI();
         const modal = document.getElementById('loginModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-        showToast('Ingresaste en Modo Invitado (Solo Lectura)', 'info');
-      });
-
-      // 5. Modal Nuevo Frente
-      document.getElementById('headerAddBtn')?.addEventListener('click', () => {
-        if (currentUserRole !== 'admin') return;
-        const currentAreaCode = currentActiveTab.replace('area-', '');
-        const selArea = document.getElementById('taskFormArea');
-        if (selArea && ['4680', '4652', '4653'].includes(currentAreaCode)) {
-          selArea.value = currentAreaCode;
-        }
-        document.getElementById('taskFormId').value = '';
-        document.getElementById('taskFormCode').value = '';
-        document.getElementById('taskFormTitle').value = '';
-        document.getElementById('taskFormAxes').value = '';
-
-        const modal = document.getElementById('addTaskModal');
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        }
-      });
-
-      document.getElementById('closeTaskModalBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('addTaskModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-
-      document.getElementById('cancelTaskFormBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('addTaskModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-
-      document.getElementById('taskForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const code = document.getElementById('taskFormCode').value.trim().toUpperCase();
-        const title = document.getElementById('taskFormTitle').value.trim();
-        const area = document.getElementById('taskFormArea').value;
-        const axes = document.getElementById('taskFormAxes').value.trim();
-        const staff = document.getElementById('taskFormStaff').value;
-        const bp = document.getElementById('taskFormBlueprint').value;
-
-        const newTask = {
-          id: 'task-' + Date.now(),
-          area,
-          code,
-          title,
-          axes,
-          staff,
-          blueprint: bp,
-          createdDate: activeDateString,
-          steps: {
-            fundacion: { done: false, fecha: null, hora: null },
-            prevaciado: { done: false, fecha: null, hora: null },
-            postvaciado: { done: false, fecha: null, hora: null }
-          }
-        };
-
-        tasks.push(newTask);
-        saveAllToStorage();
-
-        const modal = document.getElementById('addTaskModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-
-        switchTab(`area-${area}`);
-        renderCurrentAreaTable();
-        renderPendingModule();
-        renderExcelPreview();
-        updateBadgesAndCounters();
-        renderCalendarView();
-        showToast(`Elemento ${code} registrado en Área ${area}`, 'success');
-      });
-
-      // 6. Modal WhatsApp
-      document.getElementById('headerWhatsAppBtn')?.addEventListener('click', openWhatsAppModal);
-      document.getElementById('closeWhatsAppModalBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('whatsAppModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-
-      document.getElementById('copyWhatsAppBtn')?.addEventListener('click', () => {
-        const text = document.getElementById('whatsAppMessageText').value;
-        navigator.clipboard.writeText(text).then(() => {
-          showToast('Texto copiado al portapapeles', 'info');
-        }).catch(() => {
-          showToast('No se pudo copiar automáticamente', 'warning');
-        });
-      });
-
-      document.getElementById('sendWhatsAppBtn')?.addEventListener('click', () => {
-        const text = encodeURIComponent(document.getElementById('whatsAppMessageText').value);
-        window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-      });
-
-      // 7. Modales de Planos y Staff
-      document.getElementById('addBlueprintBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('blueprintModal');
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        }
-      });
-      document.getElementById('closeBlueprintModalBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('blueprintModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-      document.getElementById('cancelBlueprintFormBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('blueprintModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-      document.getElementById('blueprintForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const code = document.getElementById('bpFormCode').value.trim().toUpperCase();
-        const title = document.getElementById('bpFormTitle').value.trim();
-        const rev = document.getElementById('bpFormRev').value.trim();
-        const area = document.getElementById('bpFormArea').value;
-
-        blueprints.push({ id: 'bp-' + Date.now(), code, title, rev, area });
-        saveAllToStorage();
-        renderBlueprintsGrid();
-
-        const modal = document.getElementById('blueprintModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-        showToast(`Plano ${code} registrado`, 'success');
-      });
-
-      document.getElementById('addStaffBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('staffModal');
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        }
-      });
-      document.getElementById('closeStaffModalBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('staffModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-      document.getElementById('cancelStaffFormBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('staffModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
-      document.getElementById('staffForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('staffFormName').value.trim();
-        const role = document.getElementById('staffFormRole').value.trim();
-        const phone = document.getElementById('staffFormPhone').value.trim();
-        const defaultArea = document.getElementById('staffFormDefaultArea').value;
-
-        staffList.push({ id: 'st-' + Date.now(), name, role, phone, defaultArea });
-        saveAllToStorage();
-        renderStaffGrid();
-
-        const modal = document.getElementById('staffModal');
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-        showToast(`Topógrafo ${name} registrado`, 'success');
-      });
-
-      // 8. Botones de Descarga Excel
-      document.getElementById('downloadExcelDailyBtn')?.addEventListener('click', () => exportToExcel(false));
-      document.getElementById('downloadExcelAllBtn')?.addEventListener('click', () => exportToExcel(true));
-
-      // 9. Búsqueda en vivo
-      document.getElementById('areaSearchInput')?.addEventListener('input', () => {
-        renderCurrentAreaTable();
-      });
-
-      // 10. Alternar Tema Claro / Oscuro
-      document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        localStorage.setItem('topografia_theme', isDark ? 'dark' : 'light');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        showToast('Modo Consulta (Solo Lectura) activado', 'info');
       });
     }
 
+    function updateRoleUI() {
+      const badge = document.getElementById('roleBadge');
+      const state = document.getElementById('loginSessionState');
+      const closeBtn = document.getElementById('closeLoginModalBtn');
+
+      if (currentUserRole === 'admin') {
+        if (badge) {
+          badge.textContent = 'Admin';
+          badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30';
+        }
+        if (state) state.textContent = 'Administrador Activo';
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+        document.getElementById('headerAddBtn')?.classList.remove('hidden');
+      } else {
+        if (badge) {
+          badge.textContent = 'Solo Lectura';
+          badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+        }
+        if (state) state.textContent = 'Modo Consulta (Solo Lectura)';
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        document.getElementById('headerAddBtn')?.classList.add('hidden');
+      }
+    }
+
     // ----------------------------------------------------
-    // INICIALIZACIÓN GLOBAL AL CARGAR LA PÁGINA
+    // INICIO AL CARGAR EL DOCUMENTO
     // ----------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Restaurar tema preferido
-      const savedTheme = localStorage.getItem('topografia_theme');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      }
-
-      // 2. Mostrar modal de login de inmediato
-      const loginModal = document.getElementById('loginModal');
-      if (loginModal) {
-        loginModal.classList.remove('hidden');
-        loginModal.classList.add('flex');
-      }
-
-      // 3. Inicializar eventos y vistas
+      initDatabase();
       setupEventListeners();
-      setActiveDate(activeDateString);
-      renderStaffGrid();
-      renderBlueprintsGrid();
+
+      // Comprobar sesión guardada
+      const saved = localStorage.getItem('topografia_user_role');
+      if (saved === 'admin' || saved === 'guest') {
+        currentUserRole = saved;
+      } else {
+        const modal = document.getElementById('loginModal');
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+      }
+
       updateRoleUI();
+      setActiveDate(activeDateString);
+      switchTab('area-4680');
+      populateModalSelects();
     });
   </script>
 </body>
